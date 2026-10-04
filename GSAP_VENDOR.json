@@ -1,0 +1,33 @@
+{
+  "version": "3.15.0",
+  "metadata_source": "https://registry.npmjs.org/gsap/latest",
+  "tarball": "https://registry.npmjs.org/gsap/-/gsap-3.15.0.tgz",
+  "verified_integrity": "sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==",
+  "license_source": "https://gsap.com/standard-license/",
+  "files": {
+    "SplitText.min.js": {
+      "bytes": 7732,
+      "sha256": "419f7027a5f086a12cb7988736d8fdd3a6ed2200229661de25b6628ca7ced344"
+    },
+    "ScrollToPlugin.min.js": {
+      "bytes": 4059,
+      "sha256": "07cfd328e41012ae60b5614c2e58399fc13af8b1aec765febe770d4eb3e62fcd"
+    },
+    "ScrollSmoother.min.js": {
+      "bytes": 13373,
+      "sha256": "1956015299d15f86cd819aa432f9b886b704fd7b3ed408b02d7b63f994aa1504"
+    },
+    "ScrollTrigger.min.js": {
+      "bytes": 44575,
+      "sha256": "b0b14d67b55b0c43c756ac0b106cfcb09d0879945f6ead64451065b0672916a2"
+    },
+    "gsap.min.js": {
+      "bytes": 72927,
+      "sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb"
+    },
+    "LICENSE.txt": {
+      "bytes": 4568,
+      "sha256": "4f5b930ef482256230e1a8afa2f2ea8f774d62c4e7353fc4882d4112cc3da678"
+    }
+  }
+}

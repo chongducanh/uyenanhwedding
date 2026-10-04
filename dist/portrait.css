@@ -1,0 +1,70 @@
+/* A photographic coverflow: GSAP owns every transform, reveal, and crossfade. */
+.portrait{background:var(--dark);color:var(--cream)}
+.portrait-stage,.motion-enabled .portrait-stage{height:100svh;min-height:0;overflow:hidden;isolation:isolate;padding:104px 5vw 26px;display:flex;flex-direction:column}
+.portrait-backdrops,.portrait-atmosphere{position:absolute;inset:0;pointer-events:none}
+.portrait-backdrops{z-index:-2;background:#2d1d26}
+.portrait-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(28px) saturate(.55);transform:scale(1.15);opacity:0}
+.portrait-backdrop:first-child{opacity:1}
+.portrait-atmosphere{z-index:-1;background:linear-gradient(0deg,#21171dfc 0%,#29182180 38%,#23151c8c 70%,#21171de8 100%)}
+.portrait-heading{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;flex-shrink:0}
+.portrait-heading .eyebrow{font-size:10px;letter-spacing:2.2px;color:#e3cbd3}
+.portrait-dateline{font-size:10px;letter-spacing:2px;color:#d6bec7}
+.portrait-gallery{position:relative;flex:1;min-height:0;margin:20px -5vw 0}
+.portrait-perspective{position:absolute;inset:0;perspective:1800px;perspective-origin:50% 50%;transform-style:preserve-3d}
+.portrait-panel{position:absolute;left:50%;top:50%;width:clamp(180px,22vw,330px);height:100%;max-height:min(56svh,510px);transform:translate(-50%,-50%);overflow:hidden;background:#38242e;box-shadow:0 18px 42px #150b1370;backface-visibility:hidden;will-change:transform,opacity}
+.portrait-panel img{object-position:50% 32%;user-select:none;-webkit-user-drag:none}
+.portrait-panel-shade{position:absolute;inset:0;background:linear-gradient(0deg,#1c0f1830,#1c0f1860);opacity:0;pointer-events:none}
+.portrait-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;padding:13px;border:1px solid #ead5dd45;border-radius:50%;background:#24171d70;color:var(--cream);z-index:10;display:grid;place-items:center;backdrop-filter:blur(8px)}
+.portrait-arrow svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.25}
+.portrait-prev{left:3vw}.portrait-next{right:3vw}.portrait-arrow:disabled{opacity:.25;cursor:default}
+.portrait-signature{text-align:center;position:relative;z-index:2;flex-shrink:0;padding-top:20px}
+.portrait-signature p{font:400 clamp(33px,3.8vw,55px)/1.15 var(--serif);letter-spacing:-.8px}
+.portrait-signature em{font-size:.72em;color:#d9b3c2;padding:0 9px}
+.portrait-signature>span{display:block;font-size:9px;letter-spacing:2px;color:#d3b7c2;margin-top:14px}
+.portrait-footer{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:28px;flex-shrink:0;font-size:9px;letter-spacing:1px;color:#c4a9b4}
+.portrait-progress{height:1px;width:min(240px,35vw);background:#dec0cc35}
+.portrait-progress>span{display:block;height:100%;background:#d3aabb;transform:scaleX(.2);transform-origin:left}
+#portrait-count{font-variant-numeric:tabular-nums}
+@media(max-width:700px){
+ .portrait-stage,.motion-enabled .portrait-stage{padding:90px 7vw 25px}
+ .portrait-heading .eyebrow,.portrait-dateline{font-size:9px;letter-spacing:1.5px}
+ .portrait-gallery{margin:20px -7vw 0}.portrait-perspective{perspective:1200px}
+ .portrait-panel{width:62vw;max-height:54svh}
+ .portrait-prev{left:3vw}.portrait-next{right:3vw}.portrait-arrow{width:42px;height:42px;padding:12px}
+ .portrait-signature{padding-top:22px}.portrait-signature p{font-size:clamp(29px,8.6vw,44px);letter-spacing:-.4px;white-space:nowrap}
+ .portrait-signature em{padding:0 3px}.portrait-signature>span{font-size:8px;letter-spacing:1.2px;margin-top:13px}
+ .portrait-footer{margin-top:28px;font-size:8px;gap:20px}
+}
+@media(max-height:650px) and (max-width:700px){
+ .portrait-stage,.motion-enabled .portrait-stage{padding-top:82px;padding-bottom:18px}
+ .portrait-gallery{margin-top:16px}.portrait-panel{max-height:51svh}
+ .portrait-signature{padding-top:16px}.portrait-signature p{font-size:29px}.portrait-signature>span{font-size:7px;margin-top:9px;letter-spacing:1px}
+ .portrait-footer{margin-top:20px}
+}
+@media(max-height:680px) and (min-width:701px){
+ .portrait-stage,.motion-enabled .portrait-stage{padding-top:90px;padding-bottom:20px}
+ .portrait-gallery{margin-top:15px}.portrait-panel{width:20vw;max-height:50svh}
+ .portrait-signature{padding-top:15px}.portrait-signature p{font-size:38px}.portrait-signature>span{margin-top:10px;font-size:8px}
+ .portrait-footer{margin-top:19px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .portrait-stage,.motion-enabled .portrait-stage{padding:82px 6vw 14px}
+ .portrait-heading .eyebrow,.portrait-dateline{font-size:8px}
+ .portrait-gallery{margin:10px -6vw 0}.portrait-panel{width:20vw;max-height:51svh}
+ .portrait-signature{padding-top:10px}.portrait-signature p{font-size:27px;line-height:1}.portrait-signature>span{display:none}
+ .portrait-footer{margin-top:12px;font-size:7px}.portrait-arrow{width:38px;height:38px;padding:11px}
+}
+/* A static photographic spread remains available without animation. */
+html:not(.motion-enabled) .portrait-stage{height:auto;min-height:0;padding-top:95px;padding-bottom:35px}
+html:not(.motion-enabled) .portrait-gallery{flex:none;height:auto;min-height:0;margin-top:35px}
+html:not(.motion-enabled) .portrait-perspective{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;padding:0 6vw;perspective:none}
+html:not(.motion-enabled) .portrait-panel{position:relative;left:auto;top:auto;width:100%;height:350px;max-height:none;transform:none;box-shadow:none}
+html:not(.motion-enabled) .portrait-panel:nth-child(even){margin-top:30px}
+html:not(.motion-enabled) .portrait-arrow,html:not(.motion-enabled) .portrait-progress,html:not(.motion-enabled) #portrait-count{display:none}
+@media(max-width:700px){
+ html:not(.motion-enabled) .portrait-perspective{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:0 7vw}
+ html:not(.motion-enabled) .portrait-panel{height:240px}
+ html:not(.motion-enabled) .portrait-panel:first-child{grid-column:1/-1;height:420px}
+ html:not(.motion-enabled) .portrait-panel:nth-child(even){margin-top:0}
+}
+@media print{.portrait-backdrops,.portrait-atmosphere,.portrait-arrow,.portrait-footer{display:none!important}.portrait-perspective{position:relative!important;display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.portrait-panel{position:static!important;transform:none!important;width:100%!important;height:220px!important;opacity:1!important}.portrait-panel-shade{display:none}.portrait-heading,.portrait-signature{color:var(--wine)!important;opacity:1!important;transform:none!important}.portrait-gallery{height:auto!important}.portrait-stage{height:auto!important}}

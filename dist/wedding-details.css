@@ -1,0 +1,136 @@
+/* Full-bleed chapters after removing the fixed navigation. */
+.portrait-stage,.motion-enabled .portrait-stage{padding-top:42px}
+.motion-enabled.ring-has3d .ring-stage,.ring-stage{padding-top:42px}
+.schedule-stage,.motion-enabled .schedule-stage{padding-top:48px}
+.location-stage,.motion-enabled .location-stage{padding-top:42px}
+.countdown-stage,.motion-enabled .countdown-stage{padding-top:42px}
+.farewell-scene{padding-top:65px}
+.portrait-backdrop,.ring-backdrop{filter:blur(40px) saturate(.65)}
+.portrait-atmosphere,.ring-atmosphere{background:rgba(33,23,29,.5)}
+.ring-stage{isolation:isolate;background:var(--dark)}
+.ring-backdrops,.ring-atmosphere{position:absolute;inset:0;pointer-events:none;z-index:-1}
+.ring-backdrops{z-index:-2;overflow:hidden}
+.ring-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.16);opacity:0}
+.ring-backdrop:first-child{opacity:1}
+.ring-backdrop:not([src]){visibility:hidden}
+/* A soft album photograph behind the countdown, with a readable dark veil. */
+.countdown-backdrop{position:absolute;inset:-48px;z-index:-2;pointer-events:none;filter:blur(40px) saturate(.65)}
+.countdown-backdrop img{object-position:50% 45%}
+.countdown-atmosphere{position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(33,23,29,.65)}
+/* A date on the left, a real October calendar on the right. */
+.calendar-stage,.motion-enabled .calendar-stage{height:100svh;min-height:0;padding:42px 7vw 38px}
+.calendar-layout{flex:1;min-height:0;display:grid;grid-template-columns:1.12fr 1fr;gap:7vw;align-items:center}
+.calendar-date-block{min-width:0;text-align:center}
+.calendar-intro{margin:0;padding:0}
+.date-composition{margin:12px 0 0;padding:0;gap:2.4vw}
+.date-piece{font-size:clamp(120px,16vw,270px)}
+.date-divider{height:12vw;max-height:145px;margin-top:0}
+.calendar-details{padding:0;margin-top:26px;gap:15px}
+.weekday{font-size:30px}.calendar-details p{font-size:9px;letter-spacing:1.6px}.year{font-size:34px;letter-spacing:3px}
+.date-promise{font-size:26px;line-height:1.35;padding:0;margin:45px 0 0;max-width:none}
+.month-calendar{width:100%;max-width:520px;margin:auto;border-top:1px solid #521e3040;border-bottom:1px solid #521e3040;padding:25px 0 20px}
+.month-heading{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:24px}
+.month-heading h3{font:400 43px/1.1 var(--serif);letter-spacing:-.5px;margin:0}.month-heading>span{font-size:11px;letter-spacing:2px}
+.month-grid{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0 7px;text-align:center}
+.month-grid th{font-weight:500;font-size:10px;letter-spacing:1px;color:var(--muted);height:31px;padding:0}
+.month-grid abbr{text-decoration:none}.month-grid td{position:relative;height:53px;padding:0}
+.month-day{position:relative;z-index:1;width:42px;height:42px;display:inline-grid;place-items:center;font:400 27px/1 var(--serif);font-variant-numeric:lining-nums tabular-nums;border:1px solid transparent;border-radius:50%}
+.month-grid td:nth-child(7):not(.is-wedding) .month-day{color:#a25a71}
+.is-today .month-day{border-color:var(--wine);background:#fbf7f02e}
+.is-wedding .month-day{color:#fff4ee;font-weight:500;top:-1px}
+.wedding-heart{position:absolute;left:50%;top:50%;width:51px;height:47px;transform:translate(-50%,-50%);overflow:visible;fill:var(--wine);stroke:var(--wine);stroke-width:.5}
+.is-wedding.is-today .month-day{border-color:#e9bdcc;background:none}
+.month-legend{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:22px;font-size:10px;color:var(--muted)}
+.month-legend>span{display:flex;align-items:center;gap:9px}.month-legend>span[hidden]{display:none}
+.month-legend i{width:13px;height:13px;border:1px solid var(--wine);border-radius:50%}.month-legend b{font-size:18px;color:var(--wine);line-height:1}
+.viewer-thumbnails{width:max-content;justify-content:flex-start;overflow-x:auto;max-width:min(740px,100%);margin-inline:auto;padding:4px 3px;scrollbar-width:thin;scrollbar-color:#d1a4b755 transparent}
+.photo-viewer .viewer-thumb{flex:0 0 47px}
+@media(max-width:1000px) and (min-width:701px){
+ .calendar-layout{gap:5vw;grid-template-columns:1fr 1fr}.date-piece{font-size:17vw}.calendar-details{gap:8px}.weekday{font-size:25px}.year{font-size:28px}.calendar-details p{font-size:8px;letter-spacing:.6px}.month-heading h3{font-size:36px}.month-grid td{height:46px}.month-day{font-size:24px;width:36px;height:36px}.wedding-heart{width:44px;height:41px}
+}
+@media(max-width:700px){
+ .portrait-stage,.motion-enabled .portrait-stage,.motion-enabled.ring-has3d .ring-stage,.ring-stage{padding-top:32px}
+ .schedule-stage,.motion-enabled .schedule-stage,.location-stage,.motion-enabled .location-stage,.countdown-stage,.motion-enabled .countdown-stage{padding-top:35px}
+ .calendar-stage,.motion-enabled .calendar-stage{padding:32px 7vw 28px}
+ .calendar-layout{grid-template-columns:1fr;gap:24px;align-content:center}
+ .calendar-intro .eyebrow{font-size:9px}.date-composition{margin-top:6px;gap:5vw}.date-piece{font-size:25vw;line-height:.95}
+ .date-divider{height:18vw;margin:0}.date-swoosh{height:62%;bottom:-15%}
+ .calendar-details{margin-top:18px;justify-content:center;gap:23px}.weekday{font-size:23px}.calendar-details p{font-size:8px;letter-spacing:1px}.year{font-size:27px;letter-spacing:2px}
+ .date-promise{display:none}
+ .month-calendar{max-width:420px;padding:16px 0 14px}.month-heading{margin-bottom:10px}.month-heading h3{font-size:32px}.month-heading>span{font-size:9px}
+ .month-grid{border-spacing:0 3px}.month-grid th{font-size:9px;height:26px}.month-grid td{height:43px}.month-day{font-size:23px;width:34px;height:34px}.wedding-heart{width:41px;height:38px}
+ .month-legend{margin-top:13px;font-size:9px;gap:10px}.month-legend>span{gap:7px}
+ .photo-viewer .viewer-thumb{flex-basis:42px}
+}
+@media(max-height:650px) and (max-width:700px){
+ .calendar-stage,.motion-enabled .calendar-stage{padding-top:22px;padding-bottom:20px}
+ .calendar-stage .chapter-heading{font-size:8px;padding-bottom:11px}
+ .calendar-layout{gap:14px}.calendar-intro .eyebrow{font-size:8px}.date-piece{font-size:23vw}.calendar-details{margin-top:13px;gap:20px}.weekday{font-size:21px}.year{font-size:23px}
+ .month-calendar{padding:12px 0 10px}.month-heading h3{font-size:28px}.month-heading{margin-bottom:7px}.month-grid{border-spacing:0 1px}.month-grid th{height:22px}.month-grid td{height:35px}.month-day{font-size:21px;width:30px;height:30px}.wedding-heart{width:37px;height:34px}.month-legend{font-size:8px;margin-top:10px}
+}
+@media(max-height:600px) and (min-width:701px){
+ .calendar-stage,.motion-enabled .calendar-stage{padding:28px 6vw 20px}.calendar-layout{gap:7vw}.calendar-stage .chapter-heading{padding-bottom:12px}
+ .date-piece{font-size:17vw}.calendar-details{margin-top:18px}.date-promise{margin-top:20px;font-size:21px}
+ .month-calendar{padding:12px 0}.month-heading{margin-bottom:8px}.month-heading h3{font-size:30px}.month-grid{border-spacing:0 2px}.month-grid td{height:34px}.month-grid th{height:22px}.month-day{width:29px;height:29px;font-size:21px}.wedding-heart{width:37px;height:34px}.month-legend{margin-top:10px;font-size:8px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .portrait-stage,.motion-enabled .portrait-stage,.motion-enabled.ring-has3d .ring-stage,.ring-stage{padding-top:24px}
+ .schedule-stage,.motion-enabled .schedule-stage,.countdown-stage,.motion-enabled .countdown-stage{padding-top:28px}.farewell-scene{padding-top:35px}
+ .calendar-stage,.motion-enabled .calendar-stage{padding:20px 6vw 16px}.calendar-stage .chapter-heading{padding-bottom:10px;font-size:8px}
+ .calendar-layout{grid-template-columns:1fr 1fr;gap:6vw;align-content:center}.calendar-intro{padding:0;margin:0}.calendar-intro .eyebrow{font-size:8px}
+ .date-composition{margin:8px 0 0}.date-piece{font-size:17vw}.date-divider{height:10vw}.calendar-details{padding:0;margin-top:14px;gap:12px}.calendar-details p{font-size:7px;letter-spacing:.5px}.weekday{font-size:22px}.year{font-size:24px}.date-promise{display:none}
+ .month-calendar{padding:10px 0}.month-heading{margin-bottom:6px}.month-heading h3{font-size:27px}.month-grid{border-spacing:0 1px}.month-grid th{height:19px;font-size:8px}.month-grid td{height:30px}.month-day{font-size:19px;width:26px;height:26px}.wedding-heart{width:32px;height:30px}.month-legend{font-size:7px;margin-top:8px;gap:8px}.month-legend>span{gap:5px}.month-legend i{width:10px;height:10px}
+}
+html:not(.motion-enabled) .calendar-stage{height:auto;min-height:650px}
+html:not(.motion-enabled) .calendar-layout{padding-top:40px;padding-bottom:35px}
+@media print{.month-calendar,.month-cell,.month-day,.month-heading,.month-legend,.wedding-heart{opacity:1!important;visibility:visible!important;transform:none!important}.wedding-heart{position:static!important;display:inline-block;width:22px;height:20px}.is-wedding .month-day{color:var(--wine)}.ring-backdrops,.ring-atmosphere{display:none}}
+
+/* The couple's portrait photographs retain their focal points on wide screens. */
+.opening-photo{background:#222a22}
+.opening-photo::before,.farewell-photo::before{content:"";position:absolute;inset:-5%;background:center/cover no-repeat;filter:blur(35px);opacity:.45;pointer-events:none}
+.opening-photo::before{background-image:url('images/photo-aut01161-480.webp')}
+.farewell-photo::before{background-image:url('images/photo-aut01628-480.webp')}
+.opening-photo img{object-position:50% 30%}
+.event-photo img{object-position:50% 30%}
+.event-card:nth-child(2) .event-photo img{object-position:50% 55%}
+.farewell-photo img{filter:none;object-position:50% 25%}
+@media(min-width:701px) and (orientation:landscape){
+ .opening-photo img,.farewell-photo img{position:absolute;left:auto;right:0;width:70%;height:100%;object-fit:cover}
+ .opening-photo img{object-position:50% 28%}
+ .photo-invitation-shade{background:linear-gradient(90deg,#351b23 0%,#351b23ed 15%,#351b2399 34%,#351b2300 65%),linear-gradient(0deg,#26121d70,transparent 50%)}
+ .photo-invitation{left:6vw;bottom:10%;max-width:42vw}
+ .photo-invitation-names{font-size:clamp(60px,6.2vw,100px)}
+ .photo-invitation-details{flex-wrap:wrap;gap:10px 24px}
+ .farewell-content{width:45%;max-width:660px;margin-right:auto;text-align:left}
+ .farewell-content h2{font-size:clamp(43px,4.5vw,72px)}
+ .farewell-note{margin-left:0}.farewell-signature{font-size:clamp(28px,3.3vw,42px)}
+ .farewell-shade{background:linear-gradient(90deg,#24141ef5 0%,#24141eec 24%,#24141e70 48%,#24141e10 80%),linear-gradient(0deg,#24141e70,transparent 60%)}
+}
+@media(max-width:700px) and (orientation:portrait){
+ .opening-photo img{object-position:50% 50%}
+ .photo-invitation{bottom:6%}
+ .photo-invitation-shade{background:linear-gradient(0deg,#21121cee 0%,#24141e80 31%,transparent 69%)}
+ .farewell-photo{background:#24141e}
+ .farewell-photo::before{opacity:.18}
+ .farewell-photo img{position:absolute;inset:0;width:100%;height:64%;object-fit:cover;object-position:50% 25%;-webkit-mask-image:linear-gradient(#000 0%,#000 72%,transparent 100%);mask-image:linear-gradient(#000 0%,#000 72%,transparent 100%)}
+ .farewell-content{position:absolute;left:7%;right:7%;bottom:68px;width:auto;max-width:none;margin:0;text-align:center}
+ .farewell-content .eyebrow{font-size:9px;margin-bottom:12px}
+ .farewell-content h2{font-size:clamp(27px,8vw,36px);line-height:1.12;letter-spacing:-.6px}
+ .farewell-note{font-size:11px;line-height:1.6;margin-top:14px}
+ .farewell-signature{font-size:27px;margin-top:18px}
+ .farewell-link{font-size:10px;margin-top:10px;padding-block:6px}
+ .farewell-shade{background:linear-gradient(0deg,#24141e 0%,#24141ef5 34%,#24141e80 50%,transparent 72%)}
+}
+@media(max-width:700px) and (max-height:650px) and (orientation:portrait){
+ .farewell-content{bottom:48px}.farewell-content .eyebrow{font-size:8px;margin-bottom:9px}
+ .farewell-content h2{font-size:27px}.farewell-note{font-size:10px;margin-top:10px}
+ .farewell-signature{font-size:24px;margin-top:12px}.farewell-link{margin-top:7px;font-size:9px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .farewell-photo img{position:absolute;left:auto;right:0;width:55%;height:100%;object-fit:cover;object-position:50% 25%}
+ .farewell-content{position:absolute;left:6vw;right:auto;top:50%;bottom:auto;width:44%;max-width:none;margin:0;transform:translateY(-50%);text-align:left}
+ .farewell-content .eyebrow{font-size:8px;margin-bottom:9px}.farewell-content h2{font-size:25px;line-height:1.1;letter-spacing:-.3px}
+ .farewell-note{font-size:9px;line-height:1.6;margin:10px 0 0}.farewell-signature{font-size:22px;margin-top:12px}
+ .farewell-link{font-size:9px;margin-top:8px;padding-block:5px}
+ .farewell-shade{background:linear-gradient(90deg,#24141ef5 0%,#24141ee8 36%,#24141e50 57%,#24141e00 80%)}
+}

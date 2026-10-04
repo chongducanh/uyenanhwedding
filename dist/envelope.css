@@ -1,0 +1,249 @@
+/* Full-viewport invitation. Paper artwork is original; GSAP owns every moving fold. */
+.opening-stage,.motion-enabled .opening-stage,.farewell-stage,.motion-enabled .farewell-stage{
+ height:100svh;min-height:0;padding:0;overflow:hidden;background:var(--paper);isolation:isolate;
+}
+.opening-card-space,.closing-card-space{
+ position:absolute;inset:0;transform:none;width:100%;height:100%;perspective:2400px;pointer-events:none;
+}
+.wedding-card{width:100%;height:100%;box-shadow:none;transform-style:preserve-3d}
+.card-inside{inset:0;border:0;padding:clamp(90px,12svh,140px) 6vw 7svh;gap:7vw;grid-template-columns:43% 1fr;background:var(--paper)}
+.card-inside-photo{height:100%;min-height:0;position:relative}
+.card-inside-photo img{object-position:50% 29%}
+.card-inside-copy{padding:0 2vw;color:var(--wine)}
+.card-inside-copy>span{font-size:11px;letter-spacing:2.5px}
+.card-inside-copy p{font:400 clamp(50px,5.6vw,85px)/1.05 var(--serif);letter-spacing:-1.5px;margin:28px 0}
+.card-inside-copy small{font:400 10px/1.8 var(--sans);letter-spacing:1.8px}
+.card-inside-copy .inside-rule{width:36px;height:1px;background:#ae7c8b;margin:5px 0 25px}
+.card-inside-copy .inside-message{font:italic 27px/1.4 var(--serif);letter-spacing:0;margin:28px 0 0;color:var(--muted)}
+.envelope-flap{position:absolute;inset:0;backface-visibility:hidden;transform-style:preserve-3d;filter:drop-shadow(0 4px 11px #18091280);will-change:transform}
+.flap-surface{position:absolute;inset:0;background-color:#521e30;background-image:linear-gradient(#30071930,#30071930),url('images/envelope-paper.webp');background-size:cover;background-position:center}
+.flap-bottom{transform-origin:center bottom;z-index:2}
+.flap-top{transform-origin:center top;z-index:3}
+.flap-left{transform-origin:left center;z-index:4}
+.flap-right{transform-origin:right center;z-index:5}
+.flap-bottom .flap-surface{clip-path:polygon(0 100%,50% 50%,100% 100%);filter:brightness(.72)}
+.flap-top .flap-surface{clip-path:polygon(0 0,100% 0,50% 50%);filter:brightness(1)}
+.flap-left .flap-surface{clip-path:polygon(0 0,50% 50%,0 100%);filter:brightness(.8)}
+.flap-right .flap-surface{clip-path:polygon(100% 0,100% 100%,50% 50%);filter:brightness(.88)}
+.card-seal{z-index:6;top:50%;width:78px;height:78px;border:1px solid #d5aaa775;background:#592136;color:#edd5c1;box-shadow:inset 0 0 0 5px #582436,inset 0 0 0 6px #b1797855,0 5px 16px #1b081858;font:400 27px var(--serif);letter-spacing:-2px}
+.card-seal em{font-size:21px;margin-inline:3px}
+.opening-intro,.opening-dateline,.opening-controls,.closing-summary,.closing-dateline,.closing-actions{position:absolute;z-index:7;left:0;right:0;text-align:center;color:#f2e5d5}
+.opening-intro{top:26%;padding:0 6vw;pointer-events:none}
+.opening-intro .eyebrow{font-size:10px;letter-spacing:3.2px;margin-bottom:25px;color:#dfc2ba}
+.opening-intro h1{font:400 clamp(64px,8vw,128px)/1.1 var(--serif);letter-spacing:-2.5px}
+.opening-intro h1 em{font-size:.62em;color:#d4aea3;padding:0 .18em}
+.opening-dateline,.closing-dateline{bottom:23%;pointer-events:none}
+.opening-dateline p,.closing-dateline p{font:400 21px var(--serif);letter-spacing:5px}
+.opening-dateline span,.closing-dateline span{display:block;font-size:9px;letter-spacing:2px;color:#d9bab2;margin-top:15px}
+.opening-controls{bottom:7%;margin:0;padding:0 6vw}
+.card-action{border:1px solid #d7b6ab80;background:#49132338;padding:12px 27px;gap:25px;font-size:12px;letter-spacing:.4px;color:#f2e5d5;min-height:48px}
+.card-action svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.2;flex:none}
+.fold-edge{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#dfbfa333;stroke-width:1;pointer-events:none}
+.fold-edge path{vector-effect:non-scaling-stroke}
+.opening-controls p{color:#d7b6ab;font-size:10px;margin-top:16px;letter-spacing:.5px}
+.motion-enabled .farewell-scene{height:100%;min-height:0}
+.closing-card-space{z-index:2}
+.closing-summary,.motion-enabled .closing-summary{top:26%;padding:0 6vw;pointer-events:none}
+.closing-summary .eyebrow{font-size:10px;letter-spacing:2.6px;color:#dfc2ba}
+.closing-summary h2{font:400 clamp(64px,7vw,104px)/1.1 var(--serif);letter-spacing:-2px;margin-top:26px}
+.closing-summary h2 em{font-weight:400}
+.closing-actions,.motion-enabled .closing-actions{top:auto;bottom:8%;padding:0 6vw;gap:36px;z-index:8}
+.closing-actions button,.closing-actions a{color:#f2e5d5;border-bottom-color:#d7b6ab80;font-size:12px;max-width:none;min-height:46px}
+@media(orientation:portrait){.flap-surface{background-image:linear-gradient(#30071930,#30071930),url('images/envelope-paper-mobile.webp')}}
+/* Portrait paper uses a smaller photographic inset below the invitation text. */
+@media(max-width:700px){
+ .opening-card-space,.closing-card-space{perspective:1300px}
+ .opening-intro{top:20%;padding-inline:7vw}
+ .opening-intro .eyebrow{font-size:9px;letter-spacing:2.5px;margin-bottom:23px}
+ .opening-intro h1{font-size:clamp(55px,15vw,83px);line-height:1;letter-spacing:-1.2px}
+ .opening-intro h1 span{display:block}
+ .opening-intro h1 em{display:block;font-size:.47em;line-height:1.2;padding:5px 0}
+ .card-seal{width:63px;height:63px;font-size:24px;top:50%}
+ .card-seal em{font-size:19px}
+ .opening-dateline,.closing-dateline{bottom:24%}
+ .opening-dateline p,.closing-dateline p{font-size:20px;letter-spacing:3.5px}
+ .opening-dateline span,.closing-dateline span{font-size:8px;letter-spacing:1.5px;margin-top:13px}
+ .opening-controls{bottom:max(6%,env(safe-area-inset-bottom));padding-inline:7vw}
+ .card-action{min-height:46px;font-size:11px;padding:10px 24px}
+ .opening-controls p{font-size:9px;margin-top:15px}
+ .card-inside{padding:90px 9vw 6svh;gap:4svh;grid-template-columns:1fr;grid-template-rows:1fr 33%;}
+ .card-inside-copy{grid-row:1;justify-content:center;padding:0}
+ .card-inside-copy>span{font-size:9px;letter-spacing:1.8px}
+ .card-inside-copy p{font-size:clamp(45px,13vw,65px);line-height:1.05;margin:20px 0;letter-spacing:-1px}
+ .card-inside-copy small{font-size:8px;letter-spacing:1px}
+ .card-inside-copy .inside-rule{margin:0 0 18px;width:28px}
+ .card-inside-copy .inside-message{font-size:21px;line-height:1.3;margin:20px 0 0}
+ .card-inside-photo{grid-row:2;width:74%;justify-self:center}
+ .card-inside-photo img{object-position:50% 33%}
+ .closing-summary,.motion-enabled .closing-summary{top:23%;padding-inline:7vw}
+ .closing-summary .eyebrow{font-size:9px;letter-spacing:1.8px}
+ .closing-summary h2{font-size:clamp(50px,14vw,72px);margin-top:23px;line-height:1.03;letter-spacing:-1px}
+ .closing-summary h2 em{display:block}
+ .closing-actions,.motion-enabled .closing-actions{bottom:max(8%,env(safe-area-inset-bottom));gap:24px;padding-inline:7vw}
+ .closing-actions button,.closing-actions a{font-size:10px;min-height:44px}
+}
+@media(max-height:680px) and (min-width:701px){
+ .opening-intro{top:24%}.opening-intro h1{font-size:clamp(58px,7vw,95px)}
+ .opening-intro .eyebrow{margin-bottom:14px}.card-seal{width:61px;height:61px;font-size:24px;top:50%}
+ .opening-dateline,.closing-dateline{bottom:24%}.opening-dateline span,.closing-dateline span{margin-top:9px}
+ .opening-controls{bottom:5%}.opening-controls p{margin-top:10px}
+ .card-inside{padding-top:92px;padding-bottom:6svh}.card-inside-copy p{font-size:56px;margin:20px 0}
+ .card-inside-copy .inside-message{font-size:23px;margin-top:18px}
+ .closing-summary,.motion-enabled .closing-summary{top:24%}.closing-summary h2{font-size:70px;margin-top:18px}
+ .closing-actions,.motion-enabled .closing-actions{bottom:6%}
+}
+@media(max-height:650px) and (max-width:700px){
+ .opening-intro{top:19%}.opening-intro .eyebrow{margin-bottom:15px;font-size:8px}
+ .opening-intro h1{font-size:49px}.card-seal{top:50%;width:50px;height:50px;font-size:19px}.card-seal em{font-size:16px}
+ .opening-dateline,.closing-dateline{bottom:22%}.opening-dateline p,.closing-dateline p{font-size:17px}
+ .opening-dateline span,.closing-dateline span{font-size:7px;margin-top:8px}
+ .opening-controls{bottom:4%}.opening-controls p{margin-top:8px;font-size:8px}
+ .card-inside{padding-top:81px;grid-template-rows:1fr 26%;gap:16px;padding-bottom:28px}
+ .card-inside-copy p{font-size:40px;margin:15px 0}.card-inside-copy .inside-message{font-size:18px;margin-top:12px}
+ .card-inside-copy .inside-rule{margin-bottom:13px}.closing-summary h2{font-size:50px}
+ .closing-actions,.motion-enabled .closing-actions{bottom:5%}
+}
+/* Landscape phones: a horizontal cover and invitation keep every action above the fold. */
+@media(max-height:500px) and (orientation:landscape){
+ .opening-intro{top:25%}.opening-intro .eyebrow{font-size:8px;margin-bottom:10px}
+ .opening-intro h1{font-size:46px;line-height:1.05;letter-spacing:-1px}.opening-intro h1 span,.opening-intro h1 em{display:inline;padding:0 .1em}
+ .card-seal{top:50%;width:44px;height:44px;font-size:17px}.card-seal em{font-size:14px}
+ .opening-dateline,.closing-dateline{left:6vw;right:auto;bottom:9%;text-align:left}
+ .opening-dateline p,.closing-dateline p{font-size:16px;letter-spacing:2px}.opening-dateline span,.closing-dateline span{font-size:7px;margin-top:6px}
+ .opening-controls{left:auto;right:6vw;bottom:7%;padding:0}.card-action{min-height:40px;font-size:10px;padding:6px 20px}.opening-controls p{margin-top:7px;font-size:8px}
+ .card-inside{padding:83px 7vw 6vh;gap:5vw;grid-template-columns:40% 1fr;grid-template-rows:1fr}
+ .card-inside-photo{grid-row:1;width:100%}.card-inside-copy{grid-column:2;grid-row:1}.card-inside-copy p{font-size:36px;margin:12px 0}
+ .card-inside-copy>span{font-size:8px}.card-inside-copy small{font-size:7px}.card-inside-copy .inside-rule{margin:0 0 12px}
+ .card-inside-copy .inside-message{font-size:18px;margin-top:12px}
+ .closing-summary,.motion-enabled .closing-summary{top:25%}.closing-summary .eyebrow{font-size:8px}.closing-summary h2{font-size:45px;margin-top:10px}.closing-summary h2 em{display:inline}
+ .closing-actions,.motion-enabled .closing-actions{left:auto;right:6vw;bottom:8%;padding:0;gap:22px}.closing-actions button,.closing-actions a{font-size:9px}
+ .farewell-content .eyebrow{margin-bottom:14px}.farewell-content h2{font-size:34px}.farewell-note{font-size:11px;margin-top:14px}.farewell-signature{font-size:25px;margin-top:16px}.farewell-link{margin-top:10px;font-size:10px}.farewell-bottom{bottom:14px}
+ .farewell-scene{padding:80px 7vw 50px}
+}
+/* Native/reduced motion views show a static cover and keep all links in normal flow. */
+html:not(.motion-enabled) .opening-stage{min-height:600px}
+html:not(.motion-enabled) .opening-card .envelope-flap{display:block}
+html:not(.motion-enabled) .opening-card .card-seal{display:flex}
+html:not(.motion-enabled) .farewell-stage{height:auto;min-height:0;background:#521e30}
+html:not(.motion-enabled) .farewell-scene{position:relative;height:auto;min-height:100svh}
+html:not(.motion-enabled) .closing-card-space{position:absolute;inset:auto 0 0;margin:0;transform:none;width:100%;height:600px}
+html:not(.motion-enabled) .closing-summary{position:relative;inset:auto;padding:85px 7vw 0;height:250px}
+html:not(.motion-enabled) .closing-dateline{position:relative;inset:auto;padding-top:160px}
+html:not(.motion-enabled) .closing-actions{position:relative;inset:auto;padding:24px 7vw 48px}
+html:not(.motion-enabled) .closing-card .card-seal{top:50%}
+@media print{.opening-stage{display:none!important}.closing-card-space,.closing-summary,.closing-dateline,.closing-actions{display:none!important}.farewell-stage{height:auto!important}}
+
+/* One cover opens directly onto the photograph; no intermediate invitation panel. */
+.opening-cover{position:absolute;inset:0;z-index:2;pointer-events:none}
+.opening-photo{position:absolute;inset:0;overflow:hidden;background:var(--dark)}
+.opening-photo img{object-position:50% 33%;transform-origin:center center}
+.opening-intro .eyebrow{margin:28px 0 0}
+.closing-paper{position:absolute;inset:0;background:var(--paper)}
+html:not(.motion-enabled) .opening-stage{display:block;height:auto;min-height:0}
+html:not(.motion-enabled) .opening-cover{width:100%;position:relative;height:100svh;min-height:600px}
+html:not(.motion-enabled) .opening-photo{width:100%;position:relative;height:100svh;min-height:480px}
+html:not(.motion-enabled) .opening-card-space{height:100%}
+html:not(.motion-enabled) .closing-summary{height:280px}
+html:not(.motion-enabled) .closing-dateline{padding-top:135px;padding-bottom:80px}
+html:not(.motion-enabled) .closing-card-space{height:600px}
+@media(max-width:700px){.opening-intro .eyebrow{margin-top:26px}.opening-photo img{object-position:50% 30%}}
+@media(max-height:650px) and (max-width:700px){.opening-intro h1{font-size:45px}.opening-intro .eyebrow{margin-top:18px}}
+@media(max-height:500px) and (orientation:landscape){.opening-intro .eyebrow{margin-top:15px}.opening-photo img{object-position:50% 32%}}
+@media print{.opening-stage{display:block!important}.opening-cover{display:none!important}.opening-photo{position:relative!important;height:700px!important}.opening-photo img{transform:none!important}}
+
+@media(min-width:701px){.opening-photo img{object-position:50% 10%}}
+
+/* Both envelope covers share one center and a clear name-first hierarchy. */
+.opening-cover,.closing-envelope{--seal-size:78px;--seal-gap:32px}
+.closing-envelope{position:absolute;inset:0;z-index:2;pointer-events:none}
+.opening-card .card-seal,.closing-card .card-seal{top:50%;left:50%;width:var(--seal-size);height:var(--seal-size)}
+.opening-intro,.closing-summary,.motion-enabled .closing-summary{
+ top:auto;bottom:calc(50% + var(--seal-size)/2 + var(--seal-gap));height:auto;padding:0 6vw;
+}
+.opening-intro h1,.closing-names{font:400 clamp(60px,7.5vw,118px)/1.06 var(--serif);letter-spacing:-2px}
+.opening-intro h1 em,.closing-names em{font-size:.62em;font-weight:400;color:#d4aea3;padding:0 .18em}
+.opening-intro .eyebrow{margin:24px 0 0}
+.closing-message{font:400 clamp(24px,2.3vw,34px)/1.35 var(--serif);letter-spacing:0;margin-top:20px;color:#e0c3b8}
+.closing-message em{font-weight:400}
+.opening-dateline,.closing-dateline{left:0;right:0;bottom:22%;text-align:center}
+html:not(.motion-enabled) .closing-envelope{position:relative;height:max(600px,100svh)}
+html:not(.motion-enabled) .closing-envelope .closing-card-space{position:absolute;inset:0;width:100%;height:100%;margin:0}
+html:not(.motion-enabled) .closing-envelope .closing-summary{position:absolute;top:auto;bottom:calc(50% + var(--seal-size)/2 + var(--seal-gap));height:auto;padding:0 6vw}
+html:not(.motion-enabled) .closing-envelope .closing-dateline{position:absolute;inset:auto 0 22%;padding:0}
+@media(max-width:700px){
+ .opening-cover,.closing-envelope{--seal-size:62px;--seal-gap:24px}
+ .opening-intro h1,.closing-names{font-size:clamp(36px,min(14vw,8svh),64px);line-height:1;letter-spacing:-1px}
+ .opening-intro h1 span,.closing-names span{display:block}
+ .opening-intro h1 em,.closing-names em{display:block;font-size:.47em;line-height:1.2;padding:5px 0}
+ .opening-intro .eyebrow{margin-top:22px}
+ .closing-message{font-size:25px;margin-top:20px}
+ .opening-dateline,.closing-dateline{bottom:22%}
+}
+@media(max-height:680px) and (min-width:701px){
+ .opening-cover,.closing-envelope{--seal-size:62px;--seal-gap:23px}
+ .opening-intro h1,.closing-names{font-size:clamp(58px,6.6vw,94px)}
+ .opening-intro .eyebrow{margin-top:18px}.closing-message{font-size:29px;margin-top:16px}
+}
+@media(max-height:650px) and (max-width:700px){
+ .opening-cover,.closing-envelope{--seal-size:50px;--seal-gap:20px}
+ .opening-intro h1,.closing-names{font-size:clamp(34px,min(13vw,7.5svh),48px)}
+ .opening-intro .eyebrow{margin-top:15px}.closing-message{font-size:22px;margin-top:14px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .opening-cover,.closing-envelope{--seal-size:42px;--seal-gap:14px}
+ .opening-intro h1,.closing-names{font-size:clamp(28px,min(5.2vw,10svh),44px);line-height:1.04;letter-spacing:-.5px}
+ .opening-intro h1 span,.opening-intro h1 em,.closing-names span,.closing-names em{display:inline;padding:0 .12em}
+ .opening-intro .eyebrow{margin-top:10px}.closing-message{font-size:clamp(16px,4.7svh,21px);margin-top:8px;line-height:1.2}
+ .opening-dateline,.closing-dateline{left:0;right:0;bottom:16%;text-align:center}
+ html:not(.motion-enabled) .closing-envelope .closing-dateline{bottom:16%}
+}
+@media print{.closing-envelope{display:none!important}}
+@media(max-height:360px) and (orientation:landscape){.opening-cover,.closing-envelope{--seal-gap:8px}}
+
+/* The photograph holds the invitation after the envelope has opened. */
+.photo-invitation-shade{position:absolute;inset:0;background:linear-gradient(0deg,#21121cde 0%,#24141e80 35%,transparent 78%),linear-gradient(90deg,#24141e40,transparent 75%);pointer-events:none}
+.photo-invitation{position:absolute;left:7vw;bottom:9%;max-width:760px;color:var(--cream);text-align:left}
+.photo-invitation-kicker{font-size:11px;letter-spacing:2.5px;color:#ead0d8;margin-bottom:22px}
+.photo-invitation-names{font:400 clamp(68px,6.8vw,106px)/.96 var(--serif);letter-spacing:-2px}
+.photo-invitation-names em{font-size:.66em;font-weight:400;color:#d9aebf;padding-right:8px}
+.photo-invitation-copy{font-size:16px;line-height:1.85;margin-top:27px;color:#f0e3e7}
+.photo-invitation-details{margin-top:25px;display:flex;align-items:baseline;gap:32px}
+.photo-invitation-details p{font:italic 25px/1.3 var(--serif)}
+.photo-invitation-details span{font-size:10px;letter-spacing:1.7px;color:#dec7d0}
+@media(max-width:700px){
+ .photo-invitation{left:7vw;right:7vw;bottom:8%;max-width:none}
+ .photo-invitation-kicker{font-size:9px;margin-bottom:18px;letter-spacing:1.8px}
+ .photo-invitation-names{font-size:clamp(49px,14vw,70px);letter-spacing:-1px;line-height:1}
+ .photo-invitation-names em{padding-right:4px}
+ .photo-invitation-copy{font-size:14px;line-height:1.75;margin-top:22px}
+ .photo-invitation-details{display:block;margin-top:23px}
+ .photo-invitation-details p{font-size:23px}.photo-invitation-details span{display:block;font-size:9px;margin-top:10px}
+}
+@media(max-height:680px) and (min-width:701px){
+ .photo-invitation{bottom:7%}.photo-invitation-kicker{margin-bottom:15px}
+ .photo-invitation-names{font-size:70px}.photo-invitation-copy{font-size:14px;margin-top:18px}
+ .photo-invitation-details{margin-top:18px}.photo-invitation-details p{font-size:23px}
+}
+@media(max-height:650px) and (max-width:700px){
+ .photo-invitation{bottom:6%}.photo-invitation-kicker{margin-bottom:14px}
+ .photo-invitation-names{font-size:48px}.photo-invitation-copy{font-size:13px;margin-top:16px}
+ .photo-invitation-details{margin-top:17px}.photo-invitation-details p{font-size:21px}
+ .photo-invitation-details span{margin-top:8px}
+}
+@media(max-height:500px) and (orientation:landscape){
+ .photo-invitation{bottom:7%;left:6vw;max-width:80%}
+ .photo-invitation-kicker{font-size:8px;margin-bottom:10px}
+ .photo-invitation-names{font-size:clamp(33px,8svh,43px);line-height:1.05}
+ .photo-invitation-names .line-mask{display:inline-block;vertical-align:top}
+ .photo-invitation-names .line-mask+.line-mask{margin-left:10px}
+ .photo-invitation-copy{font-size:12px;line-height:1.65;margin-top:12px}
+ .photo-invitation-details{display:flex;gap:24px;margin-top:12px}
+ .photo-invitation-details p{font-size:20px}.photo-invitation-details span{font-size:8px;margin:0}
+}
+@media print{.photo-invitation,.photo-invitation>* , .photo-name,.photo-invitation-shade{opacity:1!important;visibility:visible!important;transform:none!important}}
+@media(max-height:360px) and (orientation:landscape){
+ .farewell-scene{padding-top:82px;padding-bottom:36px}
+ .farewell-content .eyebrow{margin-bottom:10px}.farewell-content h2{font-size:29px}
+ .farewell-note{font-size:10px;line-height:1.65;margin-top:10px}.farewell-signature{font-size:23px;margin-top:12px}
+ .farewell-link{font-size:9px;margin-top:6px;padding-block:5px}.farewell-bottom{bottom:10px}
+}

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/envelope-paper.webp" media="(orientation:landscape)">
 <link rel="preload" as="image" href="images/envelope-paper-mobile.webp" media="(orientation:portrait)">
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="envelope.css"><link rel="stylesheet" href="wedding-details.css"><link rel="stylesheet" href="memories-album.css"><link rel="stylesheet" href="memories-interactions.css"><link rel="stylesheet" href="memories.css">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="envelope.css"><link rel="stylesheet" href="wedding-details.css"><link rel="stylesheet" href="memories-album.css"><link rel="stylesheet" href="memories-interactions.css"><link rel="stylesheet" href="memories.css"><link rel="stylesheet" href="journey.css">
 </head><body>
 <a class="skip" href="#celebration">Đến lịch trình lễ cưới</a>
 <div class="page-progress" aria-hidden="true"></div>
@@ -31,9 +31,17 @@
   <figure class="opening-photo" id="invitation"><img data-hero="aut01161" src="images/hero-aut01161-1440.webp" srcset="images/hero-aut01161-960.webp 960w, images/hero-aut01161-1440.webp 1440w, images/hero-aut01161-2048.webp 2048w, images/hero-aut01161-3072.webp 3072w" sizes="(orientation:portrait) max(100vw,67svh), (max-width:700px) 100vw, 70vw" width="3072" height="4608" alt="Nhật Uyên và Đức Anh nhìn nhau giữa khu vườn" loading="eager" fetchpriority="high" decoding="async"><div class="photo-invitation-shade" aria-hidden="true"></div><figcaption class="photo-invitation"><p class="eyebrow photo-invitation-kicker">01 / LỜI MỜI</p><h1 class="photo-invitation-names" aria-label="Nhật Uyên và Đức Anh"><span class="line-mask"><span class="photo-name">Nhật Uyên</span></span><span class="line-mask"><span class="photo-name"><em>&</em> Đức Anh</span></span></h1><p class="photo-invitation-copy">Trân trọng kính mời bạn<br>đến chung vui Lễ vu quy cùng gia đình.</p><div class="photo-invitation-details"><p>Thứ Bảy, 24.10.2026</p><span>VÕ XU · LÂM ĐỒNG</span></div></figcaption></figure>
  </div>
 </section>
+<section class="journey chapter journey-static" id="journey" data-chapter="Hành trình" aria-labelledby="journey-title">
+ <div class="journey-stage stage">
+  <header class="journey-heading"><p class="eyebrow">OUR JOURNEY</p><h2 id="journey-title">Hành trình <em>của 2 đứa mình</em></h2></header>
+  <div class="journey-scene"></div>
+  <footer class="journey-footer"><p class="journey-current">Bốn dấu mốc · Một hành trình</p><p class="journey-scroll-hint">Cuộn chậm, cùng nhớ lại</p></footer>
+ </div>
+ <!-- journey-fallback:start --><noscript><style>#journey .journey-footer{display:none}#journey .journey-stage{padding-bottom:0}</style><div class="journey-noscript"><ol><li><time>07.04.2024</time>Làm quen</li><li><time>24.08.2024</time>Tỏ tình</li><li><time>06.06.2025</time>Cầu hôn</li><li><time>24.10.2026</time>Đám cưới</li></ol></div></noscript><!-- journey-fallback:end -->
+</section>
 <section class="wedding-memories chapter" id="memories" data-chapter="Wedding Memories" aria-labelledby="memories-title">
  <div class="mem-stage stage">
-  <header class="mem-heading"><div><p class="eyebrow">02 / WEDDING GALLERY</p><h2 id="memories-title">Một bàn <em>ký ức.</em></h2></div><p class="mem-edition">Wedding Memories<span>24.10.2026</span></p></header>
+  <header class="mem-heading"><div><p class="eyebrow">02 / BỘ ẢNH CƯỚI</p><h2 id="memories-title">Một bàn <em>ký ức.</em></h2></div><p class="mem-edition">Wedding Memories<span>24.10.2026</span></p></header>
   <div class="mem-camera"><div class="mem-world"></div></div>
   <div class="mem-wish-host"></div>
   <div class="mem-caption" aria-live="off"><span class="mem-caption-index"></span><p class="mem-caption-text">Những điều đẹp đẽ, ở lại cùng nhau.</p></div>
@@ -171,5 +179,5 @@
  </div></div><div class="closing-dateline"><p>24 . 10 . 2026</p><span>HẸN BẠN VÀO NGÀY CHUNG ĐÔI</span></div></div></div>
 </section>
 </main></div>
-<script src="vendor/gsap/gsap.min.js"></script><script src="vendor/gsap/ScrollTrigger.min.js"></script><script src="vendor/gsap/ScrollSmoother.min.js"></script><script src="vendor/gsap/ScrollToPlugin.min.js"></script><script src="vendor/gsap/SplitText.min.js"></script><script src="memories-data.js"></script><script src="memories-album.js"></script><script src="memories-interactions.js"></script><script src="memories.js"></script><script src="countdown.js"></script><script src="calendar.js"></script><script src="motion.js"></script>
+<script src="vendor/gsap/gsap.min.js"></script><script src="vendor/gsap/ScrollTrigger.min.js"></script><script src="vendor/gsap/ScrollSmoother.min.js"></script><script src="vendor/gsap/ScrollToPlugin.min.js"></script><script src="vendor/gsap/SplitText.min.js"></script><script src="memories-data.js"></script><script src="vendor/gsap/Flip.min.js"></script><script src="journey-data.js"></script><script src="journey-viewer.js"></script><script src="journey.js"></script><script src="memories-album.js"></script><script src="memories-interactions.js"></script><script src="memories.js"></script><script src="countdown.js"></script><script src="calendar.js"></script><script src="motion.js"></script>
 </body></html>

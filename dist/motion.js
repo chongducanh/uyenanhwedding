@@ -1,11 +1,11 @@
 /* GSAP owns page motion; WeddingMemories owns its gallery and viewer lifecycle. */
 (() => {
  if (!window.gsap || !window.ScrollTrigger) return;
- gsap.registerPlugin(ScrollTrigger, ScrollSmoother, ScrollToPlugin, SplitText);
+ gsap.registerPlugin(ScrollTrigger, ScrollSmoother, ScrollToPlugin, SplitText, Flip);
  ScrollTrigger.config({ignoreMobileResize:true});
  const root=document.documentElement;
  const $=(s)=>document.querySelector(s), $$=(s)=>gsap.utils.toArray(s);
- let smoother=null,mm=null,reduced=false,memories=null;
+ let smoother=null,mm=null,reduced=false,memories=null,journey=null;
  const timelines={};
  // Photos and web fonts must never block the invitation or its controls.
  document.fonts?.ready.then(()=>ScrollTrigger.refresh());
@@ -18,7 +18,7 @@
   const el=typeof selector==='string'?$(selector):selector;if(!el)return;
   const photoTarget=el.id==='invitation';
   const pin=el.id==='memories'?memories?.timeline?.scrollTrigger:ScrollTrigger.getAll().find(st=>st.vars.id===`pin-${photoTarget?'opening':el.id}`);
-  const readableProgress={memories:.12,date:.85,celebration:.25,location:.9,farewell:.30};
+  const readableProgress={journey:.12,memories:.12,date:.85,celebration:.25,location:.9,farewell:.30};
   const destination=pin?pin.start+(pin.end-pin.start)*(photoTarget ? .85 : (readableProgress[el.id]||0)):(smoother?smoother.offset(el,'top top'):el.getBoundingClientRect().top+scrollY);
   scrollToY(destination,animate,duration);
  }
@@ -34,9 +34,11 @@
    // Reduced motion keeps the gallery and full-image viewer usable without pinned motion.
    if(reduced){
     gsap.set('.event-line span',{scaleX:1});
+    const journeyExperience=window.JourneyExperience?.create({gsap,ScrollTrigger,Flip,getSmoother:()=>smoother,reduced:true,mobile:ctx.conditions.galleryMobile,tablet:ctx.conditions.galleryTablet});
+    journey=journeyExperience||null;
     const experience=window.WeddingMemories?.create({gsap,ScrollTrigger,getSmoother:()=>smoother,reduced:true,mobile:ctx.conditions.galleryMobile,tablet:ctx.conditions.galleryTablet});
     memories=experience||null;if(experience?.timeline)timelines.memories=experience.timeline;
-    return()=>{experience?.destroy();memories=null;root.classList.remove('reduced');};
+    return()=>{journeyExperience?.destroy();journey=null;experience?.destroy();memories=null;root.classList.remove('reduced');};
    }
    smoother=ScrollSmoother.create({wrapper:'#smooth-wrapper',content:'#smooth-content',smooth:1.05,smoothTouch:.12,effects:false,normalizeScroll:false});
    const mobile=ctx.conditions.mobile,flowMap=mobile||ctx.conditions.short;
@@ -62,6 +64,9 @@
     .from('.photo-invitation-copy',{y:24,autoAlpha:0,duration:.7},3.25)
     .from('.photo-invitation-details',{y:20,autoAlpha:0,duration:.65},3.55)
     .to('.opening-photo',{duration:1.15},4.2);
+   // Create pins in DOM order: Journey always releases before Wedding Memories.
+   const journeyExperience=window.JourneyExperience?.create({gsap,ScrollTrigger,Flip,getSmoother:()=>smoother,reduced,mobile:ctx.conditions.galleryMobile,tablet:ctx.conditions.galleryTablet});
+   journey=journeyExperience||null;if(journey?.timeline)timelines.journey=journey.timeline;
    // Keep gallery layout, navigation and modal state inside one disposable experience.
    const experience=window.WeddingMemories?.create({gsap,ScrollTrigger,getSmoother:()=>smoother,reduced,mobile:ctx.conditions.galleryMobile,tablet:ctx.conditions.galleryTablet});
    memories=experience||null;if(experience?.timeline)timelines.memories=experience.timeline;
@@ -153,7 +158,7 @@
    ScrollTrigger.refresh();
    return()=>{
     // Restore any gallery modal scroll lock before disposing the shared smoother.
-    experience?.destroy();memories=null;$('.farewell-scene').inert=false;splits.forEach(s=>s.revert());smoother?.kill();smoother=null;root.classList.remove('motion-enabled');
+    journeyExperience?.destroy();journey=null;experience?.destroy();memories=null;$('.farewell-scene').inert=false;splits.forEach(s=>s.revert());smoother?.kill();smoother=null;root.classList.remove('motion-enabled');
    };
   });
  }
@@ -164,9 +169,10 @@
  function captureMemoriesResize(){
   if(galleryViewport.width===innerWidth&&galleryViewport.height===innerHeight)return;
   galleryViewport={width:innerWidth,height:innerHeight};
-  const trigger=memories?.timeline?.scrollTrigger;
+  const activeExperience=journey?.timeline?.scrollTrigger?.isActive?journey:memories;
+  const trigger=activeExperience?.timeline?.scrollTrigger;
   if(!memoriesRestore&&trigger?.isActive&&!reduced){
-   memoriesRestore={navigation:memories.getNavigationState?.()||null,progress:trigger.progress};
+   memoriesRestore={experience:activeExperience===journey?'journey':'memories',navigation:activeExperience.getNavigationState?.()||null,progress:trigger.progress};
    gsap.killTweensOf(window);
   }
   // A resize which causes no refresh must leave the current view untouched.
@@ -178,9 +184,9 @@
   restoreTask?.kill();
   restoreTask=gsap.delayedCall(.01,()=>{
    restoreTask=null;
-   const saved=memoriesRestore,timeline=memories?.timeline,trigger=timeline?.scrollTrigger;
+   const saved=memoriesRestore,experience=saved?.experience==='journey'?journey:memories,timeline=experience?.timeline,trigger=timeline?.scrollTrigger;
    if(!saved||!trigger||!trigger.enabled||reduced)return;
-   const time=saved.navigation?memories.timeForNavigationState?.(saved.navigation):null;
+   const time=saved.navigation?experience.timeForNavigationState?.(saved.navigation):null;
    const progress=typeof time==='number'&&Number.isFinite(time)&&timeline.duration()>0
     ?gsap.utils.clamp(0,1,time/timeline.duration()):saved.progress;
    restoringMemories=true;
@@ -204,7 +210,7 @@
  }));
  addEventListener('popstate',()=>goTo(location.hash||'#opening',false));
  // Hover feedback also runs through GSAP; focus styling remains immediate.
- $$('button,.map-bottom a,.farewell-link').filter(el=>!el.closest('#memories,.mem-viewer')).forEach(el=>{
+ $$('button,.map-bottom a,.farewell-link').filter(el=>!el.closest('#memories,.mem-viewer,#journey,.journey-viewer')).forEach(el=>{
   el.addEventListener('pointerenter',e=>{if(!reduced&&e.pointerType==='mouse'&&!el.disabled)gsap.to(el,{opacity:.7,duration:.22,ease:'power1.out',overwrite:true});});
   el.addEventListener('pointerleave',()=>gsap.to(el,{opacity:1,duration:reduced?0:.22,overwrite:true,onComplete:()=>gsap.set(el,{clearProps:'opacity'})}));
  });
@@ -212,5 +218,5 @@
  mapButton.addEventListener('click',()=>{const on=mapButton.getAttribute('aria-pressed')!=='true';mapButton.setAttribute('aria-pressed',String(on));mapButton.textContent=on?'Quay lại cuộn trang':'Tương tác bản đồ';mapShell.classList.toggle('is-interactive',on);map.tabIndex=on?0:-1;});
  gsap.delayedCall(.15,()=>{ScrollTrigger.refresh();if(location.hash)goTo(location.hash,false);});
  // Exposes only animation state for browser QA and future editing.
- window.weddingMotion={get smoother(){return smoother;},get reduced(){return reduced;},get memories(){return memories;},timelines,gsapVersion:gsap.version};
+ window.weddingMotion={get smoother(){return smoother;},get reduced(){return reduced;},get memories(){return memories;},get journey(){return journey;},timelines,gsapVersion:gsap.version};
 })();

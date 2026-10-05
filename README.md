@@ -42,3 +42,8 @@ kết nối Internet.
 
 Xem [WEDDING_MEMORIES.md](WEDDING_MEMORIES.md) cho cấu trúc camera, album lật trang,
 callback lời chúc và bộ đồ họa WebP dành riêng cho từng lễ.
+
+## Hành trình
+
+Xem [JOURNEY.md](JOURNEY.md) để sửa ngày, gán 4 ảnh kỷ niệm và điều chỉnh
+film helix. Section dùng cấu hình nhà trai/nhà gái sẵn có.

@@ -180,9 +180,9 @@
 </section>
 </main></div>
 <script src="vendor/gsap/gsap.min.js"></script><script src="vendor/gsap/ScrollTrigger.min.js"></script><script src="vendor/gsap/ScrollSmoother.min.js"></script><script src="vendor/gsap/ScrollToPlugin.min.js"></script><script src="vendor/gsap/SplitText.min.js"></script><script src="memories-data.js"></script><script src="memories-layout.js"></script><script src="vendor/gsap/Flip.min.js"></script><script src="journey-data.js"></script><script src="journey-viewer.js"></script><script src="journey-ribbon.js"></script><script src="journey.js"></script><script src="memories-album.js"></script><script>
-// Replace APPS_SCRIPT_URL with this site's deployed Google Apps Script /exec URL.
+// Both wedding editions submit to the owner-configured Google Apps Script deployment.
 window.onWeddingWishSubmit = async (d) => {
-  const endpoint = 'APPS_SCRIPT_URL';
+  const endpoint = 'https://script.google.com/macros/s/AKfycbzc947ybInuKhcz-ZTjxeN6wxOy6NjkNDU5GamjESPbg_ETWWWIiz3DRe95uTQ8fRU/exec';
   if (!endpoint.startsWith('https://')) throw new Error('Lời chúc chưa gửi được. Bạn vui lòng thử lại sau.');
   await fetch(endpoint, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:d.name,message:d.message,anonymous:d.anonymous})});
   return {savedLocally:false,message:'Lời chúc đã đến tay Nhật Uyên & Đức Anh. Cảm ơn bạn!'};

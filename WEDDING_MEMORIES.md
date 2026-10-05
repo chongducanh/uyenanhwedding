@@ -79,14 +79,25 @@ Skipping or reversing never submits. Drafts stay in memory.
 
 ## Google Sheets callback
 
-Replace `APPS_SCRIPT_URL` in **dist/index.html**, in the inline
-`window.onWeddingWishSubmit` before `memories-interactions.js`, with that edition's
-HTTPS Apps Script `/exec` URL. This placeholder is still unconfigured by request.
+Both editions use the same deployed Apps Script endpoint in **dist/index.html**,
+in `window.onWeddingWishSubmit` before `memories-interactions.js`:
+
+`https://script.google.com/macros/s/AKfycbzc947ybInuKhcz-ZTjxeN6wxOy6NjkNDU5GamjESPbg_ETWWWIiz3DRe95uTQ8fRU/exec`
+
+Destination: [wedding wishes Sheet](https://docs.google.com/spreadsheets/d/1HC8fRjSwbpfvHqad8sFujO46BaYlxz7ZWjJEAUJeA-k/edit), first tab `gift`.
+The payload remains `name`, `message`, and `anonymous`; both editions share this
+inbox and preserve their own thank-you message.
+
 `apps-script/loi-chuc.gs` is repository reference only, not frontend code.
+It opens the supplied Sheet ID explicitly. Updating that reference does not
+update the deployed Apps Script; redeploy from the Apps Script editor if its
+server code changes.
+
 Success uses the callback's message; failed requests preserve the draft. No
 localStorage success/demo fallback exists. The requested `no-cors` transport
-cannot verify a Sheet row in frontend code; verify your Sheet after configuring
-its real URL. QA uses a mock callback and never sends test wishes to a live Sheet.
+cannot verify a Sheet row in frontend code. Verify actual delivery in `gift`
+after submitting a real wish. Automated callback checks intercept fetch and do
+not add test wishes to the live Sheet.
 
 ## Responsive / verification
 

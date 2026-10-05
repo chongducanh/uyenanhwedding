@@ -67,9 +67,12 @@ as the camera travels over the new white table during the wish-card sequence.
 
 `getFocusTransform()` measures actual bounds and converts them back into world
 coordinates. Resizing recalculates the camera and slot. Journey and Memories
-keep independent sequential pins. The overview now spans up to 96% of the
-viewport width, letting only non-interactive outer cloth/lower drape crop when
-necessary; all interactive objects remain visible. Fullscreen frame/album viewers remain usable.
+keep independent sequential pins. `CONFIG.overviewScale` (0.88) makes the whole
+overview 12% smaller, including table, decor and resting objects. Desktop now
+spans up to 84.48% of viewport width; mobile up to about 96.7%. The same scale
+applies when returning to the table and exiting. Object focus compensates for
+this scale so photos, album pages and the wish form keep their reading size.
+All interactive objects remain visible; fullscreen viewers remain usable.
 
 `memories-wish-scene.js` animates the same paper from its tabletop anchor to the
 form and back into the measured slot. The box stays closed. Clipping begins only

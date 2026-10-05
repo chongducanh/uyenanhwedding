@@ -3,7 +3,7 @@
 (() => {
  'use strict';
  const CONFIG = {
-  worldWidth:1448,worldCenterY:500,photoFocusScale:.78,albumScale:.88,
+  worldWidth:1448,worldCenterY:500,overviewScale:.88,photoFocusScale:.78,albumScale:.88,
   photoScrollLength:1.12,albumPageScrollLength:1.3,cameraDuration:.65,
   blurAmount:2,mobileBreakpoint:767,mobilePhotoScrollLength:.43,
   mobileAlbumPageScrollLength:.43,scrub:.75
@@ -130,7 +130,7 @@
    const dimensions=()=>({width:stage.clientWidth,height:stage.clientHeight});
    // Fit the interactive scene, allowing the satin drape to extend below the
    // viewport. On phones only the non-interactive outer cloth is cropped.
-   const baseScale=()=>{const v=dimensions();return mobile?Math.min(v.width*.96/1265,v.height*.68/780):Math.min(v.width*.96/layout.image.width,v.height*.96/760);};
+   const baseScale=()=>{const v=dimensions();return (mobile?Math.min(v.width*.96/1265,v.height*.68/780):Math.min(v.width*.96/layout.image.width,v.height*.96/760))*CONFIG.overviewScale;};
    // Read the true laid-out bounds and invert only the world camera matrix.
    // Frame rotations are below one degree; offset bounds avoid rotation drift.
    function getFocusTransform(target,widthRatio=.82,heightRatio=.73,screenY=.51){

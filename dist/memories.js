@@ -17,7 +17,7 @@
   const wishHost=section.querySelector('.mem-wish-host'),heading=section.querySelector('.mem-heading');
   const captionHint=section.querySelector('.mem-caption-hint');
   const caption=section.querySelector('.mem-caption-text'),indexLabel=section.querySelector('.mem-caption-index');
-  const hint=section.querySelector('.mem-scroll-hint'),progress=section.querySelector('.mem-progress>span');
+  const progress=section.querySelector('.mem-progress>span');
   const nav=[...section.querySelectorAll('[data-memory-jump]')];
   const listeners=[],locks=new Set();let destroyed=false,timeline=null,lockedAt=null,lockedScroll=0,wasPaused=false,wishScene=null,submissionTravel=null;
   const listen=(target,type,callback,options)=>{target.addEventListener(type,callback,options);listeners.push(()=>target.removeEventListener(type,callback,options));};
@@ -81,7 +81,7 @@
    const tableGallery=el('div','mem-static-frames');frames=data.photos.map(createPhoto);tableGallery.append(...frames);world.append(tableGallery);
    const mount=el('div','mem-static-album');world.append(mount);
    album=window.WeddingAlbum.create({mount,photos:data.album,site:data.site,onPhotoClick:openPhoto,mobile,reduced:true});
-   wish.setActive(true);captionHint.textContent='';caption.textContent='Những hình ảnh để giữ. Những lời thương để trao.';hint.textContent='Bấm ảnh để xem trọn khung';
+   wish.setActive(true);captionHint.textContent='Bấm ảnh để xem trọn khung';caption.textContent='Những hình ảnh để giữ. Những lời thương để trao.';
    nav.forEach(button=>listen(button,'click',()=>{const target=button.dataset.memoryJump==='wishes'?wishHost:button.dataset.memoryJump==='album'?mount:tableGallery;target.scrollIntoView({behavior:'instant',block:'start'});}));
   }else{
    world.classList.add('wedding-scene');
@@ -232,10 +232,9 @@
      frames.forEach(frame=>{frame.style.zIndex=frame===focused?'60':frame.dataset.row==='front'?'24':'20';});
      albumMount.style.zIndex=focused===albumMount?'60':'26';box.style.zIndex=focused===box?'60':'28';
      caption.textContent=photo?photo.photo.caption:page?'Lật từng trang, giữ từng khoảnh khắc.':isForm?'Một lời chúc, một kỷ niệm đẹp.':activePhase.startsWith('album')?'Lật từng trang, giữ từng khoảnh khắc.':activePhase.startsWith('box')?'Gửi lại một lời thương.':'Những điều đẹp đẽ, ở lại cùng nhau.';
-     captionHint.textContent=page?'Bấm ảnh để xem trọn khung · Cuộn chậm để lật trang':'';
+     captionHint.textContent=page?'Bấm ảnh để xem trọn khung':'';
      indexLabel.textContent=photo?`${String(photo.index+1).padStart(2,'0')} / ${String(frames.length).padStart(2,'0')}`:page?`${String(page.index+1).padStart(2,'0')} / ${String(album.spreadCount).padStart(2,'0')}`:'';
      section.dataset.state=photo?'PHOTO_FOCUS':page?'ALBUM_PAGE':isForm?(wish.submitted?'CARD_SUBMITTED':'CARD_INTERACTIVE'):({'intro':'TABLE_OVERVIEW','album-focus':'ALBUM_FOCUS','album-open':'ALBUM_OPEN','album-close':'ALBUM_CLOSING','box-focus':'MONEY_BOX_FOCUSED','card-lift':'CARD_PICKING_UP','card-insert':'CARD_INSERTING','card-inserted':'CARD_INSERTED','exit':'SCENE_EXITING'}[activePhase]||'TABLE_OVERVIEW');
-     hint.textContent=page?'Cuộn chậm để lật trang':isForm?'Cuộn tiếp khi bạn đã sẵn sàng':'Cuộn để khám phá';
     }
     heading.classList.toggle('mem-heading--compact',time>timeline.labels['photo-0']&&time<timeline.labels.exit);
     if(lastPage!==Number(isAlbum)){lastPage=Number(isAlbum);albumMount.style.pointerEvents=isAlbum?'auto':'none';}

@@ -114,8 +114,8 @@ titles as a list. After changing dates, run
 
 `dist/journey-ribbon.js` builds one analytic ruled surface. Photo cells and empty
 stock are contiguous intervals of the same angular coordinate. Both top and
-bottom rails, perforations, image pixels and small film annotations sample that
-surface. There are no independent Bézier connectors, per-photo cylinders or
+bottom rails, perforations, image pixels sample that surface. Decorative cell labels and serial numbers
+are omitted so photographs fill the cell from one perforated rail to the other. There are no independent Bézier connectors, per-photo cylinders or
 side-specific bends. At every cell boundary, positions and first derivatives
 match exactly; changing the photo density cannot introduce a crease.
 
@@ -123,7 +123,9 @@ The subtle champagne stock has narrow rails and small real perforations
 (SVG even-odd paths), spaced by accumulated arc length through both photo cells
 and their connectors. Holes continue through the cell margins. No separate
 cream card background or CSS perforation row floats above the film. The
-original photographs, crop modes and fullscreen viewer are unchanged.
+original photographs and fullscreen viewer are unchanged. In-film textures use
+`cover` to fill each cell, including the landscape photograph; fullscreen retains
+`contain` and shows the complete original image.
 
 `JOURNEY_CONFIG.ribbon.stockWidth` sets stock height around each photo;
 `holePitch` controls perforation spacing and `patchesPerJoin` tessellates each
@@ -143,7 +145,10 @@ stock stop together. Reduced motion retains four accessible normal-flow rows.
 
 ### Curved photo surfaces
 
-`ribbon.photoSlices` controls 32 cached texture strips per photograph.
+`ribbon.photoSlices` controls 32 cached texture strips per photograph. Their
+height is exactly `frameHeight × stockWidth × RAIL_INNER`, using the same
+constant as the inner rail edges. The photo is vertically centered, with no
+caption band, and spans the full cell width.
 `framePlane().at()` evaluates the shared helix at each source-pixel interval;
 `framePlane().tangent()` includes its vertical rise. A world-space `matrix3d`
 maps each image strip using the helix chord, vertical ruling and surface normal.
@@ -157,7 +162,7 @@ semantic photo button, in its perspective/opacity group, and forward pointer
 clicks to it. A small texture overlap prevents seams; width and background crop
 are measured only on layout refresh, while scroll updates transforms and depth.
 The original image is still used for alt text, static fallback and the fullscreen
-viewer. Its file and crop mode are unchanged; no edited or rasterized assets are
+viewer. Its file is unchanged; no edited or rasterized assets are
 introduced. The viewer always shows the undistorted original.
 
 Image decode is cached across matchMedia rebuilds. This avoids a second delayed

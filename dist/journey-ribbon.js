@@ -4,7 +4,7 @@
    transparent film and punched rails keep the central time axis readable. */
 (() => {
   'use strict';
-  const NS='http://www.w3.org/2000/svg', PERSPECTIVE=1400;
+  const NS='http://www.w3.org/2000/svg', PERSPECTIVE=1400, RAIL_INNER=.935;
   const add=(a,b)=>a.map((v,i)=>v+b[i]);
   const mul=(a,s)=>a.map(v=>v*s);
   const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
@@ -30,23 +30,22 @@
     return {center,at,tangent};
   }
   function createPhotoSurface({paper,item,group,button},settings) {
-    const imageWindow=paper.querySelector('.journey-image-window');
     const layer=document.createElement('span');layer.className='journey-photo-surface';layer.setAttribute('aria-hidden','true');
     const strips=Array.from({length:settings.photoSlices},()=>{
       const strip=document.createElement('span');strip.className='journey-photo-slice';layer.append(strip);return strip;
-    });
-    const labels=['journey-film-label','journey-film-number'].map(cls=>{
-      const label=paper.querySelector('.'+cls).cloneNode(true);label.classList.add('journey-surface-label');layer.append(label);return label;
     });
     group.append(layer);
     const open=()=>button.click();layer.addEventListener('click',open);
     let halfWidth=0,imageWidth=0,imageHeight=0,arcWidth=0,geometry=null,verticalOffset=0,lastPose='';
     function resize(g) {
-      halfWidth=g.frameWidth/2;imageWidth=imageWindow.clientWidth;imageHeight=imageWindow.clientHeight;arcWidth=imageWidth/strips.length;
-      geometry=g;verticalOffset=(imageWindow.offsetTop+imageHeight/2-g.frameHeight/2)/(g.frameHeight/2);
+      // The photo spans the complete cell, up to the perforated rails. Share
+      // their exact material height so no caption band or padding remains.
+      halfWidth=g.frameWidth/2;imageWidth=g.frameWidth;imageHeight=g.frameHeight*settings.stockWidth*RAIL_INNER;arcWidth=imageWidth/strips.length;
+      group.style.setProperty('--journey-image-height',imageHeight+'px');
+      geometry=g;verticalOffset=0;
       const ratio=item.width/item.height;
       const ratioFits=ratio>imageWidth/imageHeight;
-      const scaleByWidth=item.fit==='contain'?ratioFits:!ratioFits;
+      const scaleByWidth=!ratioFits; // Fill the film; the original fullscreen image still uses contain.
       const paintedWidth=scaleByWidth?imageWidth:imageHeight*ratio,paintedHeight=paintedWidth/ratio;
       strips.forEach((strip,i)=>{
         strip.style.width=(arcWidth+2)+'px';strip.style.height=imageHeight+'px';
@@ -71,11 +70,6 @@
         strip.style.transform=`translate(-50%,-50%) matrix3d(${matrix.join(',')})`;
         strip.style.zIndex=String(1000+Math.round(center[2]*3));
         strip.style.pointerEvents=pose.opacity>.06?'auto':'none';
-      });
-      labels.forEach((label,i)=>{
-        const u=i?.77:-.64,center=surface.at(u,.94),axis=surface.tangent(u);
-        const normal=[-axis[2],0,axis[0]],length=Math.max(.000001,Math.hypot(...normal));
-        label.style.transform=`translate(-50%,-50%) matrix3d(${[...axis,0,0,1,0,0,...mul(normal,1/length),0,...center,1].join(',')})`;
       });
     }
     return {resize,render,destroy(){layer.removeEventListener('click',open);layer.remove();}};
@@ -135,7 +129,7 @@
           const ts=Array.from({length:samples+1},(_,i)=>patch.start+(patch.end-patch.start)*i/samples);
           const line=v=>ts.map(t=>project(surface(t,v),g));
           const top=line(-1),bottom=line(1),outline=polygon([...top,...[...bottom].reverse()]);
-          let rails=polygon([...top,...line(-.935).reverse()])+polygon([...line(.935),...[...bottom].reverse()]);
+          let rails=polygon([...top,...line(-RAIL_INNER).reverse()])+polygon([...line(RAIL_INNER),...[...bottom].reverse()]);
           for(const hole of holes){
             // Clip a punched hole at patch seams so adjacent pieces stay continuous.
             const lo=Math.max(patch.start,hole.lo),hi=Math.min(patch.end,hole.hi);

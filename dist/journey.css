@@ -34,17 +34,15 @@
 .journey-placeholder::after{content:"";position:absolute;inset:10px;border:1px solid #d1b99a22;pointer-events:none}
 .journey-placeholder-monogram{font:italic 57px/1 var(--serif);letter-spacing:-4px;padding-right:4px;color:#d9bc9c}
 .journey-placeholder-date{font:400 8px/1.4 var(--sans);letter-spacing:2px}
-.journey-film-number{position:absolute;bottom:7px;right:18px;font:400 8px/1 var(--sans);letter-spacing:1px;padding-inline:3px;background:#e9ddc9}
-.journey-film-label{position:absolute;bottom:7px;left:16px;font:400 5px/1 var(--sans);letter-spacing:1.2px;padding-inline:3px;background:#e9ddc9}
 .journey-footer{position:absolute;left:6%;right:6%;bottom:3.4%;display:flex;justify-content:space-between;gap:24px;align-items:center;z-index:1300;pointer-events:none}
-.journey-current,.journey-scroll-hint{font:400 9px/1.5 var(--sans);letter-spacing:1px;color:#cdb3b0}
-.journey-scroll-hint{text-align:right;color:#b3929a}
+.journey-current{font:400 9px/1.5 var(--sans);letter-spacing:1px;color:#cdb3b0}
+
 .journey-viewer{position:fixed;inset:0;width:100%;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;color:#f3e6d2;background:transparent;overflow:hidden;overscroll-behavior:contain}
 .journey-viewer:not([open]){display:none}.journey-viewer::backdrop{background:transparent}
 .journey-viewer-shade{position:absolute;inset:0;background:#211019f5}
 .journey-viewer-slot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
 .journey-viewer .journey-paper{padding:8px;box-shadow:0 20px 90px #0d060a88}
-.journey-viewer .journey-paper::before,.journey-viewer .journey-paper::after,.journey-viewer .journey-film-label,.journey-viewer .journey-film-number{display:none}
+.journey-viewer .journey-paper::before,.journey-viewer .journey-paper::after{display:none}
 .journey-viewer .journey-image{object-fit:contain;background:#24151e}
 .journey-viewer .journey-placeholder-monogram{font-size:clamp(65px,12vw,130px)}
 .journey-viewer .journey-placeholder-date{font-size:12px;letter-spacing:3px}
@@ -64,14 +62,14 @@
 .journey-static .journey-marker-copy{left:calc(50% + 25px);top:32px}
 .journey-static .journey-marker[data-side=left] .journey-marker-copy{left:auto;right:calc(50% + 25px)}
 .journey-static .journey-photo{position:relative;left:auto;top:auto;width:36%;max-width:260px;height:auto;transform:none;opacity:1;aspect-ratio:1/1.34}
-.journey-static .journey-footer{position:relative;inset:auto;margin-top:40px}.journey-static .journey-scroll-hint{display:none}
+.journey-static .journey-footer{position:relative;inset:auto;margin-top:40px}
 .journey-noscript{position:relative;max-width:650px;margin:0 auto;padding:40px 24px 65px}.journey-noscript ol{list-style:none;padding:0;border-left:1px solid #c5a57b55}.journey-noscript li{margin:25px 0;padding-left:24px;font:400 26px var(--serif)}.journey-noscript time{display:block;font:400 12px var(--sans);color:#c6a78f;margin-bottom:7px}
 @media(max-width:1023px){.journey-stage{perspective:1200px}.journey-heading h2{font-size:55px}.journey-milestone-title{font-size:30px}}
 @media(max-width:767px){
  .journey-stage{perspective:1100px}.journey-heading{top:4%;left:8%;right:8%}.journey-heading h2{font-size:clamp(33px,9.6vw,48px);line-height:1.06;letter-spacing:-.7px}.journey-heading h2 em{display:block}.journey-heading .eyebrow{font-size:7px;letter-spacing:2.5px}
  .journey-marker-copy{left:16px;top:-20px;max-width:140px}.journey-marker[data-side=left] .journey-marker-copy{right:16px}.journey-date{font-size:8px;letter-spacing:1px}.journey-milestone-title{font-size:25px;margin-top:4px}
- .journey-paper{padding:16px 9px 20px}.journey-paper::before{top:5px}.journey-paper::after{bottom:6px}.journey-placeholder-monogram{font-size:40px;letter-spacing:-3px}.journey-placeholder-date{font-size:6px;letter-spacing:1px}.journey-film-number{right:12px;bottom:6px;font-size:6px}.journey-film-label{left:12px;bottom:6px;font-size:4px}
- .journey-footer{bottom:3%;left:6%;right:6%;display:block;text-align:center}.journey-current{font-size:8px;letter-spacing:.7px}.journey-scroll-hint{font-size:7px;margin-top:7px;text-align:center;letter-spacing:.5px}
+ .journey-paper{padding:16px 9px 20px}.journey-paper::before{top:5px}.journey-paper::after{bottom:6px}.journey-placeholder-monogram{font-size:40px;letter-spacing:-3px}.journey-placeholder-date{font-size:6px;letter-spacing:1px}
+ .journey-footer{bottom:3%;left:6%;right:6%;display:block;text-align:center}.journey-current{font-size:8px;letter-spacing:.7px}
  .journey-viewer-title{font-size:17px}.journey-viewer-bar{left:5%;right:5%;top:12px}.journey-viewer-hint{font-size:9px;bottom:14px}
  .journey-static .journey-stage{padding-inline:5%}.journey-static .journey-marker{min-height:250px}.journey-static .journey-photo{width:42%}.journey-static .journey-heading{margin-bottom:45px}
  .journey-static .journey-marker-copy{left:calc(50% + 16px)}.journey-static .journey-marker[data-side=left] .journey-marker-copy{right:calc(50% + 16px)}
@@ -89,11 +87,12 @@
 .journey-ribbon-rails{fill:#e9ddc9;fill-opacity:.36}
 .journey-ribbon-edges{fill:none;stroke:#f0d6b4;stroke-width:.55;stroke-opacity:.3}
 .journey-ribbon-shadow{fill:none;stroke:#0c030a;stroke-opacity:.18;stroke-width:3;transform:translate(1px,3px)}
-.journey-enhanced .journey-paper{background:transparent;box-shadow:none}
-.journey-enhanced .journey-image-window{box-shadow:0 3px 10px #10071030,inset 0 0 0 1px #cfbc9b}
+.journey-enhanced .journey-photo .journey-paper{padding:0;background:transparent;box-shadow:none}
+/* Match the curved pixel surface to the opening between the two film rails.
+   Scoped to the film: the fullscreen viewer retains its own contain layout. */
+.journey-enhanced .journey-photo .journey-image-window{height:var(--journey-image-height,100%);top:calc((100% - var(--journey-image-height,100%))/2);width:100%}
 .journey-enhanced .journey-axis{z-index:1000}
 .journey-enhanced .journey-paper::before,.journey-enhanced .journey-paper::after{display:none}
-.journey-enhanced .journey-film-label,.journey-enhanced .journey-film-number{background:transparent;color:#e9ddc9}
 .journey-enhanced .journey-marker-copy{isolation:isolate}
 .journey-enhanced .journey-marker-copy::before{content:"";position:absolute;inset:-7px -10px;z-index:-1;background:radial-gradient(ellipse at 35% 50%,#321b27d9 20%,#321b2780 55%,transparent 80%);filter:blur(7px);pointer-events:none}
 
@@ -122,10 +121,6 @@
 .journey-photo-plane{position:absolute;left:50%;top:50%;width:var(--journey-frame-width,250px);aspect-ratio:1/1.34;transform-style:preserve-3d;pointer-events:none}
 .journey-enhanced .journey-photo-plane>.journey-photo{inset:0;width:100%;height:100%;z-index:1;transform:none}
 
-/* The tiny film annotations follow the same material tangent as the images. */
-.journey-enhanced .journey-photo .journey-film-label,
-.journey-enhanced .journey-photo .journey-film-number{visibility:hidden}
-.journey-enhanced .journey-surface-label{position:absolute;top:50%;left:50%;right:auto;bottom:auto;width:max-content;padding:0;background:transparent;color:#e9ddc9;pointer-events:none;transform-origin:50% 50%}
 /* Keyboard focus follows the curved photographic surface, not its invisible
    planar interaction target. This also avoids a floating rectangle after ESC. */
 .journey-enhanced .journey-photo:focus-visible{outline:none}

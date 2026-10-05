@@ -49,9 +49,7 @@
         if(item.width&&item.height){image.width=item.width;image.height=item.height;}
         image.addEventListener('load',()=>{placeholder.hidden=true;},{once:true});image.addEventListener('error',()=>{image.hidden=true;},{once:true});window.append(image);
       }
-      const number=make('span','journey-film-number',String(index+1).padStart(2,'0'));number.setAttribute('aria-hidden','true');
-      const filmLabel=make('span','journey-film-label','OUR JOURNEY');filmLabel.setAttribute('aria-hidden','true');
-      paper.append(window,number,filmLabel);button.append(paper);
+      paper.append(window);button.append(paper);
       const group=make('div','journey-photo-group'),plane=make('div','journey-photo-plane');plane.append(button);group.append(plane);film.append(group);
       return {item,marker,dot,copy,button,paper,group,plane};
     });

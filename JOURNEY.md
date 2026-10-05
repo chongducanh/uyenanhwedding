@@ -19,7 +19,7 @@ no dates. Both sites use byte-identical Journey JS/CSS and Flip files.
 
 ## Milestone photographs
 
-The owner supplied `Photos.zip`. Both sites use the same three personal photos
+The owner supplied `Photos.zip` and `24-25-10-2026.zip`. Both sites use all four personal photos
 in the requested order, with the existing dates unchanged:
 
 | Milestone | Original file | Published base name |
@@ -27,6 +27,7 @@ in the requested order, with the existing dates unchanged:
 | Làm quen | `07-04-2024.jpg` — laptop by the window | `journey-meet` |
 | Tỏ tình | `24-08-2024.JPG` — mirror portrait | `journey-confession` |
 | Cầu hôn | `06-06-2025.jpg` — couple, flowers and ring under a tree | `journey-proposal` |
+| Đám cưới | `24-25-10-2026.png` — wedding portrait in the flower garden | `journey-wedding` |
 
 Files live in `dist/images/journey/`. Each has a `-preview.webp` (long edge
 1200px, quality 84) for the film and a `-full.webp` (up to 2560px, quality 90)
@@ -38,11 +39,7 @@ The landscape meeting photo uses `fit: 'contain'` inside its film segment so
 both the laptop and the window remain visible. All fullscreen images use
 contain. The other film segments retain the existing portrait crop.
 
-Milestone 4 still intentionally uses its paper placeholder. After the owner
-chooses its photo, set `image` / optional `full`, `width`, `height`, `alt` and
-`imageReady: true` in `journey-data.js`. Until then, no request is made for the
-placeholder `journey-wedding.jpg`. Dates continue to come from each site's
-existing identity config.
+The fourth original is 1024 × 1536. Its preview is 800 × 1200; its fullscreen WebP retains the original resolution. Dates continue to come from each site's identity config.
 
 The viewer uses the exact same paper element as the film frame, including
 when a placeholder is shown. Configured fullscreen images use object-fit:
@@ -60,12 +57,25 @@ lengths × milestone count, final hold, and outro, then multiplies by stage
 height. Default desktop length is 9.15 viewport heights; mobile is 3.96.
 Adding a fifth milestone adds a marker and photo phase automatically.
 
-Curated back / approaching / focus / crossing / passed / settle transforms
-control x/y/z, scale, rotationY and rotationZ. Layering follows depth. Four
-individual film papers leave genuine transparent gaps around the center spine.
-Tablet reduces movement; mobile uses a shallow helix. Timeline endpoints stay
-inside the viewport. Outro settles the film around the completed timeline and
-fades gently into the existing gallery palette, without an empty/black screen.
+All four frames use one continuous mathematical helix. `filmState.progress` is
+the single animated travel value; frame index contributes only a fixed offset.
+`getHelixTransform(progress, index, geometry, settings, count)` calculates every
+frame's position, depth, scale, opacity and orientation. There are no per-frame
+reset tweens, modulo wraps, corner poses or disappear/reappear transitions.
+
+The marker and reading segments advance the same film progress continuously.
+Sine/cosine drive lateral travel and depth; a smooth longitudinal curve keeps
+the finite ribbon inside the viewport. Rendered depth determines stacking.
+The papers have real transparent gaps, and the active caption remains beside
+the center spine. The previous caption dims as the next milestone approaches.
+Tablet and mobile reduce radius/depth; resize remeasures the shared geometry.
+The outro continues travel and gently fades the whole scene into the gallery.
+
+To inspect the shared path locally, set `JOURNEY_CONFIG.debug.showFilmPath` to
+`true` in `dist/journey-data.js`. Sample points use the same transform helper.
+The guide is disabled unless the hostname is localhost/127.0.0.1/::1, even if
+the flag is accidentally enabled in a deployed config. Production default is
+`false`. `helix.frameSpacing`, `turns` and `focusAngle` live alongside the data.
 
 `journey-viewer.js`: GSAP Flip opens the actual paper in a native dialog;
 Flip.fit maps its return to the live film-frame bounds. The scene's scroll
@@ -105,3 +115,10 @@ across breakpoints. A browser-only landscape-photo fixture verified fullscreen
 contain sizing; a browser-only fifth milestone verified data-driven generation
 and distance. These fixtures were not saved to either site's content. Reduced
 motion and no-JS fallbacks expose all four milestones.
+
+The continuous-helix revision was additionally checked across 1440 × 1000,
+820 × 1180, 390 × 844, 320 × 640 and 740 × 390. All frames change transform
+together; dense path samples remain continuous, fixed offsets remain unchanged,
+and reverse scrolling restores travel. Both sites' four real photos passed
+fullscreen open/close/resume checks. Film centering is reapplied on every render
+to avoid transform-cache drift after GSAP Flip restores a viewed paper.

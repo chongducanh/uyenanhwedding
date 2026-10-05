@@ -5,6 +5,29 @@
   const make=(tag,cls,text)=>{const node=document.createElement(tag);node.className=cls;if(text!==undefined)node.textContent=text;return node;};
   const clamp=(min,max,value)=>Math.max(min,Math.min(max,value));
   const markerPosition=(index,count)=>count===1?.5:.12+index/(count-1)*.76;
+  // A single, unwrapped ribbon coordinate. Index only contributes a fixed offset;
+  // every frame and debug sample is evaluated on this same continuous 3D curve.
+  function getHelixTransform(progress,index,g,settings,count) {
+    const offset=index*settings.frameSpacing;
+    const q=(offset-progress)/settings.frameSpacing;
+    const angle=settings.focusAngle+(progress-offset)*Math.PI*2*settings.turns;
+    const depth=Math.cos(angle),front=clamp(0,1,(depth+1)/(Math.cos(settings.focusAngle)+1));
+    const proximity=1/(1+Math.pow(q/1.3,2));
+    // Camera follows the ribbon gently; tanh keeps its finite ends inside the stage.
+    const follow=(progress/settings.frameSpacing/Math.max(1,count-1)-.5)*.8;
+    const z=depth*g.depth;
+    return {
+      x:Math.sin(angle)*g.radiusX,
+      y:g.centerY+g.radiusY*Math.tanh(q*.72+follow)-g.height*.5,
+      z,
+      rotationY:-Math.sin(angle-settings.focusAngle)*g.yaw,
+      rotationZ:Math.sin(angle)*3+Math.sin(q*.8),
+      scale:.58+.28*front+.14*proximity,
+      opacity:.35+.40*front+.25*proximity,
+      zIndex:1000+Math.round(z*2),
+      angle,offset
+    };
+  }
   function renderJourney(config) {
     const section=document.querySelector('#journey');if(!section)return null;
     const scene=section.querySelector('.journey-scene');scene.replaceChildren();
@@ -39,6 +62,9 @@
     const {section,scene,axis,items,film,progress}=dom,stage=section.querySelector('.journey-stage');
     const heading=section.querySelector('.journey-heading'),footer=section.querySelector('.journey-footer'),chapter=section.querySelector('.journey-current');
     const lengths=config.scroll[mobile?'mobile':tablet?'tablet':'desktop'],phases=[],listeners=[],fades=[];
+    const helix=config.helix,filmState={progress:-.36*helix.frameSpacing};
+    let filmGeometry=null,debugPoints=[];
+    const debugEnabled=!!config.debug?.showFilmPath&&['localhost','127.0.0.1','::1'].includes(location.hostname);
     let timeline=null,trigger=null,lockedAt=null,pausedBefore=false,guard=false,destroyed=false,active='';
     const getScroll=()=>getSmoother()?.scrollTop()??window.scrollY;
     const setScroll=y=>getSmoother()?getSmoother().scrollTop(y):window.scrollTo(0,y);
@@ -47,65 +73,74 @@
     const unlock=y=>{setScroll(y);lockedAt=null;getSmoother()?.paused(pausedBefore);ScrollTrigger.update();};
     const viewer=window.JourneyPhotoViewer.create({gsap,Flip,reduced,lock,unlock,getScroll,getResumeScroll});
     const listen=(node,event,fn)=>{node.addEventListener(event,fn);listeners.push(()=>node.removeEventListener(event,fn));};
-    items.forEach(({button,item})=>listen(button,'click',()=>viewer.openPhotoViewer(button,item)));
+    items.forEach(({button,item,marker})=>{
+      listen(button,'click',()=>viewer.openPhotoViewer(button,item));
+      if(!reduced)marker.dataset.side='right';
+    });
     section.classList.toggle('journey-static',reduced);section.classList.toggle('journey-enhanced',!reduced);
     function geometry() {
-      const width=stage.clientWidth,height=stage.clientHeight;
-      const frameWidth=Math.min(width*(mobile?.40:tablet?.27:.235),mobile?188:280,height*(mobile?.25:.30));
-      return {width,height,frameWidth,frameHeight:frameWidth*1.34,top:height*(mobile?.235:.245),bottom:height*.865,
-        radiusX:width*(mobile?.30:tablet?.33:.325),depth:mobile?38:tablet?85:160};
+      const width=stage.clientWidth,height=stage.clientHeight,landscape=width>height&&height<601;
+      const frameWidth=Math.min(width*(mobile?.30:tablet?.24:.20),mobile?164:260,height*(landscape?.205:.245));
+      const depth=mobile?54:tablet?145:230;
+      const top=height*(landscape?.26:mobile?.235:.245),bottom=height*(landscape?.83:.865);
+      return {width,height,frameWidth,top,bottom,centerY:(top+bottom)/2,radiusY:(bottom-top)*.30,
+        radiusX:Math.min(width*(mobile?.34:.28),(width/2-frameWidth*.50-14)/(1+depth/1400)),
+        depth,yaw:mobile?16:tablet?25:34};
     }
-    function helixPose(index,pose) {
-      const g=geometry(),side=index%2?1:-1,point=markerPosition(index,items.length);
-      const markerY=g.top+(g.bottom-g.top)*point;
-      const compactLandscape=g.width>g.height&&g.height<601;
-      const focusY=mobile&&!compactLandscape?markerY:clamp(g.top+g.frameHeight*.38,g.bottom-g.frameHeight*.42,markerY);
-      const focusX=side*(g.frameWidth*.60+(compactLandscape?105:mobile?8:tablet?135:125));
-      const poses={
-        back:{x:side*g.radiusX,y:markerY-g.height*.5,z:-g.depth,rotationY:-side*(mobile?10:24),rotationZ:side*6,scale:.76,opacity:.32},
-        approaching:{x:side*g.radiusX*.78,y:focusY-g.height*.5,z:-g.depth*.25,rotationY:-side*(mobile?7:18),rotationZ:side*3,scale:.88,opacity:.64},
-        focus:{x:focusX,y:focusY-g.height*.5,z:g.depth*.48,rotationY:-side*(mobile?1:3),rotationZ:side*.8,scale:1,opacity:1},
-        crossing:{x:-side*g.radiusX*.22,y:markerY-g.height*.5-22,z:-g.depth*.70,rotationY:side*(mobile?7:25),rotationZ:side*7,scale:.65,opacity:.24},
-        passed:{x:-side*g.radiusX*.94,y:markerY-g.height*.5-14,z:-g.depth*1.3,rotationY:side*(mobile?10:28),rotationZ:-side*5,scale:.64,opacity:.24},
-        settle:{x:side*g.radiusX*.92,y:markerY-g.height*.5,z:-g.depth*.45,rotationY:-side*(mobile?8:18),rotationZ:side*4,scale:.74,opacity:.45}
-      };
-      return poses[pose];
+    function transformAt(progress,index) {
+      return getHelixTransform(progress,index,filmGeometry||geometry(),helix,items.length);
+    }
+    function renderFilm() {
+      if(reduced||destroyed||!filmGeometry)return;
+      items.forEach(({button},index)=>{
+        const {angle,offset,...pose}=transformAt(filmState.progress,index);
+        gsap.set(button,{...pose,xPercent:-50,yPercent:-50,force3D:true});
+      });
+      debugPoints.forEach(({node,index})=>{
+        const pose=transformAt(filmState.progress,index);
+        gsap.set(node,{x:pose.x,y:pose.y,z:pose.z,opacity:.3+.6*(pose.z/filmGeometry.depth+1)/2,force3D:true});
+      });
+    }
+    function buildDebugPath() {
+      if(!debugEnabled||reduced)return;
+      const guide=make('div','journey-path-guide');guide.setAttribute('aria-hidden','true');film.prepend(guide);
+      const samples=Math.max(72,items.length*24);
+      for(let i=0;i<=samples;i++){
+        const node=make('span','journey-path-point');guide.append(node);
+        debugPoints.push({node,index:-.35+(items.length-.3)*i/samples});
+      }
     }
     function sizePhotos() {
       if(reduced)return;
-      const g=geometry();stage.style.setProperty('--journey-frame-width',g.frameWidth+'px');
+      filmGeometry=geometry();const g=filmGeometry;
+      stage.style.setProperty('--journey-frame-width',g.frameWidth+'px');
       stage.style.setProperty('--journey-axis-top',g.top+'px');stage.style.setProperty('--journey-axis-bottom',(g.height-g.bottom)+'px');
+      renderFilm();
     }
-    function movePhotoAlongFilmPath(tl,index,pose,duration,at) {
-      const vars={duration,ease:'sine.inOut'};
-      for(const key of ['x','y','z','rotationY','rotationZ','scale','opacity'])vars[key]=()=>helixPose(index,pose)[key];
-      return tl.to(items[index].button,vars,at);
+    function advanceFilm(tl,frameCoordinate,duration,at=0,ease='sine.inOut') {
+      // No photo-specific tweens: advancing this scalar moves every frame together.
+      return tl.to(filmState,{progress:frameCoordinate*helix.frameSpacing,duration,ease},at);
     }
     function updateTimelineProgress(tl,value,duration,at=0) {tl.to(progress,{scaleY:value,duration,ease:'none'},at);}
     function activateMilestone(tl,index) {
       const item=items[index],duration=lengths.marker;
+      if(index)tl.to(items[index-1].copy,{opacity:.35,duration:duration*.5},0);
       updateTimelineProgress(tl,markerPosition(index,items.length),duration*.64);
       tl.to(item.copy,{opacity:1,y:0,duration:duration*.36},duration*.64)
         .to(item.dot,{opacity:1,scale:1.08,duration:duration*.18,ease:'sine.inOut'},duration*.64)
         .to(item.dot,{scale:1,duration:duration*.18,ease:'sine.inOut'},duration*.82);
-      movePhotoAlongFilmPath(tl,index,'approaching',duration,0);
-      if(index)resetPreviousPhoto(tl,index-1,duration);
-    }
-    function resetPreviousPhoto(tl,index,duration) {
-      movePhotoAlongFilmPath(tl,index,'crossing',duration*.55,0);
-      movePhotoAlongFilmPath(tl,index,'passed',duration*.45,duration*.55);
+      advanceFilm(tl,index-.16,duration);
     }
     function focusJourneyPhoto(tl,index) {
       const length=lengths.photo+(index===items.length-1?lengths.finalHold:0);
-      movePhotoAlongFilmPath(tl,index,'focus',length*.58,0);
-      if(index===items.length-1)updateTimelineProgress(tl,1,length*.58,0);
-      tl.to({},{duration:length*.42},length*.58);
+      // The frame crosses the front of the SAME helix. Slow travel is its reading hold.
+      advanceFilm(tl,index+.08,length);
+      if(index===items.length-1)updateTimelineProgress(tl,1,length*.64,0);
     }
     function playOutro(tl) {
-      items.forEach((_,i)=>movePhotoAlongFilmPath(tl,i,'settle',lengths.outro*.52,0));
-      tl.to({},{duration:lengths.outro*.16},lengths.outro*.52)
-        .to(scene,{scale:.95,opacity:.62,duration:lengths.outro*.32,ease:'sine.inOut'},lengths.outro*.68)
-        .to(heading,{opacity:.6,y:-8,duration:lengths.outro*.32},lengths.outro*.68);
+      advanceFilm(tl,items.length-1+.48,lengths.outro);
+      tl.to(scene,{scale:.96,opacity:.65,duration:lengths.outro*.38,ease:'sine.inOut'},lengths.outro*.62)
+        .to(heading,{opacity:.65,y:-8,duration:lengths.outro*.38},lengths.outro*.62);
     }
     function calculateJourneyScrollDistance() {
       return Math.round(stage.clientHeight*(lengths.intro+items.length*(lengths.marker+lengths.photo)+lengths.finalHold+lengths.outro));
@@ -120,12 +155,11 @@
         chapter.textContent=index===undefined?`${items.length} dấu mốc · Một hành trình`:`${String(index+1).padStart(2,'0')} / ${String(items.length).padStart(2,'0')} — ${items[index].item.title}`;
         items.forEach(({marker},i)=>{if(i===index)marker.setAttribute('aria-current','step');else marker.removeAttribute('aria-current');});
       }
-      // Layering follows continuous depth, so crossing frames never pop forward.
-      items.forEach(({button})=>{button.style.zIndex=String(300+Math.round(Number(gsap.getProperty(button,'z'))));});
+      renderFilm();
     }
     function buildJourneyTimeline() {
       sizePhotos();gsap.set(items.map(i=>i.button),{xPercent:-50,yPercent:-50,transformOrigin:'50% 50%',force3D:true});
-      items.forEach(({button},i)=>gsap.set(button,helixPose(i,'back')));
+      buildDebugPath();renderFilm();
       gsap.set(progress,{scaleY:0,transformOrigin:'50% 0'});gsap.set(items.map(i=>i.copy),{opacity:.22,y:6});gsap.set(items.map(i=>i.dot),{opacity:.32});
       timeline=gsap.timeline({defaults:{ease:'none'},onUpdate:updateExperience});
       const part=(name,index,build)=>{const child=gsap.timeline();build(child);const start=timeline.duration();timeline.addLabel(name,start).add(child,start);phases.push({name,index,start,end:start+child.duration()});};
@@ -134,6 +168,7 @@
           .fromTo(axis,{opacity:.2},{opacity:1,duration:lengths.intro*.7},0)
           .fromTo(film,{opacity:.2},{opacity:1,duration:lengths.intro*.7},0)
           .to({},{duration:lengths.intro*.3});
+        advanceFilm(tl,-.28,lengths.intro,0);
       });
       items.forEach((_,i)=>{part(`marker-${i}`,i,tl=>activateMilestone(tl,i));part(`photo-${i}`,i,tl=>focusJourneyPhoto(tl,i));});
       part('outro',undefined,playOutro);
@@ -155,11 +190,11 @@
       return phase?{label:phase.name,within:clamp(0,1,(time-phase.start)/(phase.end-phase.start))}:null;
     }
     function timeForNavigationState(token) {const phase=phases.find(p=>p.name===token?.label)||phases[0];return phase?phase.start+(phase.end-phase.start)*clamp(0,1,token?.within||0):0;}
-    return {timeline,phases,config,calculateJourneyScrollDistance,getNavigationState,timeForNavigationState,viewer,
+    return {timeline,phases,config,filmState,transformAt,calculateJourneyScrollDistance,getNavigationState,timeForNavigationState,viewer,
       refresh(){sizePhotos();ScrollTrigger.refresh();},
       destroy(){destroyed=true;viewer.destroy();trigger?.kill();timeline?.kill();fades.forEach(t=>{t.scrollTrigger?.kill();t.kill();});listeners.forEach(fn=>fn());
         section.classList.remove('journey-enhanced');section.classList.add('journey-static');delete section.dataset.phase;scene.replaceChildren();gsap.set([stage,scene,heading,axis,footer],{clearProps:'all'});}
     };
   }
-  window.JourneyExperience={create,renderJourney};
+  window.JourneyExperience={create,renderJourney,getHelixTransform};
 })();

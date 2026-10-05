@@ -105,3 +105,19 @@
 }
 .journey-enhanced .journey-marker-copy{left:32px}
 @media(max-width:767px){.journey-enhanced .journey-marker-copy{left:25px}}
+
+/* Photo pixels bend on the same cylinder as their stock. Only the original img
+   is semantic; the lightweight cached texture strips disappear in the viewer. */
+.journey-photo-surface{display:none}
+.journey-enhanced .journey-photo .journey-paper,
+.journey-enhanced .journey-photo .journey-image-window{overflow:visible;transform-style:preserve-3d}
+.journey-enhanced .journey-photo .journey-image-window{background:transparent;box-shadow:none}
+.journey-enhanced .journey-photo .journey-image{visibility:hidden}
+.journey-enhanced .journey-photo-group:has(.journey-paper)>.journey-photo-surface{display:contents}
+.journey-photo-slice{position:absolute;top:50%;left:50%;background-color:#422530;background-repeat:no-repeat;transform-origin:50% 50%;backface-visibility:visible;pointer-events:auto;cursor:zoom-in}
+
+.journey-photo-group{position:absolute;inset:0;perspective:1400px;transform-style:flat;pointer-events:none}
+
+
+.journey-photo-plane{position:absolute;left:50%;top:50%;width:var(--journey-frame-width,250px);aspect-ratio:1/1.34;transform-style:preserve-3d;pointer-events:none}
+.journey-enhanced .journey-photo-plane>.journey-photo{inset:0;width:100%;height:100%;z-index:1;transform:none}

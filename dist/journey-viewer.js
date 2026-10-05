@@ -3,7 +3,7 @@
 (() => {
   'use strict';
   const make=(tag,cls,text)=>{const n=document.createElement(tag);n.className=cls;if(text)n.textContent=text;return n;};
-  function create({gsap,Flip,reduced,lock,unlock,getScroll,getResumeScroll}) {
+  function create({gsap,Flip,reduced,lock,unlock,getScroll,getResumeScroll,preparePhoto=()=>Promise.resolve(),restorePhoto=()=>{}}) {
     const dialog=make('dialog','journey-viewer');dialog.setAttribute('aria-labelledby','journey-viewer-title');
     const shade=make('div','journey-viewer-shade');shade.setAttribute('aria-hidden','true');
     const slot=make('div','journey-viewer-slot');
@@ -11,6 +11,7 @@
     const closeButton=make('button','journey-viewer-close','Đóng ×');closeButton.type='button';closeButton.setAttribute('aria-label','Đóng ảnh hành trình');
     const hint=make('p','journey-viewer-hint','Cuộn tiếp để trở về hành trình');
     bar.append(title,closeButton);dialog.append(shade,slot,bar,hint);document.body.append(dialog);
+    let requestId=0;
     let state='closed',paper=null,opener=null,flip=null,travel=null,destroyed=false;
     let savedScroll=0,pendingScroll=0,scrollIntent=0,lastWheel=0,touchY=null;
     let oldOverflow='',oldBodyOverflow='',oldPadding='',lastStyle='';
@@ -21,15 +22,21 @@
       const height=Math.min(innerHeight*.82,innerHeight-120),width=Math.min(innerWidth*.90,height*ratio);
       Object.assign(slot.style,{width:width+'px',height:width/ratio+'px'});
     }
-    function openPhotoViewer(button,item) {
+    async function openPhotoViewer(button,item) {
       if(destroyed||state!=='closed')return;
-      state='opening';opener=button;paper=button.querySelector('.journey-paper');
+      const request=++requestId;
+      state='preparing';opener=button;paper=button.querySelector('.journey-paper');
       savedScroll=getScroll();pendingScroll=0;scrollIntent=0;touchY=null;travel?.kill();lock();
       lastStyle=paper.getAttribute('style')||'';
-      const source=Flip.getState(paper);
       const html=document.documentElement;
       oldOverflow=html.style.overflow;oldBodyOverflow=document.body.style.overflow;oldPadding=document.body.style.paddingRight;
       const gutter=Math.max(0,innerWidth-html.clientWidth);
+      // Straighten this same curved cell before Flip lifts its original paper.
+      // The shared scroll lock also covers this short preparation phase.
+      await preparePhoto(button);
+      if(destroyed||request!==requestId||state!=='preparing'||opener!==button)return;
+      state='opening';
+      const source=Flip.getState(paper);
       if(gutter)document.body.style.paddingRight=gutter+'px';
       html.style.overflow='hidden';document.body.style.overflow='hidden';
       title.textContent=`${item.title} · ${item.date}`;slot.append(paper);measureViewer();dialog.showModal();
@@ -44,12 +51,13 @@
         full.decode().then(()=>{if(!destroyed&&paper?.contains(image)&&state!=='closed'&&state!=='closing'){image.src=item.full;measureViewer();}}).catch(()=>{});
       }
     }
-    function finishClose() {
+    function finishClose(immediate=false) {
       if(state==='closed')return;
-      state='closed';flip=null;
+      state='closed';requestId++;flip=null;
       if(dialog.open)dialog.close();
       document.documentElement.style.overflow=oldOverflow;document.body.style.overflow=oldBodyOverflow;document.body.style.paddingRight=oldPadding;
       paper?.setAttribute('style',lastStyle);
+      restorePhoto(opener,immediate||destroyed);
       const destination=getResumeScroll(savedScroll);
       unlock(destination);
       if(opener?.isConnected)opener.focus({preventScroll:true});
@@ -60,11 +68,12 @@
     }
     function closePhotoViewer(forward=0,immediate=false) {
       if(state==='closed'||state==='closing')return;
-      state='closing';pendingScroll=forward;flip?.kill();gsap.killTweensOf([shade,bar,hint]);
+      const preparing=state==='preparing';state='closing';pendingScroll=forward;flip?.kill();gsap.killTweensOf([shade,bar,hint]);
+      if(preparing){finishClose(true);return;}
       // Keep the native top-layer open while returning the paper. Flip's temporary
       // absolute positioning would otherwise be covered by the dialog itself.
       const target=Flip.fit(paper,opener,{scale:true,getVars:true});
-      const finish=()=>{opener.append(paper);gsap.set(paper,{clearProps:'all'});finishClose();};
+      const finish=()=>{opener.append(paper);gsap.set(paper,{clearProps:'all'});finishClose(immediate);};
       if(reduced||immediate){finish();return;}
       flip=gsap.to(paper,{...target,duration:.48,ease:'power3.inOut',onComplete:finish});
       gsap.to([shade,bar,hint],{opacity:0,duration:.44});
@@ -87,16 +96,18 @@
       if(['ArrowDown','PageDown',' '].includes(e.key)&&!e.shiftKey&&!(e.key===' '&&e.target===closeButton)){e.preventDefault();closePhotoViewer(Math.min(180,innerHeight*.25));}
       if(e.key==='Tab'){e.preventDefault();closeButton.focus({preventScroll:true});}
     });
+    listen(window,'keydown',e=>{if(state==='preparing'&&e.key==='Escape'){e.preventDefault();closePhotoViewer(0,true);}});
     listen(dialog,'cancel',e=>{e.preventDefault();closePhotoViewer();});
     listen(dialog,'click',e=>{if(e.target===dialog||e.target===shade)closePhotoViewer();});
     listen(closeButton,'click',()=>closePhotoViewer());
     listen(dialog,'close',()=>{if(state!=='closed')closePhotoViewer(0,true);});
     listen(window,'resize',()=>{
       if(state==='closed'||state==='closing')return;
+      if(state==='preparing'){closePhotoViewer(0,true);return;}
       flip?.kill();gsap.set(paper,{clearProps:'all'});measureViewer();gsap.set([shade,bar,hint],{opacity:1});state='open';
     });
     return {openPhotoViewer,closePhotoViewer,handleViewerScroll,get isOpen(){return state!=='closed';},
-      destroy(){if(destroyed)return;destroyed=true;travel?.kill();flip?.kill();if(state!=='closed'){state='open';closePhotoViewer(0,true);}gsap.killTweensOf([shade,bar,hint]);listeners.forEach(fn=>fn());dialog.remove();}
+      destroy(){if(destroyed)return;destroyed=true;travel?.kill();flip?.kill();if(state!=='closed'){if(state==='closing')state='open';closePhotoViewer(0,true);}gsap.killTweensOf([shade,bar,hint]);listeners.forEach(fn=>fn());dialog.remove();}
     };
   }
   window.JourneyPhotoViewer={create};

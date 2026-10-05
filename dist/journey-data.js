@@ -16,8 +16,8 @@
     ],
     // One material coordinate drives both photo cells and the connecting stock.
     // Radians between cells, focus bearing, and vertical pitch define the coil.
-    flow: {frameSpacing:1, angularSpacing:2.12, focusAngle:-.76},
-    ribbon: {patchesPerJoin:16, stockWidth:1.08, holePitch:14},
+    flow: {frameSpacing:1, angularSpacing:2.12, focusAngle:-.76, frontBend:.04, sideBend:.90},
+    ribbon: {patchesPerJoin:16, stockWidth:1.08, holePitch:14, photoSlices:24},
     debug: {showFilmPath:false}, // Local development only; ignored on hosted origins.
     scroll: {
       desktop: {intro:.8, marker:.7, photo:1.1, finalHold:.25, outro:.9},

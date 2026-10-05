@@ -65,16 +65,15 @@ same path: they never fly back to a starting position or wrap to another cell.
 
 `JOURNEY_CONFIG.flow` defines angular spacing (2.12 radians), focus bearing and
 material spacing. The responsive geometry caps the desktop radius at 290px;
-including the rectangular cells and connectors, the visible film occupies about
-±410px around the axis. Tablet and mobile reduce both radius and depth. There
+including the curved cells and connectors, the visible film stays within about
+±380px around the axis. Tablet and mobile reduce both radius and depth. There
 is no horizontal tracking camera and no viewport-wide leader or wave profile.
 
 Depth controls perspective, size, opacity and stacking relative to the axis at
 z-index 1000. Front photos are about 220–230px wide on ordinary desktop sizes;
 rear cells become smaller and more muted. Photographs follow the elliptical
-coil's tangent with slight in-plane roll. At each side turn they pass briefly
-edge-on; the far-side material direction reverses so images remain readable,
-without mirrored backs. The vertical travel compresses smoothly at the distant
+coil's tangent with slight in-plane roll. The material normal continues through each side turn, without an orientation
+flip. A curved surface stays visible even when its center is nearly edge-on. The vertical travel compresses smoothly at the distant
 ends and fades, keeping the title and footer clear.
 
 The marker phase fills the timeline while the coil advances gently. The photo
@@ -85,13 +84,16 @@ and restores the logical phase. The outro continues shared travel and settles
 into Wedding Memories. A development-only guide can be enabled with
 `JOURNEY_CONFIG.debug.showFilmPath`; hosted origins ignore it.
 
-`journey-viewer.js`: GSAP Flip opens the actual paper in a native dialog;
+`journey-viewer.js`: the selected cell straightens gently while scroll is locked,
+then GSAP Flip opens its original paper in a native dialog;
 Flip.fit maps its return to the live film-frame bounds. The scene's scroll
 position is retained. Close button, Escape and backdrop click return focus to
 the originating button. Forward wheel, upward swipe or forward-scroll keys
 close first and then advance by the user's scroll gesture; reverse wheel does
 not unexpectedly advance. Native dialog and explicit Tab handling trap focus.
-Cleanup restores overflow, smoother state, and the paper DOM node.
+Cleanup restores overflow, smoother state, the paper DOM node and its curvature.
+The preparation step can be cancelled by Escape or resize; an opening request ID
+prevents a cancelled preparation from opening a later dialog.
 
 `motion.js`: creates Journey before Memories, disposes both with matchMedia,
 and preserves the active experience's logical phase across resize. Existing
@@ -105,7 +107,7 @@ titles as a list. After changing dates, run
 ## Connected film surface
 
 `dist/journey-ribbon.js` builds one connected strip: a short leader, alternating
-flat photo cells and curved stock, then a short fading tail. Every cell uses
+curved photo cells and connecting stock, then a short fading tail. Every cell uses
 exactly the same 3D plane as its DOM photo. Each connecting cubic starts and
 ends on the actual cell edges, with matching tangent directions. Both rails
 come from this one surface; there are no independent wave paths. `framePlane()`
@@ -124,7 +126,7 @@ far stock behind the fixed time axis and near stock in front. Photo cells remain
 above their own stock. Captions have a subtle local scrim and stay readable;
 active opacity is 1, inactive opacity is 0.35–0.38.
 
-SVG nodes are allocated once and reused (68 patches for four photographs).
+SVG nodes are allocated once and reused (96 patches for four photographs).
 Scroll performs no DOM geometry measurements. Identical progress/geometry skips
 ribbon work, resize invalidates measurements, and destroy removes all patches.
 The bounded film volume has a soft edge outside both timeline caps, so title,
@@ -132,6 +134,28 @@ footer and caps remain clear. Decorative surfaces ignore pointer input and are
 hidden from accessibility APIs. Keyboard navigation brings distant cells into
 their reading phase. Fullscreen freezes the same shared playhead, so photos and
 stock stop together. Reduced motion retains four accessible normal-flow rows.
+
+### Curved photo surfaces
+
+`flow.frontBend` and `flow.sideBend` tune the curve in radians. Curvature stays
+subtle while reading the foreground photo and increases at the two side turns.
+`ribbon.photoSlices` controls the 24 cached texture strips per photograph.
+`localCurve()` and `framePlane().at()` are shared by those pixels, the film rails
+and connector anchors; `framePlane().tangent()` keeps the joins smooth.
+
+Each strip receives a complete world-space transform. Nesting the strips inside
+a rotated native button can flatten their paint at the side turn in browsers,
+even when its DOM bounds appear correct. The strips therefore live beside the
+semantic photo button, in its perspective/opacity group, and forward pointer
+clicks to it. A small texture overlap prevents seams; width and background crop
+are measured only on layout refresh, while scroll updates transforms and depth.
+The original image is still used for alt text, static fallback and the fullscreen
+viewer. Its file and crop mode are unchanged; no edited or rasterized assets are
+introduced. The viewer always shows the undistorted original.
+
+Image decode is cached across matchMedia rebuilds. This avoids a second delayed
+image refresh shifting a restored scroll position after resizing. Texture layers,
+listeners and the brief GSAP straighten/restore tweens are disposed on cleanup.
 
 ## Dependencies
 

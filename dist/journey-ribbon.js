@@ -13,20 +13,74 @@
   const point=p=>p.map(v=>v.toFixed(2)).join(',');
   const polygon=points=>'M'+points.map(point).join('L')+'Z';
   const curve=(a,b,c,d,t)=>add(add(mul(a,(1-t)**3),mul(b,3*(1-t)**2*t)),add(mul(c,3*(1-t)*t*t),mul(d,t**3)));
+  // Photo strips and film rails sample the same cylindrical surface. Curvature
+  // is local to the cell; its edges and tangents are also the connector anchors.
+  function localCurve(x,halfWidth,bend) {
+    if(Math.abs(bend)<.0001)return [x,0,0];
+    const radius=halfWidth/bend,angle=x/radius;
+    return [radius*Math.sin(angle),0,radius*(Math.cos(angle)-1)];
+  }
   function framePlane(pose,g) {
-    // Matches GSAP's rotateZ · rotateY · scale order, with centered photo origins.
     const y=pose.rotationY*Math.PI/180,z=pose.rotationZ*Math.PI/180;
-    return {center:[pose.x,pose.y,pose.z],
-      across:mul([Math.cos(y)*Math.cos(z),Math.cos(y)*Math.sin(z),-Math.sin(y)],g.frameWidth*pose.scale/2),
-      vertical:mul([-Math.sin(z),Math.cos(z),0],g.frameHeight*pose.scale/2)};
+    const right=[Math.cos(y)*Math.cos(z),Math.cos(y)*Math.sin(z),-Math.sin(y)];
+    const up=[-Math.sin(z),Math.cos(z),0],normal=[Math.sin(y)*Math.cos(z),Math.sin(y)*Math.sin(z),Math.cos(y)];
+    const halfWidth=g.frameWidth*pose.scale/2,halfHeight=g.frameHeight*pose.scale/2;
+    const center=[pose.x,pose.y,pose.z];
+    const at=(u,v=0)=>{
+      const local=localCurve(u*halfWidth,halfWidth,pose.bend||0);
+      return add(add(add(center,mul(right,local[0])),mul(normal,local[2])),mul(up,v*halfHeight));
+    };
+    const tangent=u=>{const angle=u*(pose.bend||0);return add(mul(right,Math.cos(angle)),mul(normal,-Math.sin(angle)));};
+    return {center,across:mul(right,halfWidth),vertical:mul(up,halfHeight),at,tangent};
+  }
+  function createPhotoSurface({paper,item,group,button},settings) {
+    const imageWindow=paper.querySelector('.journey-image-window');
+    const layer=document.createElement('span');layer.className='journey-photo-surface';layer.setAttribute('aria-hidden','true');
+    const strips=Array.from({length:settings.photoSlices},()=>{
+      const strip=document.createElement('span');strip.className='journey-photo-slice';layer.append(strip);return strip;
+    });
+    group.append(layer);
+    const open=()=>button.click();layer.addEventListener('click',open);
+    let halfWidth=0,imageWidth=0,imageHeight=0,arcWidth=0,geometry=null,verticalOffset=0,lastPose='';
+    function resize(g) {
+      halfWidth=g.frameWidth/2;imageWidth=imageWindow.clientWidth;imageHeight=imageWindow.clientHeight;arcWidth=imageWidth/strips.length;
+      geometry=g;verticalOffset=(imageWindow.offsetTop+imageHeight/2-g.frameHeight/2)/(g.frameHeight/2);
+      const ratio=item.width/item.height;
+      const ratioFits=ratio>imageWidth/imageHeight;
+      const scaleByWidth=item.fit==='contain'?ratioFits:!ratioFits;
+      const paintedWidth=scaleByWidth?imageWidth:imageHeight*ratio,paintedHeight=paintedWidth/ratio;
+      strips.forEach((strip,i)=>{
+        strip.style.width=(arcWidth+2)+'px';strip.style.height=imageHeight+'px';
+        strip.style.backgroundImage=`url("${item.image}")`;
+        strip.style.backgroundSize=`${paintedWidth}px ${paintedHeight}px`;
+        strip.style.backgroundPosition=`${(imageWidth-paintedWidth)/2-i*arcWidth+1}px ${(imageHeight-paintedHeight)/2}px`;
+      });lastPose='';
+    }
+    function render(pose) {
+      if(!geometry)return;
+      const key=[pose.x,pose.y,pose.z,pose.rotationY,pose.rotationZ,pose.scale,pose.bend].join(',');
+      if(key===lastPose)return;lastPose=key;
+      const surface=framePlane(pose,geometry);
+      strips.forEach((strip,i)=>{
+        const left=-imageWidth/2+i*arcWidth;
+        const a=localCurve(left,halfWidth,pose.bend),b=localCurve(left+arcWidth,halfWidth,pose.bend);
+        const center=mix(surface.at(left/halfWidth,verticalOffset),surface.at((left+arcWidth)/halfWidth,verticalOffset),.5);
+        const width=distance(a,b)+2,yaw=Math.atan2(a[2]-b[2],b[0]-a[0])*180/Math.PI;
+        // A complete world-space pose per slice avoids browsers flattening a
+        // nested 3D photo at exactly the side turn. Only transforms change.
+        strip.style.transform=`translate(-50%,-50%) translate3d(${center[0]}px,${center[1]}px,${center[2]}px) rotateZ(${pose.rotationZ}deg) rotateY(${pose.rotationY+yaw}deg) scale(${pose.scale*width/(arcWidth+2)},${pose.scale})`;
+        strip.style.zIndex=String(1000+Math.round(center[2]*3));
+      });
+    }
+    return {resize,render,destroy(){layer.removeEventListener('click',open);layer.remove();}};
   }
   function project(p,g) {const scale=PERSPECTIVE/(PERSPECTIVE-p[2]);return [g.width/2+p[0]*scale,g.height/2+p[1]*scale];}
   function create({container,count,settings}) {
     const patches=[],connections=[];
-    let destroyed=false,lastProgress=NaN,lastGeometry=null;
+    let destroyed=false,lastProgress=NaN,lastGeometry=null,lastLift=NaN;
     const subdivisions=settings.patchesPerJoin, samples=5;
-    // Alternating flat photo cells and flexible stock form one material strip.
-    // A cell uses exactly the same plane as its clickable DOM photograph.
+    // Curved photo cells and flexible stock form one material strip.
+    // Pixels, rails and connector tangents sample the same cylindrical surface.
     const addConnection=(kind,index,steps)=>{
       const connection={kind,index,patches:[]};connections.push(connection);
       for(let n=0;n<steps;n++) {
@@ -39,13 +93,13 @@
     };
     addConnection('leader',-1,8);
     for(let i=0;i<count;i++){
-      addConnection('cell',i,1);
+      addConnection('cell',i,8);
       addConnection(i===count-1?'leader':'join',i,i===count-1?8:subdivisions);
     }
-    function render(progress,g,transformAt) {
-      if(destroyed||(progress===lastProgress&&g===lastGeometry))return;
+    function render(progress,g,transformAt,lift=0) {
+      if(destroyed||(progress===lastProgress&&g===lastGeometry&&lift===lastLift))return;
       if(g!==lastGeometry)patches.forEach(({node})=>node.setAttribute('viewBox',`0 0 ${g.width} ${g.height}`));
-      lastProgress=progress;lastGeometry=g;
+      lastProgress=progress;lastGeometry=g;lastLift=lift;
       let ribbonLength=0;
       connections.forEach(connection=>{
         const index=connection.index;
@@ -53,14 +107,11 @@
         const aPose=transformAt(progress,head?-.48:index),bPose=transformAt(progress,tail?count-1+.48:index+1);
         const a=framePlane(aPose,g),b=framePlane(bPose,g);
         a.vertical=mul(a.vertical,settings.stockWidth);b.vertical=mul(b.vertical,settings.stockWidth);
-        const aDirection=mul(a.across,aPose.direction),bDirection=mul(b.across,bPose.direction);
-        const start=add(a.center,mul(aDirection,cell?-1:1));
-        const end=cell?add(a.center,aDirection):add(b.center,mul(bDirection,-1));
+        const start=cell?a.at(-1):a.at(1),end=cell?a.at(1):b.at(-1);
         const reach=Math.min(distance(start,end)*.43,g.radius*.72);
-        const c1=add(start,mul(aDirection,reach/Math.hypot(...aDirection)));
-        const c2=add(end,mul(bDirection,-reach/Math.hypot(...bDirection)));
-        const surface=(t,v=0)=>add(cell?mix(start,end,t):curve(start,c1,c2,end,t),
-          mul(cell?a.vertical:mix(a.vertical,b.vertical,t*t*(3-2*t)),v));
+        const c1=add(start,mul(a.tangent(1),reach)),c2=add(end,mul(b.tangent(-1),-reach));
+        const surface=(t,v=0)=>cell?a.at(t*2-1,v*settings.stockWidth):
+          add(curve(start,c1,c2,end,t),mul(mix(a.vertical,b.vertical,t*t*(3-2*t)),v));
         // Arc-length spacing keeps perforations regular as a connector bends.
         const arc=[0],arcSteps=48;
         let previous=surface(0);
@@ -89,7 +140,7 @@
           const leaderFade=connection.kind==='leader'?Math.pow(head?middle:1-middle,1.2):1;
           const light=(cell?aPose.opacity:aPose.opacity+(bPose.opacity-aPose.opacity)*middle)*leaderFade;
           // Photo cells and stock cross the fixed axis at the same depth.
-          patch.node.style.zIndex=String(1000+Math.round(depth*3));
+          patch.node.style.zIndex=String(1000+Math.round((cell?aPose.z:depth)*3));
           patch.node.style.opacity=String(light);
           patch.body.setAttribute('d',outline);patch.shadow.setAttribute('d','M'+bottom.map(point).join('L'));patch.rails.setAttribute('d',rails);
           patch.edges.setAttribute('d','M'+top.map(point).join('L')+'M'+bottom.map(point).join('L'));
@@ -98,5 +149,5 @@
     }
     return {render,project,framePlane,get patchCount(){return patches.length;},destroy(){destroyed=true;patches.forEach(({node})=>node.remove());}};
   }
-  window.JourneyFilmRibbon={create,framePlane,project};
+  window.JourneyFilmRibbon={create,framePlane,localCurve,project,createPhotoSurface};
 })();

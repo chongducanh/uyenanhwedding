@@ -14,10 +14,10 @@
       {id:'proposal', title:'Cầu hôn', date:'06.06.2025', image:'images/journey/journey-proposal-preview.webp', full:'images/journey/journey-proposal-full.webp', imageReady:true, width:900, height:1200, alt:`${site.names} dưới tán cây với bó hoa đỏ và chiếc nhẫn cầu hôn`},
       {id:'wedding', title:'Đám cưới', date:site.dateLabel, image:'images/journey/journey-wedding-preview.webp', full:'images/journey/journey-wedding-full.webp', imageReady:true, width:800, height:1200, alt:`${site.names} trong trang phục cưới, ngồi bên nhau giữa vườn hoa`}
     ],
-    // Low left → gentle crest → broad central dip → upper right.
-    // One profile, two direction changes; all dates/photos stay in their original order.
-    flow: {frameSpacing:.25, profile:[.71,.55,.64,.48]},
-    ribbon: {patchesPerJoin:10, stockWidth:1.34, holePitch:18},
+    // One material coordinate drives both photo cells and the connecting stock.
+    // Radians between cells, focus bearing, and vertical pitch define the coil.
+    flow: {frameSpacing:1, angularSpacing:2.12, focusAngle:-.76},
+    ribbon: {patchesPerJoin:16, stockWidth:1.08, holePitch:14},
     debug: {showFilmPath:false}, // Local development only; ignored on hosted origins.
     scroll: {
       desktop: {intro:.8, marker:.7, photo:1.1, finalHold:.25, outro:.9},

@@ -25,17 +25,22 @@
     const patches=[],connections=[];
     let destroyed=false,lastProgress=NaN,lastGeometry=null;
     const subdivisions=settings.patchesPerJoin, samples=5;
-    // One ordered path, including quiet leaders that continue off either edge.
-    for(let i=-1;i<count;i++) {
-      const tail=i<0||i===count-1,steps=tail?Math.ceil(subdivisions/2):subdivisions;
-      const connection={index:i,tail,patches:[]};connections.push(connection);
+    // Alternating flat photo cells and flexible stock form one material strip.
+    // A cell uses exactly the same plane as its clickable DOM photograph.
+    const addConnection=(kind,index,steps)=>{
+      const connection={kind,index,patches:[]};connections.push(connection);
       for(let n=0;n<steps;n++) {
         const node=svg('svg','journey-ribbon-patch');node.setAttribute('aria-hidden','true');node.setAttribute('focusable','false');
-        node.dataset.filmJoin=String(i);node.dataset.filmPatch=String(n);
+        node.dataset.filmOrder=String(connections.length-1);node.dataset.filmKind=kind;node.dataset.filmJoin=String(index);node.dataset.filmPatch=String(n);
         const shadow=svg('path','journey-ribbon-shadow'),body=svg('path','journey-ribbon-body'),rails=svg('path','journey-ribbon-rails'),edges=svg('path','journey-ribbon-edges');
         rails.setAttribute('fill-rule','evenodd');node.append(shadow,body,rails,edges);container.prepend(node);
         const patch={node,shadow,body,rails,edges,start:n/steps,end:(n+1)/steps};patches.push(patch);connection.patches.push(patch);
       }
+    };
+    addConnection('leader',-1,8);
+    for(let i=0;i<count;i++){
+      addConnection('cell',i,1);
+      addConnection(i===count-1?'leader':'join',i,i===count-1?8:subdivisions);
     }
     function render(progress,g,transformAt) {
       if(destroyed||(progress===lastProgress&&g===lastGeometry))return;
@@ -44,25 +49,18 @@
       let ribbonLength=0;
       connections.forEach(connection=>{
         const index=connection.index;
-        const a=framePlane(transformAt(progress,Math.max(0,index)),g);
-        const b=framePlane(transformAt(progress,Math.min(count-1,index+1)),g);
-        // Bend over the complete distance between cell centers, including the
-        // generous stock around each photograph. Stopping the curve at photo
-        // edges would compress each bend into a short gap and create tight elbows.
+        const cell=connection.kind==='cell',head=index<0,tail=index===count-1&&!cell;
+        const aPose=transformAt(progress,head?-.48:index),bPose=transformAt(progress,tail?count-1+.48:index+1);
+        const a=framePlane(aPose,g),b=framePlane(bPose,g);
         a.vertical=mul(a.vertical,settings.stockWidth);b.vertical=mul(b.vertical,settings.stockWidth);
-        let start=a.center,end=b.center;
-        if(index<0)start=[Math.min(-g.width/2-80,end[0]-g.worldWidth*.28),end[1]+g.height*.015,end[2]];
-        if(index===count-1)end=[Math.max(g.width/2+80,start[0]+g.worldWidth*.28),start[1]-g.height*.015,start[2]];
-        // Monotone control points: each join has no overshoot and no reversal.
-        // Long horizontal tangents keep the embedded photos rectangular.
-        const run=end[0]-start[0];
-        const c1=[start[0]+run/3,start[1],start[2]],c2=[end[0]-run/3,end[1],end[2]];
-        const surface=(t,v=0)=>{
-          const center=curve(start,c1,c2,end,t);
-          // No pinched necks: the same film stock continues through each cell.
-          const span=mix(a.vertical,b.vertical,t*t*(3-2*t));
-          return add(center,mul(span,v));
-        };
+        const aDirection=mul(a.across,aPose.direction),bDirection=mul(b.across,bPose.direction);
+        const start=add(a.center,mul(aDirection,cell?-1:1));
+        const end=cell?add(a.center,aDirection):add(b.center,mul(bDirection,-1));
+        const reach=Math.min(distance(start,end)*.43,g.radius*.72);
+        const c1=add(start,mul(aDirection,reach/Math.hypot(...aDirection)));
+        const c2=add(end,mul(bDirection,-reach/Math.hypot(...bDirection)));
+        const surface=(t,v=0)=>add(cell?mix(start,end,t):curve(start,c1,c2,end,t),
+          mul(cell?a.vertical:mix(a.vertical,b.vertical,t*t*(3-2*t)),v));
         // Arc-length spacing keeps perforations regular as a connector bends.
         const arc=[0],arcSteps=48;
         let previous=surface(0);
@@ -80,15 +78,18 @@
           const ts=Array.from({length:samples+1},(_,i)=>patch.start+(patch.end-patch.start)*i/samples);
           const line=v=>ts.map(t=>project(surface(t,v),g));
           const top=line(-1),bottom=line(1),outline=polygon([...top,...[...bottom].reverse()]);
-          let rails=polygon([...top,...line(-.88).reverse()])+polygon([...line(.88),...[...bottom].reverse()]);
+          let rails=polygon([...top,...line(-.935).reverse()])+polygon([...line(.935),...[...bottom].reverse()]);
           for(const hole of holes){
             // Clip a punched hole at patch seams so adjacent pieces stay continuous.
             const lo=Math.max(patch.start,hole.lo),hi=Math.min(patch.end,hole.hi);
             if(hi<=lo)continue;
-            for(const side of [-1,1])rails+=polygon([[lo,side*.97],[hi,side*.97],[hi,side*.91],[lo,side*.91]].map(([t,v])=>project(surface(t,v),g)));
+            for(const side of [-1,1])rails+=polygon([[lo,side*.983],[hi,side*.983],[hi,side*.948],[lo,side*.948]].map(([t,v])=>project(surface(t,v),g)));
           }
-          const depth=surface((patch.start+patch.end)/2)[2],light=.9+.1*depth/g.depth;
-          patch.node.style.zIndex=String(950+Math.round(depth*2));
+          const middle=(patch.start+patch.end)/2,depth=surface(middle)[2];
+          const leaderFade=connection.kind==='leader'?Math.pow(head?middle:1-middle,1.2):1;
+          const light=(cell?aPose.opacity:aPose.opacity+(bPose.opacity-aPose.opacity)*middle)*leaderFade;
+          // Photo cells and stock cross the fixed axis at the same depth.
+          patch.node.style.zIndex=String(1000+Math.round(depth*3));
           patch.node.style.opacity=String(light);
           patch.body.setAttribute('d',outline);patch.shadow.setAttribute('d','M'+bottom.map(point).join('L'));patch.rails.setAttribute('d',rails);
           patch.edges.setAttribute('d','M'+top.map(point).join('L')+'M'+bottom.map(point).join('L'));

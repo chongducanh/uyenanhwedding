@@ -5,27 +5,32 @@
   const make=(tag,cls,text)=>{const node=document.createElement(tag);node.className=cls;if(text!==undefined)node.textContent=text;return node;};
   const clamp=(min,max,value)=>Math.max(min,Math.min(max,value));
   const markerPosition=(index,count)=>count===1?.5:.12+index/(count-1)*.76;
-  // One ordered horizontal reel. The camera advances a single shared travel
-  // value; cells never orbit, reverse direction, flip over, or cross one another.
-  const filmPosition=u=>.09+.82*u-.065*Math.sin(2*Math.PI*u);
-  function filmLevel(u,profile) {
-    const t=clamp(0,1,u)*(profile.length-1),i=Math.min(profile.length-2,Math.floor(t));
-    const q=t-i,e=q*q*(3-2*q);
-    return profile[i]+(profile[i+1]-profile[i])*e;
-  }
+  // The film is a single open helix around the fixed timeline. The camera
+  // follows its vertical travel; cells never reset or fly to independent targets.
   function getFilmTransform(progress,index,g,settings,count) {
-    const u=index/Math.max(1,count-1),travel=progress/settings.frameSpacing;
-    const cameraU=clamp(0,1,travel/Math.max(1,count-1));
-    const pan=g.trackCamera?g.focusX-filmPosition(cameraU)*g.worldWidth:g.width*.016*(.5-cameraU);
-    const emphasis=Math.exp(-Math.pow((index-travel)/.8,2));
-    const z=-g.depth*Math.sin(Math.PI*clamp(0,1,u));
+    const coordinate=index-progress/settings.frameSpacing;
+    const angle=settings.focusAngle+coordinate*settings.angularSpacing;
+    const front=(Math.cos(angle)+1)/2;
+    const direction=Math.cos(angle)<0?-1:1;
+    // Follow the tangent of the elliptical coil. Reverse the material direction
+    // on its far side so photographs stay readable instead of showing mirrored backs.
+    const tangentYaw=Math.atan2(g.depth*Math.sin(angle),g.radius*Math.cos(angle))*180/Math.PI;
+    const rotationY=tangentYaw+(direction<0?(Math.sin(angle)<0?180:-180):0);
+    const scale=.55+.43*front;
+    const z=g.depth*Math.cos(angle);
+    // Compress the distant ends of the same spiral, rather than wrapping cells.
+    const y=g.centerY-g.height/2+g.pitch*Math.tanh(coordinate*.67);
+    const edgeDistance=Math.min(y+g.height/2-g.filmTop,g.filmBottom-y-g.height/2);
+    const edge=clamp(0,1,edgeDistance/(g.frameHeight*scale*.53));
+    const distant=clamp(0,1,(3.0-Math.abs(coordinate))/1.4);
+    const visible=edge*edge*(3-2*edge)*distant*distant*(3-2*distant);
     return {
-      x:filmPosition(u)*g.worldWidth+pan-g.width/2,
-      y:g.height*(filmLevel(u,settings.profile)+.006*(.5-cameraU))-g.height/2,
-      z,rotationY:2*(u-.5),rotationZ:0,
-      scale:.84+.18*clamp(0,1,u)+.055*emphasis,
-      opacity:.84+.16*emphasis,
-      zIndex:1100+Math.round(z*2),offset:index*settings.frameSpacing
+      x:g.radius*Math.sin(angle),y,z,
+      rotationY,
+      rotationZ:2*Math.sin(angle-settings.focusAngle),scale,
+      opacity:(.4+.6*front)*visible,
+      zIndex:1000+Math.round(z*3)+2,offset:index*settings.frameSpacing,
+      angle,front,direction
     };
   }
   function renderJourney(config) {
@@ -62,7 +67,7 @@
     const {section,scene,axis,items,film,progress}=dom,stage=section.querySelector('.journey-stage');
     const heading=section.querySelector('.journey-heading'),footer=section.querySelector('.journey-footer'),chapter=section.querySelector('.journey-current');
     const lengths=config.scroll[mobile?'mobile':tablet?'tablet':'desktop'],phases=[],listeners=[],fades=[];
-    const flow=config.flow,filmState={progress:-.36*flow.frameSpacing};
+    const flow=config.flow,filmState={progress:-.76*flow.frameSpacing};
     const ribbon=reduced?null:window.JourneyFilmRibbon.create({container:film,count:items.length,settings:config.ribbon});
     let filmGeometry=null,debugPoints=[];
     const debugEnabled=!!config.debug?.showFilmPath&&['localhost','127.0.0.1','::1'].includes(location.hostname);
@@ -88,13 +93,13 @@
     listeners.push(()=>{ScrollTrigger.removeEventListener('refreshInit',capturePhotoFocus);ScrollTrigger.removeEventListener('refresh',restorePhotoFocus);});
     items.forEach(({button,item,marker},index)=>{
       listen(button,'click',()=>viewer.openPhotoViewer(button,item));
-      // On a compact viewport the reel extends off screen. Keyboard navigation
-      // brings the selected cell into its own reading phase before opening it.
+      // Bring distant or rear-facing cells into their reading phase for keyboard
+      // access, without affecting mouse clicks or a returning fullscreen photo.
       listen(button,'keydown',event=>{
         if(event.key!=='Tab'||reduced||viewer.isOpen||!trigger)return;
         const nextIndex=index+(event.shiftKey?-1:1),next=items[nextIndex];if(!next)return;
         const rect=next.button.getBoundingClientRect();
-        if(rect.left>=0&&rect.right<=stage.clientWidth)return;
+        if(rect.left>=0&&rect.right<=stage.clientWidth&&Number(gsap.getProperty(next.button,'opacity'))>.65)return;
         event.preventDefault();
         const phase=phases.find(p=>p.name===`photo-${nextIndex}`);
         const time=phase.start+(phase.end-phase.start)*.75;
@@ -108,11 +113,13 @@
     section.classList.toggle('journey-static',reduced);section.classList.toggle('journey-enhanced',!reduced);
     function geometry() {
       const width=stage.clientWidth,height=stage.clientHeight,landscape=width>height&&height<601;
-      const trackCamera=mobile||tablet;
-      const frameWidth=Math.min(width*(mobile?.39:tablet?.23:.145),mobile?180:240,height*(landscape?.22:.245));
+      const frameWidth=Math.min(mobile?width*.34:tablet?220:260,height*(landscape?.28:.35));
       const top=height*(landscape?.26:mobile?.235:.245),bottom=height*(landscape?.83:.865);
-      return {width,height,frameWidth,frameHeight:frameWidth*1.34,top,bottom,
-        worldWidth:width*(mobile?3.5:tablet?2.8:1),trackCamera,focusX:width*(mobile?.32:.30),depth:mobile?5:12};
+      const radius=Math.min(mobile?width*.31:tablet?width*.285:290,width/2-frameWidth*.48-22);
+      const filmTop=height*(landscape?.23:.215),filmBottom=height*.895;
+      return {width,height,frameWidth,frameHeight:frameWidth*1.34,top,bottom,filmTop,filmBottom,
+        radius,centerY:height*.565,pitch:height*(landscape?.31:.295),
+        depth:mobile?14:tablet?45:60};
     }
     function transformAt(progress,index) {
       return getFilmTransform(progress,index,filmGeometry||geometry(),flow,items.length);
@@ -120,7 +127,7 @@
     function renderFilm() {
       if(reduced||destroyed||!filmGeometry)return;
       items.forEach(({button},index)=>{
-        const {offset,...pose}=transformAt(filmState.progress,index);
+        const {offset,angle,front,direction,...pose}=transformAt(filmState.progress,index);
         gsap.set(button,{...pose,xPercent:-50,yPercent:-50,force3D:true});
       });
       ribbon.render(filmState.progress,filmGeometry,transformAt);
@@ -142,6 +149,7 @@
       if(reduced)return;
       filmGeometry=geometry();const g=filmGeometry;
       stage.style.setProperty('--journey-frame-width',g.frameWidth+'px');
+      stage.style.setProperty('--journey-film-top',g.filmTop+'px');stage.style.setProperty('--journey-film-bottom',(g.height-g.filmBottom)+'px');
       stage.style.setProperty('--journey-axis-top',g.top+'px');stage.style.setProperty('--journey-axis-bottom',(g.height-g.bottom)+'px');
       renderFilm();
     }
@@ -157,12 +165,13 @@
       tl.to(item.copy,{opacity:1,y:0,duration:duration*.36},duration*.64)
         .to(item.dot,{opacity:1,scale:1.08,duration:duration*.18,ease:'sine.inOut'},duration*.64)
         .to(item.dot,{scale:1,duration:duration*.18,ease:'sine.inOut'},duration*.82);
-      advanceFilm(tl,index-.16,duration);
+      advanceFilm(tl,index-.62,duration);
     }
     function focusJourneyPhoto(tl,index) {
       const length=lengths.photo+(index===items.length-1?lengths.finalHold:0);
-      // A reading hold gently advances the shared reel and its camera.
-      advanceFilm(tl,index+.08,length);
+      // The whole reel turns into the reading position, then holds for the photo.
+      advanceFilm(tl,index+.04,length*.64);
+      tl.to({},{duration:length*.36});
       if(index===items.length-1)updateTimelineProgress(tl,1,length*.64,0);
     }
     function playOutro(tl) {
@@ -188,7 +197,7 @@
     function buildJourneyTimeline() {
       sizePhotos();gsap.set(items.map(i=>i.button),{xPercent:-50,yPercent:-50,transformOrigin:'50% 50%',force3D:true});
       buildDebugPath();renderFilm();
-      gsap.set(progress,{scaleY:0,transformOrigin:'50% 0'});gsap.set(items.map(i=>i.copy),{opacity:.22,y:6});gsap.set(items.map(i=>i.dot),{opacity:.32});
+      gsap.set(progress,{scaleY:0,transformOrigin:'50% 0'});gsap.set(items.map(i=>i.copy),{opacity:.38,y:6});gsap.set(items.map(i=>i.dot),{opacity:.32});
       timeline=gsap.timeline({defaults:{ease:'none'},onUpdate:updateExperience});
       const part=(name,index,build)=>{const child=gsap.timeline();build(child);const start=timeline.duration();timeline.addLabel(name,start).add(child,start);phases.push({name,index,start,end:start+child.duration()});};
       part('intro',undefined,tl=>{
@@ -196,7 +205,7 @@
           .fromTo(axis,{opacity:.2},{opacity:1,duration:lengths.intro*.7},0)
           .fromTo(film,{opacity:.2},{opacity:1,duration:lengths.intro*.7},0)
           .to({},{duration:lengths.intro*.3});
-        advanceFilm(tl,-.28,lengths.intro,0);
+        advanceFilm(tl,-.68,lengths.intro,0);
       });
       items.forEach((_,i)=>{part(`marker-${i}`,i,tl=>activateMilestone(tl,i));part(`photo-${i}`,i,tl=>focusJourneyPhoto(tl,i));});
       part('outro',undefined,playOutro);

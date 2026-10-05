@@ -85,9 +85,9 @@
 /* The ribbon and photo planes share one perspective and one depth order. SVG
    patches are already projected; do not add transforms to these decorative nodes. */
 .journey-ribbon-patch{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
-.journey-ribbon-body{fill:#a47762;fill-opacity:.15}
-.journey-ribbon-rails{fill:#e9ddc9;fill-opacity:.72}
-.journey-ribbon-edges{fill:none;stroke:#f0d6b4;stroke-width:.65;stroke-opacity:.55}
+.journey-ribbon-body{fill:#a47762;fill-opacity:.12}
+.journey-ribbon-rails{fill:#e9ddc9;fill-opacity:.36}
+.journey-ribbon-edges{fill:none;stroke:#f0d6b4;stroke-width:.55;stroke-opacity:.3}
 .journey-ribbon-shadow{fill:none;stroke:#0c030a;stroke-opacity:.18;stroke-width:3;transform:translate(1px,3px)}
 .journey-enhanced .journey-paper{background:transparent;box-shadow:none}
 .journey-enhanced .journey-image-window{box-shadow:0 3px 10px #10071030,inset 0 0 0 1px #cfbc9b}
@@ -95,4 +95,13 @@
 .journey-enhanced .journey-paper::before,.journey-enhanced .journey-paper::after{display:none}
 .journey-enhanced .journey-film-label,.journey-enhanced .journey-film-number{background:transparent;color:#e9ddc9}
 .journey-enhanced .journey-marker-copy{isolation:isolate}
-.journey-enhanced .journey-marker[aria-current=step] .journey-marker-copy::before{content:"";position:absolute;inset:-7px -10px;z-index:-1;background:radial-gradient(ellipse at 35% 50%,#321b27d9 20%,#321b2780 55%,transparent 80%);filter:blur(7px);pointer-events:none}
+.journey-enhanced .journey-marker-copy::before{content:"";position:absolute;inset:-7px -10px;z-index:-1;background:radial-gradient(ellipse at 35% 50%,#321b27d9 20%,#321b2780 55%,transparent 80%);filter:blur(7px);pointer-events:none}
+
+/* The active film is bounded below the title and above the footer. The fixed
+   axis remains inside this volume; near/far patches cross its z-index of 1000. */
+.journey-enhanced .journey-films{
+ clip-path:inset(var(--journey-film-top) 0 var(--journey-film-bottom));
+ mask-image:linear-gradient(to bottom,transparent var(--journey-film-top),#000 calc(var(--journey-axis-top) - 11px),#000 calc(100% - var(--journey-axis-bottom) + 11px),transparent calc(100% - var(--journey-film-bottom)));
+}
+.journey-enhanced .journey-marker-copy{left:32px}
+@media(max-width:767px){.journey-enhanced .journey-marker-copy{left:25px}}

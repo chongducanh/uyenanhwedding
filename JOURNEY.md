@@ -57,24 +57,33 @@ lengths × milestone count, final hold, and outro, then multiplies by stage
 height. Default desktop length is 9.15 viewport heights; mobile is 3.96.
 Adding a fifth milestone adds a marker and photo phase automatically.
 
-All four photographs belong to one ordered horizontal film strip. The single
-`filmState.progress` value advances the scene and reading emphasis.
-`getFilmTransform(progress, index, geometry, settings, count)` keeps the photos
-in their original left-to-right order, with no orbits, mirrored backs or wraps.
-Yaw stays within one degree and the photographs have no in-plane rotation.
+All four photographs are cells of one compact, open 3D film coil around the
+fixed vertical timeline. `filmState.progress` is the only animated material
+coordinate. `getFilmTransform()` subtracts it from each cell's index, then derives
+angle, x/y/z, scale, yaw and opacity. Previous photographs continue along the
+same path: they never fly back to a starting position or wrap to another cell.
 
-`JOURNEY_CONFIG.flow.profile` defines four height landmarks: lower left, a broad
-crest, a shallow central dip, then the larger upper-right wedding photograph.
-This gives exactly two changes of vertical direction. Photo spacing leaves an
-open central area beside the unchanged timeline and its captions. On desktop,
-the complete composition drifts gently as a unit. Tablet and mobile follow the
-same wider reel horizontally, keeping the current photograph readable to the
-left of the date/title column. Off-screen cells stay on that continuous reel.
+`JOURNEY_CONFIG.flow` defines angular spacing (2.12 radians), focus bearing and
+material spacing. The responsive geometry caps the desktop radius at 290px;
+including the rectangular cells and connectors, the visible film occupies about
+±410px around the axis. Tablet and mobile reduce both radius and depth. There
+is no horizontal tracking camera and no viewport-wide leader or wave profile.
 
-The marker and reading phases retain their original durations and progression.
-Resize recomputes geometry and restores the logical phase. The outro continues
-shared travel and settles into Wedding Memories. A development-only guide can
-be enabled with `JOURNEY_CONFIG.debug.showFilmPath`; hosted origins ignore it.
+Depth controls perspective, size, opacity and stacking relative to the axis at
+z-index 1000. Front photos are about 220–230px wide on ordinary desktop sizes;
+rear cells become smaller and more muted. Photographs follow the elliptical
+coil's tangent with slight in-plane roll. At each side turn they pass briefly
+edge-on; the far-side material direction reverses so images remain readable,
+without mirrored backs. The vertical travel compresses smoothly at the distant
+ends and fades, keeping the title and footer clear.
+
+The marker phase fills the timeline while the coil advances gently. The photo
+phase rotates the whole film into its reading position and holds there; the
+progress line stays still except for its final extension below milestone four.
+The original total phase lengths remain unchanged. Resize recomputes geometry
+and restores the logical phase. The outro continues shared travel and settles
+into Wedding Memories. A development-only guide can be enabled with
+`JOURNEY_CONFIG.debug.showFilmPath`; hosted origins ignore it.
 
 `journey-viewer.js`: GSAP Flip opens the actual paper in a native dialog;
 Flip.fit maps its return to the live film-frame bounds. The scene's scroll
@@ -95,39 +104,34 @@ titles as a list. After changing dates, run
 
 ## Connected film surface
 
-`dist/journey-ribbon.js` draws one translucent film surface through the photo
-cells, with subtle leaders extending out of each viewport edge. The renderer
-receives the same travel value and poses as the photos; there is no separate
-animation clock or stationary background strip.
+`dist/journey-ribbon.js` builds one connected strip: a short leader, alternating
+flat photo cells and curved stock, then a short fading tail. Every cell uses
+exactly the same 3D plane as its DOM photo. Each connecting cubic starts and
+ends on the actual cell edges, with matching tangent directions. Both rails
+come from this one surface; there are no independent wave paths. `framePlane()`
+is the shared contract between photo transforms and film geometry.
 
-Each cubic segment covers the full distance between cell centers. Its control
-points progress strictly left-to-right, and its height interpolates without
-overshoot. This lets the curve bend gradually through the stock surrounding the
-rectangular photo windows. Constraining bends to the short gaps between photo
-edges would create tight elbows; this implementation deliberately avoids that.
-Film width interpolates smoothly, with no necks, pinches or secondary waves.
-Leaders rise very slightly and continue off screen without curling back.
+The subtle champagne stock has narrow rails and small real perforations
+(SVG even-odd paths), spaced by accumulated arc length through both photo cells
+and their connectors. Holes continue through the cell margins. No separate
+cream card background or CSS perforation row floats above the film. The
+original photographs, crop modes and fullscreen viewer are unchanged.
 
-The champagne rails use real punched perforations (SVG even-odd paths), spaced
-by accumulated arc length across the complete reel. They continue over the photo
-cells; separate CSS perforation rows are hidden in the enhanced scene. The
-photos retain their original assets, crop modes and fullscreen viewer. There is
-no transformation of their image content to match a bending film surface.
+`JOURNEY_CONFIG.ribbon.stockWidth` sets stock height around each photo;
+`holePitch` controls perforation spacing and `patchesPerJoin` tessellates each
+connector. Small projected SVG patches change depth order individually, placing
+far stock behind the fixed time axis and near stock in front. Photo cells remain
+above their own stock. Captions have a subtle local scrim and stay readable;
+active opacity is 1, inactive opacity is 0.35–0.38.
 
-`JOURNEY_CONFIG.ribbon.stockWidth` supplies room around each photo; `holePitch`
-controls regular perforation spacing and `patchesPerJoin` controls tessellation.
-A maximum of 12px depth and minimal yaw give the stock a slight perspective;
-no frame turns over. The ribbon sits behind the center timeline. Photo cells
-remain above their film stock, so the material never washes over their images.
-All colors and the main typography are retained.
-
-SVG patches are allocated once and reused. No DOM measurements happen during
-scroll. Identical travel/geometry skips ribbon work. Resize invalidates geometry,
-and destroy removes all patches. Decorative paths ignore pointer input and are
-hidden from accessibility APIs. The original photo buttons remain interactive. Keyboard focus on an off-screen
-cell brings that cell to its reading phase on compact viewports.
-Fullscreen locks the shared playhead, so photos and film freeze together. Reduced
-motion omits the moving strip and retains the four accessible photo rows.
+SVG nodes are allocated once and reused (68 patches for four photographs).
+Scroll performs no DOM geometry measurements. Identical progress/geometry skips
+ribbon work, resize invalidates measurements, and destroy removes all patches.
+The bounded film volume has a soft edge outside both timeline caps, so title,
+footer and caps remain clear. Decorative surfaces ignore pointer input and are
+hidden from accessibility APIs. Keyboard navigation brings distant cells into
+their reading phase. Fullscreen freezes the same shared playhead, so photos and
+stock stop together. Reduced motion retains four accessible normal-flow rows.
 
 ## Dependencies
 
@@ -138,16 +142,14 @@ WebGL, canvas image generation, or runtime CDN dependency is required.
 
 ## Validation
 
-The horizontal film was checked at 1440 × 1000, 820 × 1180, 390 × 844,
-320 × 640 and 740 × 390. Both rails advance monotonically left-to-right and
-have exactly two broad direction changes. Frame order stays fixed and all
-photos remain upright. Active captions have clear space beside the images.
+Browser checks cover 1440 × 1000, 1280 × 720, 820 × 1180, 390 × 844,
+320 × 640 and 740 × 390. The actual rendered rails meet exactly at every
+cell/connector seam across sampled scroll positions. Near and far film patches
+cross the axis's depth; focused photos and active captions remain clear of one
+another, with no horizontal overflow. Both timeline caps remain visible.
 
-Both sites retain all four supplied photos and their own wedding dates.
-Fullscreen open, Escape close, forward-wheel resume, image aspect ratio,
-reduced motion, responsive phase restoration and independent Journey/Memories
-pins are checked. Full-resolution photos still load only on explicit opening.
-
-Compact-screen Tab navigation brings off-screen cells into their reading phase.
-Photo focus survives asynchronous image/layout refreshes; Enter opens the viewer
-and Escape restores the same focused cell and scroll position.
+Both sites retain the supplied photos, dates, fonts, colors and background.
+Fullscreen open, Escape close, forward-wheel resume, touch dismissal, keyboard
+access, reduced motion, responsive phase restoration and separate
+Journey/Memories pins are checked. Full images load only when opened. A fifth
+milestone fixture still creates its own marker/photo phases from data.

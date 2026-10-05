@@ -13,10 +13,12 @@ animating duplicate galleries.
     .mem-heading                   screen-space chapter information
     .mem-camera
       .mem-world                   one stable 1440px coordinate system
-        .mem-table / .mem-decor
+        .mem-table / .mem-table-surface / .mem-decor
+      .mem-contact × 7             shadows on the tabletop plane
         .mem-frame × photos.length
         .mem-album-mount            physical cover + two-sided paper leaf
         .mem-money-box              hinged front + interior
+      .mem-table-foreground       flower crops and pearl strands
     .mem-wish-host                  untransformed, readable input plane
     .mem-caption / .mem-footer
 body
@@ -101,3 +103,22 @@ Checked on 2026-10-05 with Chromium at desktop, tablet and phone sizes:
 
 The supplied artwork is additionally checked at desktop and mobile sizes for
 framing, correct AU/UA identity, click targets and image loading.
+
+## Table staging
+
+The tabletop occupies world coordinates x=240…1200, y=460…635. Three rear
+frames stand at y=490; two front frames stand at y≈595 and partially overlap
+the back row. Their origins stay at the bottom center so small tilts retain a
+contact point. The closed album rests at the front with a 62° tilt and −12°
+rotation, and returns to the same pose after reading. The money box stands on
+the right with its own footprint.
+
+Seven separate contact shadows sit on the tabletop and share an upper-left
+light direction. Cropped views of the original flower garland and lightweight
+pearl paths overlap feet and edges. All ornamental layers ignore pointer
+events. Focused photos and the open album rise above foreground decoration;
+the normal physical stacking order returns in the overview.
+
+The front cloth begins at the tabletop lip instead of behind the displayed
+objects. The surface reuses the existing fabric image as its texture, so no
+new image download or photo replacement is needed.

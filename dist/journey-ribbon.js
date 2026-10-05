@@ -25,7 +25,7 @@
     const patches=[],connections=[];
     let destroyed=false,lastProgress=NaN,lastGeometry=null;
     const subdivisions=settings.patchesPerJoin, samples=5;
-    // Include film leaders beyond both end frames, rather than ending at a photo.
+    // One ordered path, including quiet leaders that continue off either edge.
     for(let i=-1;i<count;i++) {
       const tail=i<0||i===count-1,steps=tail?Math.ceil(subdivisions/2):subdivisions;
       const connection={index:i,tail,patches:[]};connections.push(connection);
@@ -41,23 +41,26 @@
       if(destroyed||(progress===lastProgress&&g===lastGeometry))return;
       if(g!==lastGeometry)patches.forEach(({node})=>node.setAttribute('viewBox',`0 0 ${g.width} ${g.height}`));
       lastProgress=progress;lastGeometry=g;
+      let ribbonLength=0;
       connections.forEach(connection=>{
         const index=connection.index;
-        const from=index<0?-settings.leaderLength:index;
-        const to=index===count-1?index+settings.leaderLength:index+1;
-        const a=framePlane(transformAt(progress,from),g),b=framePlane(transformAt(progress,to),g);
-        // Going forward through the film exits the left edge and enters the right.
-        // Endpoints are the exact photo edges, including its scale and rotation.
-        const start=index<0?a.center:add(a.center,mul(a.across,-1));
-        const end=index===count-1?b.center:add(b.center,b.across);
-        const handle=Math.max(.45,Math.min(1.5,distance(start,end)/g.frameWidth));
-        const c1=add(start,mul(a.across,-handle)),c2=add(end,mul(b.across,handle));
+        const a=framePlane(transformAt(progress,Math.max(0,index)),g);
+        const b=framePlane(transformAt(progress,Math.min(count-1,index+1)),g);
+        // Bend over the complete distance between cell centers, including the
+        // generous stock around each photograph. Stopping the curve at photo
+        // edges would compress each bend into a short gap and create tight elbows.
+        a.vertical=mul(a.vertical,settings.stockWidth);b.vertical=mul(b.vertical,settings.stockWidth);
+        let start=a.center,end=b.center;
+        if(index<0)start=[Math.min(-g.width/2-80,end[0]-g.worldWidth*.28),end[1]+g.height*.015,end[2]];
+        if(index===count-1)end=[Math.max(g.width/2+80,start[0]+g.worldWidth*.28),start[1]-g.height*.015,start[2]];
+        // Monotone control points: each join has no overshoot and no reversal.
+        // Long horizontal tangents keep the embedded photos rectangular.
+        const run=end[0]-start[0];
+        const c1=[start[0]+run/3,start[1],start[2]],c2=[end[0]-run/3,end[1],end[2]];
         const surface=(t,v=0)=>{
           const center=curve(start,c1,c2,end,t);
-          const neck=1-(1-settings.neckWidth)*Math.sin(Math.PI*t)**2;
-          let span=mul(mix(a.vertical,b.vertical,t),neck);
-          if(index<0)span=mul(span,.62+.38*t);
-          if(index===count-1)span=mul(span,1-.38*t);
+          // No pinched necks: the same film stock continues through each cell.
+          const span=mix(a.vertical,b.vertical,t*t*(3-2*t));
           return add(center,mul(span,v));
         };
         // Arc-length spacing keeps perforations regular as a connector bends.
@@ -66,9 +69,13 @@
         for(let k=1;k<=arcSteps;k++){const next=surface(k/arcSteps);arc.push(arc.at(-1)+distance(next,previous));previous=next;}
         const total=arc.at(-1),holes=[];
         const tAtLength=value=>{let k=1;while(k<arcSteps&&arc[k]<value)k++;return (k-1+(value-arc[k-1])/Math.max(.001,arc[k]-arc[k-1]))/arcSteps;};
-        for(let length=settings.holePitch/2;length<total-settings.holePitch/3;length+=settings.holePitch){
-          holes.push({t:tAtLength(length),lo:tAtLength(Math.max(0,length-settings.holePitch*.17)),hi:tAtLength(Math.min(total,length+settings.holePitch*.17))});
+        const halfHole=settings.holePitch*.17;
+        const firstHole=Math.floor((ribbonLength-halfHole)/settings.holePitch)*settings.holePitch+settings.holePitch/2;
+        for(let global=firstHole;global<ribbonLength+total+halfHole;global+=settings.holePitch){
+          const lo=Math.max(0,global-ribbonLength-halfHole),hi=Math.min(total,global-ribbonLength+halfHole);
+          if(hi>lo)holes.push({lo:tAtLength(lo),hi:tAtLength(hi)});
         }
+        ribbonLength+=total;
         connection.patches.forEach(patch=>{
           const ts=Array.from({length:samples+1},(_,i)=>patch.start+(patch.end-patch.start)*i/samples);
           const line=v=>ts.map(t=>project(surface(t,v),g));
@@ -80,8 +87,8 @@
             if(hi<=lo)continue;
             for(const side of [-1,1])rails+=polygon([[lo,side*.97],[hi,side*.97],[hi,side*.91],[lo,side*.91]].map(([t,v])=>project(surface(t,v),g)));
           }
-          const depth=surface((patch.start+patch.end)/2)[2],light=.48+.52*(depth/g.depth+1)/2;
-          patch.node.style.zIndex=String(1000+Math.round(depth*2)-1);
+          const depth=surface((patch.start+patch.end)/2)[2],light=.9+.1*depth/g.depth;
+          patch.node.style.zIndex=String(950+Math.round(depth*2));
           patch.node.style.opacity=String(light);
           patch.body.setAttribute('d',outline);patch.shadow.setAttribute('d','M'+bottom.map(point).join('L'));patch.rails.setAttribute('d',rails);
           patch.edges.setAttribute('d','M'+top.map(point).join('L')+'M'+bottom.map(point).join('L'));

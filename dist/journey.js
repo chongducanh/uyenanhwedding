@@ -1,35 +1,31 @@
-/* A data-driven film helix. This experience owns only #journey and its viewer;
+/* A data-driven cinematic film reel. This experience owns only #journey and its viewer;
    Wedding Memories keeps its own timeline, album, wishes and fullscreen dialog. */
 (() => {
   'use strict';
   const make=(tag,cls,text)=>{const node=document.createElement(tag);node.className=cls;if(text!==undefined)node.textContent=text;return node;};
   const clamp=(min,max,value)=>Math.max(min,Math.min(max,value));
   const markerPosition=(index,count)=>count===1?.5:.12+index/(count-1)*.76;
-  // A single, unwrapped ribbon coordinate. Index only contributes a fixed offset;
-  // every frame and debug sample is evaluated on this same continuous 3D curve.
-  function getHelixTransform(progress,index,g,settings,count) {
-    const offset=index*settings.frameSpacing;
-    const q=(offset-progress)/settings.frameSpacing;
-    const angle=settings.focusAngle+(progress-offset)*Math.PI*2*settings.turns;
-    const depth=Math.cos(angle),front=clamp(0,1,(depth+1)/(Math.cos(settings.focusAngle)+1));
-    const proximity=1/(1+Math.pow(q/1.3,2));
-    // Camera follows the ribbon gently; tanh keeps its finite ends inside the stage.
-    const follow=(progress/settings.frameSpacing/Math.max(1,count-1)-.5)*.8;
-    const z=depth*g.depth;
-    // The emulsion follows the tangent of the spool. Rear frames turn with the
-    // film instead of staying front-facing while its connecting material folds.
-    let yaw=Math.atan2(Math.sin(angle)*g.depth,Math.cos(angle)*g.radiusX);
-    yaw+=Math.PI*2*Math.round((angle-yaw)/(Math.PI*2));
+  // One ordered horizontal reel. The camera advances a single shared travel
+  // value; cells never orbit, reverse direction, flip over, or cross one another.
+  const filmPosition=u=>.09+.82*u-.065*Math.sin(2*Math.PI*u);
+  function filmLevel(u,profile) {
+    const t=clamp(0,1,u)*(profile.length-1),i=Math.min(profile.length-2,Math.floor(t));
+    const q=t-i,e=q*q*(3-2*q);
+    return profile[i]+(profile[i+1]-profile[i])*e;
+  }
+  function getFilmTransform(progress,index,g,settings,count) {
+    const u=index/Math.max(1,count-1),travel=progress/settings.frameSpacing;
+    const cameraU=clamp(0,1,travel/Math.max(1,count-1));
+    const pan=g.trackCamera?g.focusX-filmPosition(cameraU)*g.worldWidth:g.width*.016*(.5-cameraU);
+    const emphasis=Math.exp(-Math.pow((index-travel)/.8,2));
+    const z=-g.depth*Math.sin(Math.PI*clamp(0,1,u));
     return {
-      x:Math.sin(angle)*g.radiusX,
-      y:g.centerY+g.radiusY*Math.tanh(q*.72+follow)-g.height*.5,
-      z,
-      rotationY:yaw*180/Math.PI,
-      rotationZ:Math.sin(angle)*3+Math.sin(q*.8),
-      scale:.58+.28*front+.14*proximity,
-      opacity:.35+.40*front+.25*proximity,
-      zIndex:1000+Math.round(z*2),
-      angle,offset
+      x:filmPosition(u)*g.worldWidth+pan-g.width/2,
+      y:g.height*(filmLevel(u,settings.profile)+.006*(.5-cameraU))-g.height/2,
+      z,rotationY:2*(u-.5),rotationZ:0,
+      scale:.84+.18*clamp(0,1,u)+.055*emphasis,
+      opacity:.84+.16*emphasis,
+      zIndex:1100+Math.round(z*2),offset:index*settings.frameSpacing
     };
   }
   function renderJourney(config) {
@@ -66,11 +62,11 @@
     const {section,scene,axis,items,film,progress}=dom,stage=section.querySelector('.journey-stage');
     const heading=section.querySelector('.journey-heading'),footer=section.querySelector('.journey-footer'),chapter=section.querySelector('.journey-current');
     const lengths=config.scroll[mobile?'mobile':tablet?'tablet':'desktop'],phases=[],listeners=[],fades=[];
-    const helix=config.helix,filmState={progress:-.36*helix.frameSpacing};
+    const flow=config.flow,filmState={progress:-.36*flow.frameSpacing};
     const ribbon=reduced?null:window.JourneyFilmRibbon.create({container:film,count:items.length,settings:config.ribbon});
     let filmGeometry=null,debugPoints=[];
     const debugEnabled=!!config.debug?.showFilmPath&&['localhost','127.0.0.1','::1'].includes(location.hostname);
-    let timeline=null,trigger=null,lockedAt=null,pausedBefore=false,guard=false,destroyed=false,active='';
+    let timeline=null,trigger=null,lockedAt=null,pausedBefore=false,guard=false,destroyed=false,active='',focusFrame=0;
     const getScroll=()=>getSmoother()?.scrollTop()??window.scrollY;
     const setScroll=y=>getSmoother()?getSmoother().scrollTop(y):window.scrollTo(0,y);
     const lock=()=>{if(lockedAt!==null)return;lockedAt=timeline?.time()??0;pausedBefore=getSmoother()?.paused()??false;gsap.killTweensOf(window);getSmoother()?.paused(true);};
@@ -78,27 +74,53 @@
     const unlock=y=>{setScroll(y);lockedAt=null;getSmoother()?.paused(pausedBefore);ScrollTrigger.update();};
     const viewer=window.JourneyPhotoViewer.create({gsap,Flip,reduced,lock,unlock,getScroll,getResumeScroll});
     const listen=(node,event,fn)=>{node.addEventListener(event,fn);listeners.push(()=>node.removeEventListener(event,fn));};
-    items.forEach(({button,item,marker})=>{
+    // Image decoding may refresh/reparent the pin just after keyboard navigation.
+    // Restore only focus that this refresh detached; never take it from a control.
+    let refreshFocus=null;
+    const capturePhotoFocus=()=>{refreshFocus=items.find(item=>item.button===document.activeElement)?.button||null;};
+    const restorePhotoFocus=()=>{
+      const button=refreshFocus;refreshFocus=null;
+      if(!button?.isConnected||document.activeElement!==document.body)return;
+      cancelAnimationFrame(focusFrame);
+      focusFrame=requestAnimationFrame(()=>{focusFrame=0;if(!destroyed&&document.activeElement===document.body)button.focus({preventScroll:true});});
+    };
+    ScrollTrigger.addEventListener('refreshInit',capturePhotoFocus);ScrollTrigger.addEventListener('refresh',restorePhotoFocus);
+    listeners.push(()=>{ScrollTrigger.removeEventListener('refreshInit',capturePhotoFocus);ScrollTrigger.removeEventListener('refresh',restorePhotoFocus);});
+    items.forEach(({button,item,marker},index)=>{
       listen(button,'click',()=>viewer.openPhotoViewer(button,item));
+      // On a compact viewport the reel extends off screen. Keyboard navigation
+      // brings the selected cell into its own reading phase before opening it.
+      listen(button,'keydown',event=>{
+        if(event.key!=='Tab'||reduced||viewer.isOpen||!trigger)return;
+        const nextIndex=index+(event.shiftKey?-1:1),next=items[nextIndex];if(!next)return;
+        const rect=next.button.getBoundingClientRect();
+        if(rect.left>=0&&rect.right<=stage.clientWidth)return;
+        event.preventDefault();
+        const phase=phases.find(p=>p.name===`photo-${nextIndex}`);
+        const time=phase.start+(phase.end-phase.start)*.75;
+        setScroll(trigger.start+time/timeline.duration()*(trigger.end-trigger.start));
+        ScrollTrigger.update();trigger.getTween()?.progress(1);
+        cancelAnimationFrame(focusFrame);
+        focusFrame=requestAnimationFrame(()=>{focusFrame=0;if(!destroyed)next.button.focus({preventScroll:true});});
+      });
       if(!reduced)marker.dataset.side='right';
     });
     section.classList.toggle('journey-static',reduced);section.classList.toggle('journey-enhanced',!reduced);
     function geometry() {
       const width=stage.clientWidth,height=stage.clientHeight,landscape=width>height&&height<601;
-      const frameWidth=Math.min(width*(mobile?.30:tablet?.24:.20),mobile?164:260,height*(landscape?.205:.245));
-      const depth=mobile?54:tablet?145:230;
+      const trackCamera=mobile||tablet;
+      const frameWidth=Math.min(width*(mobile?.39:tablet?.23:.145),mobile?180:240,height*(landscape?.22:.245));
       const top=height*(landscape?.26:mobile?.235:.245),bottom=height*(landscape?.83:.865);
-      return {width,height,frameWidth,frameHeight:frameWidth*1.34,top,bottom,centerY:(top+bottom)/2,radiusY:(bottom-top)*.30,
-        radiusX:Math.min(width*(mobile?.34:.28),(width/2-frameWidth*.50-14)/(1+depth/1400)),
-        depth};
+      return {width,height,frameWidth,frameHeight:frameWidth*1.34,top,bottom,
+        worldWidth:width*(mobile?3.5:tablet?2.8:1),trackCamera,focusX:width*(mobile?.32:.30),depth:mobile?5:12};
     }
     function transformAt(progress,index) {
-      return getHelixTransform(progress,index,filmGeometry||geometry(),helix,items.length);
+      return getFilmTransform(progress,index,filmGeometry||geometry(),flow,items.length);
     }
     function renderFilm() {
       if(reduced||destroyed||!filmGeometry)return;
       items.forEach(({button},index)=>{
-        const {angle,offset,...pose}=transformAt(filmState.progress,index);
+        const {offset,...pose}=transformAt(filmState.progress,index);
         gsap.set(button,{...pose,xPercent:-50,yPercent:-50,force3D:true});
       });
       ribbon.render(filmState.progress,filmGeometry,transformAt);
@@ -125,7 +147,7 @@
     }
     function advanceFilm(tl,frameCoordinate,duration,at=0,ease='sine.inOut') {
       // No photo-specific tweens: advancing this scalar moves every frame together.
-      return tl.to(filmState,{progress:frameCoordinate*helix.frameSpacing,duration,ease},at);
+      return tl.to(filmState,{progress:frameCoordinate*flow.frameSpacing,duration,ease},at);
     }
     function updateTimelineProgress(tl,value,duration,at=0) {tl.to(progress,{scaleY:value,duration,ease:'none'},at);}
     function activateMilestone(tl,index) {
@@ -139,7 +161,7 @@
     }
     function focusJourneyPhoto(tl,index) {
       const length=lengths.photo+(index===items.length-1?lengths.finalHold:0);
-      // The frame crosses the front of the SAME helix. Slow travel is its reading hold.
+      // A reading hold gently advances the shared reel and its camera.
       advanceFilm(tl,index+.08,length);
       if(index===items.length-1)updateTimelineProgress(tl,1,length*.64,0);
     }
@@ -198,9 +220,9 @@
     function timeForNavigationState(token) {const phase=phases.find(p=>p.name===token?.label)||phases[0];return phase?phase.start+(phase.end-phase.start)*clamp(0,1,token?.within||0):0;}
     return {timeline,phases,config,filmState,ribbon,transformAt,calculateJourneyScrollDistance,getNavigationState,timeForNavigationState,viewer,
       refresh(){sizePhotos();ScrollTrigger.refresh();},
-      destroy(){destroyed=true;viewer.destroy();ribbon?.destroy();trigger?.kill();timeline?.kill();fades.forEach(t=>{t.scrollTrigger?.kill();t.kill();});listeners.forEach(fn=>fn());
+      destroy(){destroyed=true;cancelAnimationFrame(focusFrame);viewer.destroy();ribbon?.destroy();trigger?.kill();timeline?.kill();fades.forEach(t=>{t.scrollTrigger?.kill();t.kill();});listeners.forEach(fn=>fn());
         section.classList.remove('journey-enhanced');section.classList.add('journey-static');delete section.dataset.phase;scene.replaceChildren();gsap.set([stage,scene,heading,axis,footer],{clearProps:'all'});}
     };
   }
-  window.JourneyExperience={create,renderJourney,getHelixTransform};
+  window.JourneyExperience={create,renderJourney,getFilmTransform};
 })();

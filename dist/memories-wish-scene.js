@@ -21,8 +21,8 @@
     function calculateSlotTarget() {
       // This anchor follows the actual opening in the supplied box artwork.
       const rect = localRect(slot), scale = rect.width * .86 / paper.offsetWidth;
-      return {x: rect.x + rect.width / 2, y: rect.y + rect.height * .65,
-        scale, width: rect.width, height: rect.height};
+      return {x: rect.x + rect.width / 2, y: rect.y + rect.height / 2,
+        scale, width: rect.width, height: rect.height, angle:Number(slot.dataset.angle)||0};
     }
     function cardOnTable() {
       const rect = localRect(anchor);
@@ -50,14 +50,17 @@
         // the sheet down through a fixed clipping line. It never teleports.
         const travel = clamp(insertion / .68), eased = gsap.parseEase('power2.inOut')(travel);
         const entryHeight = h * target.scale;
-        const arrivalY = target.y - entryHeight / 2;
-        x = mix(front.x, target.x, eased);
+        const angle=target.angle*Math.PI/180;
+        const arrivalX=target.x+Math.sin(angle)*entryHeight/2;
+        const arrivalY = target.y - Math.cos(angle)*entryHeight / 2;
+        x = mix(front.x, arrivalX, eased);
         y = mix(front.y, arrivalY, eased) - Math.sin(Math.PI * travel) * (mobile ? 18 : 38);
         scale = mix(1, target.scale, eased);
-        rotation = Math.sin(Math.PI * travel) * -7;
+        rotation = mix(0,target.angle,eased)+Math.sin(Math.PI * travel) * -7;
         rotationX = 0;
         const feed = clamp((insertion - .68) / .32);
-        y += entryHeight * feed;
+        x -= Math.sin(angle)*entryHeight*feed;
+        y += Math.cos(angle)*entryHeight * feed;
         clip = feed * 100;
         opacity = feed > .94 ? 1 - (feed - .94) / .06 : 1;
         if (feed >= .99 && wish.submitted) playSubmittedConfirmation();

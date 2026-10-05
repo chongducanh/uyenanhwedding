@@ -52,12 +52,29 @@
    const image=el('img','mem-frame-image');image.src=photo.src;image.alt=photo.alt;image.width=photo.width;image.height=photo.height;image.loading='lazy';image.decoding='async';image.draggable=false;
    const surface=el('span','mem-frame-window');surface.append(image);
    button.append(surface);
-   if(data.site.frameAsset){const border=el('img','mem-frame-art');border.src=data.site.frameAsset;border.alt='';border.decoding='async';border.draggable=false;button.append(border);button.classList.add('mem-frame--art');}
+   if(data.site.frameAsset)mountFrameArtwork(button,surface,photo,index);
    button.append(el('span','mem-frame-number',String(index+1).padStart(2,'0')));
    listen(button,'click',()=>openPhoto(photo,button));return button;
   };
+  function mountFrameArtwork(button,surface,photo,index){
+   const art=layout.frameArtwork,shape=art[photo.width>photo.height?'landscape':'portrait'];
+   const [x,y,w,h]=shape.bounds,points=shape.aperture;
+   const left=Math.min(...points.map(p=>p[0])),top=Math.min(...points.map(p=>p[1]));
+   const width=Math.max(...points.map(p=>p[0]))-left,height=Math.max(...points.map(p=>p[1]))-top;
+   Object.assign(surface.style,{left:(left-x)/w*100+'%',top:(top-y)/h*100+'%',width:width/w*400+'%',height:height/h*400+'%',
+    clipPath:`polygon(${points.map(p=>`${(p[0]-left)/width*100}% ${(p[1]-top)/height*100}%`).join(',')})`});
+   const svg=(tag,attributes)=>{const node=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attributes).forEach(([key,value])=>node.setAttribute(key,value));return node;};
+   const id=`memory-frame-${data.site.key}-${index}`,border=svg('svg',{class:'mem-frame-art',viewBox:shape.bounds.join(' '),preserveAspectRatio:'none','aria-hidden':'true'});
+   const defs=svg('defs',{}),clip=svg('clipPath',{id,clipPathUnits:'userSpaceOnUse'});
+   const polygon=points=>'M'+points.map(p=>p.join(' ')).join('L')+'Z';
+   clip.append(svg('path',{d:polygon(shape.outer)+polygon(points),'clip-rule':'evenodd'}));defs.append(clip);
+   const shell=svg('g',{'clip-path':`url(#${id})`});
+   shell.append(svg('image',{href:data.site.frameAsset,width:art.width,height:art.height,transform:shape.transform||''}));
+   border.append(defs,shell);
+   button.append(border);button.classList.add('mem-frame--art');button.classList.toggle('mem-frame--landscape',photo.width>photo.height);
+  }
   world.replaceChildren();section.classList.toggle('mem-static',reduced);
-  let album,frames=[],sceneObjects=[],camera={cx:CONFIG.worldWidth/2,cy:CONFIG.worldCenterY,zoom:1,screenY:mobile?.43:tablet?.46:.5},bookState={open:0,page:0,close:0};
+  let album,frames=[],sceneObjects=[],camera={cx:CONFIG.worldWidth/2,cy:CONFIG.worldCenterY,zoom:1,screenY:mobile?.47:tablet?.48:.53},bookState={open:0,page:0,close:0};
   const phases=[],photoRanges=[],pageRanges=[];let activePhase='',lastPage=-1;
   if(reduced){
    const tableGallery=el('div','mem-static-frames');frames=data.photos.map(createPhoto);tableGallery.append(...frames);world.append(tableGallery);
@@ -89,24 +106,25 @@
    });
    const albumMount=el('div','mem-album-mount mem-object');place(albumMount,layout.album);objectLayer.append(albumMount);
    album=window.WeddingAlbum.create({mount:albumMount,photos:data.album,site:data.site,onPhotoClick:openPhoto,mobile,reduced:false});
-   contact(albumMount,layout.album.center.x-132,layout.album.center.y-20,270,52).classList.add('mem-contact--album');
+   contact(albumMount,layout.album.center.x-112,layout.album.center.y-17,232,48).classList.add('mem-contact--album');
    const box=el('div','mem-money-box mem-object');box.setAttribute('aria-hidden','true');
-   const boxImage=el('img','mem-box-art');boxImage.src=data.site.boxAsset;boxImage.alt='';boxImage.decoding='async';box.append(boxImage);place(box,layout.box);
-   const slot=el('span','mem-money-slot');box.append(slot);objectLayer.append(box);contact(box,layout.box.x+3,layout.box.foot.y-3,layout.box.w,14).classList.add('mem-contact--box');
+   const boxImage=el('img','mem-box-art');boxImage.src=data.site.boxAsset;boxImage.alt='';boxImage.decoding='async';
+   const boxSurface=el('div','mem-box-surface');boxSurface.append(boxImage);box.append(boxSurface);place(box,layout.box);
+   const art=layout.boxArtwork[data.site.key],crop=art.crop;
+   Object.assign(boxImage.style,{left:-crop[0]/crop[2]*100+'%',top:-crop[1]/crop[3]*100+'%',width:art.width/crop[2]*100+'%',height:art.height/crop[3]*100+'%'});
+   const slot=el('span','mem-money-slot');Object.assign(slot.style,{left:(art.slot.x-crop[0])/crop[2]*100+'%',top:(art.slot.y-crop[1])/crop[3]*100+'%',width:art.slot.w/crop[2]*100+'%',height:art.slot.h/crop[3]*100+'%'});
+   slot.dataset.angle=art.slot.angle;box.append(slot);objectLayer.append(box);contact(box,layout.box.x+24,layout.box.foot.y-10,layout.box.w*.85,17).classList.add('mem-contact--box');
    const cardAnchor=el('div','mem-card-anchor');cardAnchor.setAttribute('aria-hidden','true');place(cardAnchor,layout.card);objectLayer.append(cardAnchor);
    const wishArea=el('div','mem-wish-area');wishArea.setAttribute('aria-hidden','true');place(wishArea,layout.wishArea);objectLayer.append(wishArea);
    wishScene=window.WeddingWishScene.create({gsap,stage,host:wishHost,world,anchor:cardAnchor,box,slot,wish,mobile});
-   // The new base already contains every flower and pearl. Only four tiny
-   // loose petals overlap selected feet/edges, with no duplicated floral image.
-   const foreground=el('div','mem-contact-petals');foreground.setAttribute('aria-hidden','true');
-   layout.petals.forEach(p=>{const petal=el('i','mem-contact-petal');place(petal,p);petal.style.transform=`rotate(${p.r}deg)`;foreground.append(petal);});
-   objectLayer.append(foreground);
    const shadows=[...contacts.values()];
    const interactiveObjects=[...frames,albumMount,box];
    const setDressing=[table];
    sceneObjects=[...setDressing,...interactiveObjects];
+   const lightScene={amount:0};
+   const paintEdgeContrast=()=>stage.style.setProperty('--mem-light-scene',lightScene.amount);
    const dimensions=()=>({width:stage.clientWidth,height:stage.clientHeight});
-   const baseScale=()=>{const v=dimensions();return Math.min(v.width*(mobile?.98:.84)/layout.image.width,1250/layout.image.width,Math.max(160,v.height-120)/layout.image.height);};
+   const baseScale=()=>{const v=dimensions();return Math.min(v.width*(mobile?.98:.84)/layout.image.width,1250/layout.image.width,Math.max(160,v.height-(mobile?180:230))/layout.image.height);};
    // Read the true laid-out bounds and invert only the world camera matrix.
    // Frame rotations are below one degree; offset bounds avoid rotation drift.
    function getFocusTransform(target,widthRatio=.82,heightRatio=.73,screenY=.51){
@@ -121,7 +139,7 @@
    function renderCamera(){const v=dimensions(),s=baseScale()*camera.zoom;gsap.set(world,{x:v.width/2-camera.cx*s,y:v.height*camera.screenY-camera.cy*s,scale:s,force3D:false});const type=1/Math.min(v.width*CONFIG.albumScale/albumMount.offsetWidth,v.height*.82/albumMount.offsetHeight);if(type!==bookTypeScale){bookTypeScale=type;albumMount.style.setProperty('--mem-book-type-scale',type);}wishScene?.render();}
    function paintAlbum(){album.setOpen(bookState.open);album.setPage(bookState.page);album.setClose(bookState.close);}
    const targetCamera=(tl,target,length,w=.82,h=.73,y=.51,at)=>tl.to(camera,{cx:()=>getFocusTransform(target,w,h,y).cx,cy:()=>getFocusTransform(target,w,h,y).cy,zoom:()=>getFocusTransform(target,w,h,y).zoom,screenY:y,duration:length,ease:'sine.inOut',onUpdate:renderCamera},at);
-   const overview=(tl,length)=>tl.to(camera,{cx:CONFIG.worldWidth/2,cy:CONFIG.worldCenterY,zoom:1,screenY:mobile?.43:tablet?.46:.5,duration:length,ease:'sine.inOut',onUpdate:renderCamera});
+   const overview=(tl,length)=>tl.to(camera,{cx:CONFIG.worldWidth/2,cy:CONFIG.worldCenterY,zoom:1,screenY:mobile?.47:tablet?.48:.53,duration:length,ease:'sine.inOut',onUpdate:renderCamera});
    function focusObjects(tl,focus,at=0){tl.to(wishScene.state,{ambient:0,duration:.3},at);tl.to(sceneObjects.filter(n=>n!==focus),{opacity:.14,duration:mobile?.15:.35},at).to(shadows,{opacity:.08,duration:.2},at).to(focus,{opacity:1,duration:mobile?.15:.35},at);}
    const buildPart=(name,build)=>{const child=gsap.timeline();build(child);const start=timeline.duration();timeline.addLabel(name,start).add(child,start);phases.push({name,start,end:start+child.duration()});return{start,duration:child.duration()};};
    gsap.set(world,{transformOrigin:'0 0'});gsap.set(setDressing,{autoAlpha:1,y:0});gsap.set(interactiveObjects,{autoAlpha:1,y:0});gsap.set(frames,{rotation:i=>Number(frames[i].dataset.rotation),transformOrigin:'50% 100%'});gsap.set(albumMount,{rotation:layout.album.r,rotationX:layout.album.tilt,transformOrigin:'50% 50%'});gsap.set(shadows,{autoAlpha:1});gsap.set(wishHost,{autoAlpha:1});
@@ -170,6 +188,7 @@
    // PHASE 8 — Keep the complete scene visible around the closed money box.
    function focusMoneyBox(tl){
     targetCamera(tl,wishArea,mobile?.38:.85,tablet?.68:.76,.62,.5,0);
+    tl.to(lightScene,{amount:1,duration:mobile?.38:.85,onUpdate:paintEdgeContrast},0);
     tl.to(sceneObjects,{opacity:1,duration:.3},0).to(shadows,{opacity:1,duration:.3},0);
     hold(tl,mobile?.16:.3);
    }
@@ -185,7 +204,7 @@
    buildPart('card-insert',tl=>wishScene.insertCardIntoSlot(tl,mobile?.9:1.5));
    buildPart('card-inserted',tl=>hold(tl,mobile?.14:.3));
    // PHASE 10 — See the whole table one last time before releasing the pin.
-   buildPart('exit',tl=>{overview(tl,mobile?.45:.85);hold(tl,mobile?.18:.4);});
+   buildPart('exit',tl=>{overview(tl,mobile?.45:.85);tl.to(lightScene,{amount:0,duration:mobile?.45:.85,onUpdate:paintEdgeContrast},0);hold(tl,mobile?.18:.4);});
    const total=timeline.duration();
    function calculateScrollDistance(){return Math.round(stage.clientHeight*total*(tablet?.85:1));}
    let guard=false;
@@ -227,7 +246,8 @@
    }));
    renderCamera();paintAlbum();updateExperience();
    // Decode dimensions-independent artwork before the first geometry refresh.
-   Promise.allSettled([tableArt,boxImage,...world.querySelectorAll('.mem-frame-art,.mem-album-cover-image')].map(img=>img.decode().catch(()=>{}))).then(()=>{if(!destroyed)ScrollTrigger.refresh();});
+   const frameTexture=new Image();frameTexture.src=data.site.frameAsset;
+   Promise.allSettled([tableArt,boxImage,frameTexture,...world.querySelectorAll('.mem-frame-image,.mem-album-cover-image')].map(img=>img.decode().catch(()=>{}))).then(()=>{if(!destroyed)ScrollTrigger.refresh();});
   }
   function getNavigationState(){
    if(!timeline)return null;
@@ -243,7 +263,7 @@
    const phase=phases.find(p=>p.name===label)||phases[0];return phase.start+(phase.end-phase.start)*Math.max(0,Math.min(1,token.within||0));
   }
   return {timeline,config:CONFIG,phases,photoRanges,pageRanges,getNavigationState,timeForNavigationState,getCardState:()=>wishScene?{lift:wishScene.state.lift,insert:wishScene.state.insert,slot:wishScene.calculateSlotTarget()}:null,layout,getCameraState:()=>({cx:camera.cx,cy:camera.cy,zoom:camera.zoom,screenY:camera.screenY}),
-   destroy(){destroyed=true;submissionTravel?.kill();wishScene?.destroy();viewer.destroy();wish.destroy();album?.destroy();timeline?.scrollTrigger?.kill();timeline?.kill();listeners.forEach(remove=>remove());locks.clear();document.documentElement.classList.remove('mem-interaction-locked');world.replaceChildren();wishHost.replaceChildren();section.classList.remove('mem-static');delete section.dataset.phase;delete section.dataset.state;gsap.set([world,wishHost,progress],{clearProps:'all'});heading.classList.remove('mem-heading--compact');}
+   destroy(){destroyed=true;submissionTravel?.kill();wishScene?.destroy();viewer.destroy();wish.destroy();album?.destroy();timeline?.scrollTrigger?.kill();timeline?.kill();listeners.forEach(remove=>remove());locks.clear();document.documentElement.classList.remove('mem-interaction-locked');world.replaceChildren();wishHost.replaceChildren();section.classList.remove('mem-static');stage.style.removeProperty('--mem-light-scene');delete section.dataset.phase;delete section.dataset.state;gsap.set([world,wishHost,progress],{clearProps:'all'});heading.classList.remove('mem-heading--compact');}
   };
  }
  window.WeddingMemories={create,CONFIG};

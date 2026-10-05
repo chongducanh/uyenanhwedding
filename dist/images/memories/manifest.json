@@ -1,24 +1,25 @@
 [
   {
     "asset": "table",
-    "original": "Ảnh ChatGPT 13_28_24 5 thg 10, 2026.png",
+    "original": "Trang trí bàn cưới hoa đỏ trắng nến lung linh.webp",
     "webp": "table-complete.webp",
     "dimensions": [
       1448,
       1086
     ],
-    "bytes": 345396,
-    "conversion": "WebP quality 92; original dimensions, framing and colors; metadata stripped"
+    "bytes": 388686,
+    "conversion": "Owner-supplied WebP retained byte-for-byte; one transparent table composition with a CSS curtain backdrop"
   },
   {
     "asset": "frame",
-    "original": "Ảnh ChatGPT 09_04_33 5 thg 10, 2026-2.png",
+    "original": "Bộ khung ảnh cưới lãng mạn.webp",
     "webp": "frame.webp",
     "dimensions": [
-      1122,
-      1402
+      1774,
+      887
     ],
-    "bytes": 196376
+    "bytes": 103292,
+    "rendering": "Original sprite retained; hollow SVG shell masks discard all sample-photo pixels. Live site photographs sit beneath the apertures."
   },
   {
     "asset": "album-ua",
@@ -32,12 +33,13 @@
   },
   {
     "asset": "money-box-ua",
-    "original": "Hộp tiền cưới nhung đỏ monogram UA.png",
+    "original": "Hộp thiệp cưới monogram U A tinh tế.webp",
     "webp": "money-box-ua.webp",
     "dimensions": [
-      1122,
-      1402
+      1198,
+      1313
     ],
-    "bytes": 176752
+    "bytes": 161780,
+    "rendering": "Original WebP retained; cloth apron cropped/feathered in CSS; source-coordinate slot tracked by the same card."
   }
 ]

@@ -17,25 +17,32 @@ introducing a second site switch. Existing values are `groom` (nhà trai) and
 25.10.2026 for the groom, 24.10.2026 for the bride. The animation code contains
 no dates. Both sites use byte-identical Journey JS/CSS and Flip files.
 
-## Four intentional photo placeholders
+## Milestone photographs
 
-No milestone-specific photographs have been selected by the owner yet. The
-four separate film frames therefore show typographic paper placeholders; they
-do not invent event photographs or reassign existing wedding photos.
+The owner supplied `Photos.zip`. Both sites use the same three personal photos
+in the requested order, with the existing dates unchanged:
 
-Add the chosen files at:
+| Milestone | Original file | Published base name |
+| --- | --- | --- |
+| Làm quen | `07-04-2024.jpg` — laptop by the window | `journey-meet` |
+| Tỏ tình | `24-08-2024.JPG` — mirror portrait | `journey-confession` |
+| Cầu hôn | `06-06-2025.jpg` — couple, flowers and ring under a tree | `journey-proposal` |
 
-- `dist/images/journey/journey-meet.jpg`
-- `dist/images/journey/journey-confession.jpg`
-- `dist/images/journey/journey-proposal.jpg`
-- `dist/images/journey/journey-wedding.jpg`
+Files live in `dist/images/journey/`. Each has a `-preview.webp` (long edge
+1200px, quality 84) for the film and a `-full.webp` (up to 2560px, quality 90)
+loaded only on viewer open. The originals are never upscaled. EXIF orientation
+is applied before conversion, including the proposal image's orientation 5;
+metadata is stripped from published WebP files. No retouching is applied.
 
-Then set `imageReady: true` on the corresponding data entry. Alternatively,
-point `image` at an approved WebP image in the project. Update `alt` to match
-its actual content. Optional `full` loads a larger image only after a click;
-optional `width` / `height` records original dimensions. Until `imageReady`
-is enabled, no request is made to a nonexistent image path. Failed images
-fall back to the same paper placeholder.
+The landscape meeting photo uses `fit: 'contain'` inside its film segment so
+both the laptop and the window remain visible. All fullscreen images use
+contain. The other film segments retain the existing portrait crop.
+
+Milestone 4 still intentionally uses its paper placeholder. After the owner
+chooses its photo, set `image` / optional `full`, `width`, `height`, `alt` and
+`imageReady: true` in `journey-data.js`. Until then, no request is made for the
+placeholder `journey-wedding.jpg`. Dates continue to come from each site's
+existing identity config.
 
 The viewer uses the exact same paper element as the film frame, including
 when a placeholder is shown. Configured fullscreen images use object-fit:

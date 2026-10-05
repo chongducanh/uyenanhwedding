@@ -19,6 +19,7 @@
       date.dateTime=item.date.split('.').reverse().join('-');copy.append(date,title);marker.append(dot,copy);markers.append(marker);
       const button=make('button','journey-photo');button.type='button';button.dataset.milestone=item.id;button.setAttribute('aria-label',`Xem kỷ niệm: ${item.title}, ${item.date}`);
       const paper=make('span','journey-paper'),window=make('span','journey-image-window');
+      if(item.fit==='contain')paper.style.setProperty('--journey-image-fit','contain');
       const placeholder=make('span','journey-placeholder');placeholder.setAttribute('aria-hidden','true');
       placeholder.append(make('span','journey-placeholder-monogram',config.initials),make('span','journey-placeholder-date',item.date));window.append(placeholder);
       if(item.imageReady&&item.image){

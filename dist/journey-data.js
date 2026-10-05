@@ -1,6 +1,6 @@
 /* Shared by both sites. Keep the existing groom/bride identity as the only
    variant switch; the wedding milestone reuses its dateLabel directly.
-   Add the four real files below and set imageReady:true after choosing them. */
+   The first three photos are owner-supplied; the wedding photo awaits selection. */
 (() => {
   const site = window.WEDDING_MEMORIES_DATA.site;
   window.JOURNEY_CONFIG = {
@@ -9,9 +9,9 @@
     initials: site.initials,
     title: 'Hành trình của 2 đứa mình',
     milestones: [
-      {id:'meet', title:'Làm quen', date:'07.04.2024', image:'images/journey/journey-meet.jpg', imageReady:false, alt:`Kỷ niệm làm quen của ${site.names}`},
-      {id:'confession', title:'Tỏ tình', date:'24.08.2024', image:'images/journey/journey-confession.jpg', imageReady:false, alt:`Kỷ niệm tỏ tình của ${site.names}`},
-      {id:'proposal', title:'Cầu hôn', date:'06.06.2025', image:'images/journey/journey-proposal.jpg', imageReady:false, alt:`Kỷ niệm cầu hôn của ${site.names}`},
+      {id:'meet', title:'Làm quen', date:'07.04.2024', image:'images/journey/journey-meet-preview.webp', full:'images/journey/journey-meet-full.webp', imageReady:true, width:1200, height:900, fit:'contain', alt:`Chiếc laptop bên cửa sổ — kỷ niệm làm quen của ${site.names}`},
+      {id:'confession', title:'Tỏ tình', date:'24.08.2024', image:'images/journey/journey-confession-preview.webp', full:'images/journey/journey-confession-full.webp', imageReady:true, width:675, height:1200, alt:`${site.names} chụp ảnh bên nhau trước gương, lưu giữ kỷ niệm tỏ tình`},
+      {id:'proposal', title:'Cầu hôn', date:'06.06.2025', image:'images/journey/journey-proposal-preview.webp', full:'images/journey/journey-proposal-full.webp', imageReady:true, width:900, height:1200, alt:`${site.names} dưới tán cây với bó hoa đỏ và chiếc nhẫn cầu hôn`},
       {id:'wedding', title:'Đám cưới', date:site.dateLabel, image:'images/journey/journey-wedding.jpg', imageReady:false, alt:`Ngày cưới của ${site.names}`}
     ],
     scroll: {

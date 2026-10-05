@@ -1,0 +1,42 @@
+[
+  {
+    "asset": "table",
+    "original": "Bàn tiệc tình yêu đỏ sang trọng.png",
+    "webp": "table.webp",
+    "dimensions": [
+      1122,
+      1402
+    ],
+    "bytes": 387316
+  },
+  {
+    "asset": "frame",
+    "original": "Ảnh ChatGPT 09_04_33 5 thg 10, 2026-2.png",
+    "webp": "frame.webp",
+    "dimensions": [
+      1122,
+      1402
+    ],
+    "bytes": 196376
+  },
+  {
+    "asset": "album-ua",
+    "original": "Ảnh ChatGPT 09_06_26 5 thg 10, 2026.png",
+    "webp": "album-ua.webp",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "bytes": 135782
+  },
+  {
+    "asset": "money-box-ua",
+    "original": "Hộp tiền cưới nhung đỏ monogram UA.png",
+    "webp": "money-box-ua.webp",
+    "dimensions": [
+      1122,
+      1402
+    ],
+    "bytes": 176752
+  }
+]

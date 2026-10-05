@@ -1,0 +1,68 @@
+/* A local 3D coordinate system: album mount supplies the camera's dimensions. */
+.mem-album{--album-paper:#f0e6d7;--album-ink:#603b40;position:relative;width:100%;height:100%;perspective:1800px;color:var(--album-ink);font-family:'Be Vietnam Pro',sans-serif;isolation:isolate;transform-style:preserve-3d}
+.mem-album *{box-sizing:border-box}
+.mem-album-book{position:absolute;inset:0;transform-style:preserve-3d}
+.mem-album-board{position:absolute;top:-1%;bottom:-1%;width:50.8%;border-radius:3px;background:#531d29;box-shadow:0 3px 0 #a87760,0 6px 0 #4c2830,0 9px 1px #a28474,0 13px 0 #441622,0 26px 50px #10070a70;transform:translateZ(-5px);pointer-events:none}
+.mem-album-board--left{left:-.8%;border-radius:6px 0 0 6px}
+.mem-album-board--right{right:-.8%;border-radius:0 6px 6px 0}
+.mem-album-page,.mem-album-turn-face{position:absolute;top:0;width:50%;height:100%;padding:4% 3.4% 2.8%;background-color:var(--album-paper);background-image:radial-gradient(#6045330a .65px,transparent .8px);background-size:4px 4px;display:flex;flex-direction:column;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.mem-album-page--left{left:0;border-radius:3px 0 0 3px;box-shadow:inset -14px 0 22px -14px #38231060}
+.mem-album-page--right{left:50%;border-radius:0 3px 3px 0;box-shadow:inset 14px 0 22px -14px #38231060}
+.mem-album-page-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #9b80633d;padding-bottom:3%;font-size:clamp(5px,.64vw,9px);font-weight:400;letter-spacing:.15em;line-height:1.4;white-space:nowrap;flex:none}
+.mem-album-page-pictures{min-height:0;flex:1;display:flex;align-items:center;justify-content:center;gap:5%;padding:4% 0}
+.mem-album-photo{min-width:0;min-height:0;width:100%;height:100%;margin:0;display:flex;flex-direction:column;justify-content:center;gap:2.5%}
+.mem-album-photo-button{position:relative;display:flex;align-items:center;justify-content:center;min-height:0;min-width:0;flex:1;width:100%;border:0;border-radius:0;padding:0;background:transparent;color:inherit;cursor:zoom-in;box-shadow:none;appearance:none;touch-action:manipulation}
+.mem-album-photo-button:focus-visible{outline:2px solid #7e3044;outline-offset:5px}
+.mem-album-photo-image{display:block;width:100%;height:100%;min-height:0;object-fit:contain;pointer-events:none;filter:none;user-select:none;-webkit-user-select:none}
+.mem-album-photo-caption{text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(8px,1.15vw,16px);line-height:1.3;font-style:italic;flex:none;color:#68494a}
+.mem-album-page--pair .mem-album-page-pictures{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:6%}
+.mem-album-page--pair .mem-album-photo{height:86%;align-self:center}
+.mem-album-page--pair[data-layout="story"] .mem-album-photo:first-child{align-self:start;height:87%;padding-top:6%}
+.mem-album-page--pair[data-layout="story"] .mem-album-photo:last-child{align-self:end;height:87%;padding-bottom:6%}
+.mem-album-page-foot{text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(7px,.95vw,13px);font-style:italic;line-height:1.2;flex:none}
+.mem-album-page-dedication{white-space:pre-line;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(16px,3vw,36px);font-style:italic;line-height:1.5}
+.mem-album-turn{position:absolute;left:50%;top:0;width:50%;height:100%;transform-origin:left center;transform-style:preserve-3d;z-index:3}
+.mem-album-turn-face{inset:0;width:100%;padding:8% 6.8% 5.6%;transform-style:preserve-3d}
+/* Keep live text through the camera transform instead of a low-resolution
+   flattened page texture. Backface culling is repeated through the 3D tree. */
+.mem-album-turn-face *{transform-style:preserve-3d;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+/* Paint the existing preview at a larger local size before inverse scaling.
+   This prevents Chrome rasterizing a moving photo at the small tabletop size;
+   the button, composition, and camera geometry remain exactly the same. */
+.mem-album-turn-face .mem-album-photo-image{position:absolute;left:-100%;top:-100%;width:300%;height:300%;max-width:none;transform:scale(.3333333333);transform-origin:center}
+.mem-album-turn-front{border-radius:0 3px 3px 0;box-shadow:inset 12px 0 22px -15px #38231070;transform:translateZ(.3px)}
+.mem-album-turn-back{border-radius:3px 0 0 3px;box-shadow:inset -12px 0 22px -15px #38231070;transform:rotateY(180deg) translateZ(.3px)}
+.mem-album-turn-shadow{position:absolute;left:50%;top:0;width:48%;height:100%;z-index:2;pointer-events:none;transform-origin:left center;background:linear-gradient(90deg,#2b17256e,transparent 88%);opacity:0}
+.mem-album-spine{position:absolute;left:49.25%;width:1.5%;height:100%;top:0;pointer-events:none;z-index:4;background:linear-gradient(90deg,transparent,#42322518 20%,#33232155 48%,#fff6dd40 60%,transparent);transform:translateZ(2px)}
+.mem-album-cover{position:absolute;top:-1%;left:50%;width:50.8%;height:102%;transform-origin:left center;transform-style:preserve-3d;z-index:6;pointer-events:none}
+.mem-album-cover-front,.mem-album-cover-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:0 6px 6px 0;overflow:hidden}
+.mem-album-cover-front{background:radial-gradient(ellipse at 30% 10%,#8b3444aa,transparent 60%),repeating-linear-gradient(17deg,#ffffff02 0 1px,transparent 1px 4px),#531a2a;border:1px solid #af7b6460;box-shadow:inset 5px 0 7px #220f2266,inset -2px 0 4px #d09c7140,0 3px 1px #33131a;color:#e6cfa8;transform:translateZ(2px)}
+.mem-album-cover-front::before{content:"";position:absolute;inset:5%;border:1px solid #c59e655c;box-shadow:inset 0 0 0 5px #401721, inset 0 0 0 6px #c59e6529;pointer-events:none}
+.mem-album-cover-label{position:absolute;inset:13% 8%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;text-shadow:0 1px 1px #210b1a;gap:8%}
+.mem-album-cover-kicker{font-size:clamp(5px,.85vw,11px);letter-spacing:.28em;font-weight:400}
+.mem-album-cover-initials{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(35px,8vw,115px);line-height:1;font-weight:400;letter-spacing:-.06em;white-space:nowrap}
+.mem-album-cover-names{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(11px,2.1vw,29px);font-style:italic;line-height:1.35}
+.mem-album-cover-date{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(8px,1.25vw,17px);letter-spacing:.16em;white-space:nowrap}
+.mem-album-cover-image{position:absolute;left:-12%;top:-10.3%;width:123.5%;height:123.5%;max-width:none;object-fit:fill;pointer-events:none}
+.mem-album-cover-front--art{background:#4f1726;width:300%;height:300%;transform:translateZ(2px) scale(.3333333333);transform-origin:0 0;border-radius:0 18px 18px 0}
+.mem-album-cover-front--art::before,.mem-album-cover-front--art .mem-album-cover-label{display:none}
+.mem-album-cover-back{background:var(--album-paper);border:7px solid #531d29;transform:rotateY(180deg);display:grid;place-items:center;box-shadow:inset -12px 0 24px -15px #2e172daa}
+.mem-album-inside-monogram{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(25px,6vw,75px);font-style:italic;color:#8e696254;letter-spacing:-.08em}
+.mem-album-pagination{position:absolute;left:0;right:0;bottom:-9%;margin:0;color:#e8d7c2;text-align:center;font-size:clamp(9px,.8vw,12px);letter-spacing:.24em;line-height:1;pointer-events:none}
+.mem-album--mobile{perspective:1000px}
+.mem-album--mobile .mem-album-page,.mem-album--mobile .mem-album-turn-face{padding-top:5%;padding-bottom:4%}
+.mem-album--mobile .mem-album-turn-face{padding-top:10%;padding-bottom:8%}
+.mem-album--mobile .mem-album-photo-caption{font-size:clamp(8px,2vw,11px)}
+.mem-album--mobile .mem-album-page-heading{font-size:5px;letter-spacing:.08em}
+.mem-album--mobile .mem-album-page-foot{font-size:8px}
+.mem-album--mobile .mem-album-cover-kicker{font-size:5px;letter-spacing:.18em}
+.mem-album--mobile .mem-album-cover-names{font-size:13px}
+.mem-album--mobile .mem-album-cover-date{font-size:9px}
+.mem-album--mobile .mem-album-cover-initials{font-size:42px}
+.mem-album--reduced{height:auto;perspective:none;transform-style:flat;color:#eee0ce}
+.mem-album-static-heading{text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(30px,5vw,60px);font-style:italic}
+.mem-album-static-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.mem-album-static-grid .mem-album-photo{height:auto;background:#eee4d5;padding:12px;gap:10px}
+.mem-album-static-grid .mem-album-photo-button{aspect-ratio:2/3;flex:none}
+.mem-album-static-grid .mem-album-photo-caption{font-size:17px}
+@media(max-width:767px){.mem-album-static-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.mem-album-static-grid .mem-album-photo{padding:7px}.mem-album-static-grid .mem-album-photo-caption{font-size:14px}}

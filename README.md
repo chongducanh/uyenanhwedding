@@ -37,3 +37,8 @@ Các script xử lý ảnh cần Python 3 và Pillow (`python -m pip install Pil
 Ngày cưới và bộ đếm sử dụng múi giờ Việt Nam (`Asia/Ho_Chi_Minh`). Khi thiết bị
 yêu cầu giảm chuyển động, website hiển thị bố cục tĩnh. Bản đồ Google Maps cần
 kết nối Internet.
+
+## Wedding Memories
+
+Xem [WEDDING_MEMORIES.md](WEDDING_MEMORIES.md) cho cấu trúc camera, album lật trang,
+callback lời chúc và bộ đồ họa WebP dành riêng cho từng lễ.

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/envelope-paper.webp" media="(orientation:landscape)">
 <link rel="preload" as="image" href="images/envelope-paper-mobile.webp" media="(orientation:portrait)">
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="envelope.css"><link rel="stylesheet" href="portrait.css"><link rel="stylesheet" href="wedding-details.css">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="envelope.css"><link rel="stylesheet" href="wedding-details.css"><link rel="stylesheet" href="memories-album.css"><link rel="stylesheet" href="memories-interactions.css"><link rel="stylesheet" href="memories.css">
 </head><body>
 <a class="skip" href="#celebration">Đến lịch trình lễ cưới</a>
 <div class="page-progress" aria-hidden="true"></div>
@@ -31,7 +31,17 @@
   <figure class="opening-photo" id="invitation"><img data-hero="aut01161" src="images/hero-aut01161-1440.webp" srcset="images/hero-aut01161-960.webp 960w, images/hero-aut01161-1440.webp 1440w, images/hero-aut01161-2048.webp 2048w, images/hero-aut01161-3072.webp 3072w" sizes="(orientation:portrait) max(100vw,67svh), (max-width:700px) 100vw, 70vw" width="3072" height="4608" alt="Nhật Uyên và Đức Anh nhìn nhau giữa khu vườn" loading="eager" fetchpriority="high" decoding="async"><div class="photo-invitation-shade" aria-hidden="true"></div><figcaption class="photo-invitation"><p class="eyebrow photo-invitation-kicker">01 / LỜI MỜI</p><h1 class="photo-invitation-names" aria-label="Nhật Uyên và Đức Anh"><span class="line-mask"><span class="photo-name">Nhật Uyên</span></span><span class="line-mask"><span class="photo-name"><em>&</em> Đức Anh</span></span></h1><p class="photo-invitation-copy">Trân trọng kính mời bạn<br>đến chung vui Lễ vu quy cùng gia đình.</p><div class="photo-invitation-details"><p>Thứ Bảy, 24.10.2026</p><span>VÕ XU · LÂM ĐỒNG</span></div></figcaption></figure>
  </div>
 </section>
-<section class="portrait chapter" id="portrait" data-chapter="Ảnh bàn" aria-labelledby="portrait-title">
+<section class="wedding-memories chapter" id="memories" data-chapter="Wedding Memories" aria-labelledby="memories-title">
+ <div class="mem-stage stage">
+  <header class="mem-heading"><div><p class="eyebrow">02 / WEDDING GALLERY</p><h2 id="memories-title">Một bàn <em>ký ức.</em></h2></div><p class="mem-edition">Wedding Memories<span>24.10.2026</span></p></header>
+  <div class="mem-camera"><div class="mem-world"></div></div>
+  <div class="mem-wish-host"></div>
+  <div class="mem-caption" aria-live="off"><span class="mem-caption-index"></span><p class="mem-caption-text">Những điều đẹp đẽ, ở lại cùng nhau.</p></div>
+  <footer class="mem-footer"><nav class="mem-chapters" aria-label="Khám phá bàn ký ức"><button type="button" data-memory-jump="photos">Ảnh bàn</button><button type="button" data-memory-jump="album">Album cưới</button><button type="button" data-memory-jump="wishes">Lời chúc</button></nav><p class="mem-scroll-hint">Cuộn để khám phá</p><div class="mem-progress" aria-hidden="true"><span></span></div></footer>
+ </div>
+ <noscript><p>Bật JavaScript để khám phá album ảnh và bàn ký ức.</p></noscript>
+</section>
+<template id="legacy-wedding-gallery"><section class="portrait chapter" id="portrait" data-chapter="Ảnh bàn" aria-labelledby="portrait-title">
  <div class="portrait-stage stage">
   <div class="portrait-backdrops" aria-hidden="true">
 <img data-photo="aut00784" data-variant="480" src="images/photo-aut00784-480.webp" alt="" loading="lazy" decoding="async" class="portrait-backdrop" width="480" height="320">
@@ -95,8 +105,9 @@
   <div class="ring-bottom"><div class="ring-toolbar"><button type="button" class="photo-open" id="photo-open" aria-haspopup="dialog"><span id="photo-caption">Dưới tán cây</span><span class="photo-open-label">Xem ảnh</span></button><div class="ring-controls"><button type="button" id="photo-prev" aria-label="Xem ảnh trước">Trước</button><span id="photo-count" aria-live="polite" aria-atomic="true">01 / 30</span><button type="button" id="photo-next" aria-label="Xem ảnh tiếp theo">Tiếp</button></div></div><div class="ring-position" aria-hidden="true"><span></span></div><div class="ring-footnote"><p>Kéo để xoay · Bấm ảnh để xem trọn khung</p><p>Bộ ảnh cưới</p></div></div>
  </div>
 </section>
+</template>
 <section class="calendar chapter" id="date" data-chapter="Ngày hẹn" aria-labelledby="date-title">
- <div class="calendar-stage stage"><div class="chapter-heading"><span>04 / NGÀY HẸN</span><span>NHẬT UYÊN & ĐỨC ANH</span></div>
+ <div class="calendar-stage stage"><div class="chapter-heading"><span>03 / NGÀY HẸN</span><span>NHẬT UYÊN & ĐỨC ANH</span></div>
   <div class="calendar-layout"><div class="calendar-date-block">
    <div class="calendar-intro"><p class="eyebrow">HẸN BẠN VÀO NGÀY</p><h2 id="date-title" class="sr-only">Thứ Bảy, 24 tháng 10 năm 2026</h2></div>
    <div class="date-composition" aria-hidden="true"><span class="date-piece date-day">24</span><span class="date-divider"></span><span class="date-piece date-month">10</span><svg class="date-swoosh" viewBox="0 0 900 220" fill="none"><path d="M48 142C170 35 715 22 850 112C925 163 682 208 349 167"/></svg></div>
@@ -126,7 +137,7 @@
  <div class="countdown-stage stage"><div class="countdown-backdrop" aria-hidden="true"><img data-photo="aut00786" data-variant="preview" src="images/photo-aut00786-preview.webp" width="960" height="640" alt="" loading="lazy" decoding="async"></div><div class="countdown-atmosphere" aria-hidden="true"></div><svg class="countdown-orbit" viewBox="0 0 1000 1000" aria-hidden="true"><circle class="countdown-orbit-track" cx="500" cy="500" r="430"/><circle class="countdown-orbit-line" cx="500" cy="500" r="430"/></svg><div class="chapter-heading"><span>CÙNG ĐẾM NGƯỢC</span><span>24 . 10 . 2026</span></div><div class="countdown-content"><p class="eyebrow">MỖI KHOẢNH KHẮC, GẦN NHAU HƠN</p><h2 id="countdown-title"><span class="line-mask"><span class="countdown-title-line">Ngày vu quy</span></span><span class="line-mask"><em class="countdown-title-line">đang đến gần.</em></span></h2><div class="countdown-clock" role="timer" aria-label="Thời gian còn lại đến lễ vu quy" aria-live="off"><div class="count-unit"><span class="count-value" id="count-days">00</span><span class="count-label">Ngày</span></div><div class="count-unit"><span class="count-value" id="count-hours">00</span><span class="count-label">Giờ</span></div><div class="count-unit"><span class="count-value" id="count-minutes">00</span><span class="count-label">Phút</span></div><div class="count-unit"><span class="count-value" id="count-seconds">00</span><span class="count-label">Giây</span></div></div><p class="countdown-note" id="countdown-note">Lễ vu quy 08:30 · Tiệc vu quy 10:30</p></div><p class="countdown-bottom">Một lời hẹn. Một đời bên nhau.</p></div>
 </section>
 <section class="celebration chapter" id="celebration" data-chapter="Ngày chung đôi" aria-labelledby="celebration-title">
- <div class="schedule-stage stage"><div class="schedule-heading"><p class="eyebrow">05 / NGÀY CHUNG ĐÔI</p><h2 id="celebration-title">Cùng nhau, <em>trọn ngày vui.</em></h2></div>
+ <div class="schedule-stage stage"><div class="schedule-heading"><p class="eyebrow">04 / NGÀY CHUNG ĐÔI</p><h2 id="celebration-title">Cùng nhau, <em>trọn ngày vui.</em></h2></div>
  <div class="event-window"><div class="event-track">
   <article class="event-card"><div class="event-copy"><span class="event-index">01 — LỄ VU QUY</span><p class="event-time">08<span>:</span>30</p><h3>Khoảnh khắc<br><em>nên duyên.</em></h3><p>Cùng gia đình nhà gái đón mừng Lễ vu quy, chúc phúc cho chúng mình trong ngày nên duyên.</p></div><figure class="event-photo"><img data-photo="aut01461" data-variant="full" src="images/photo-aut01461-full.webp" alt="Nhật Uyên và Đức Anh tựa trán bên nhau" loading="lazy" decoding="async" data-responsive="true" sizes="(max-width: 700px) 86vw, 52vw"  width="1024" height="1536" srcset="images/photo-aut01461-480.webp 480w, images/photo-aut01461-960.webp 960w, images/photo-aut01461-full.webp 1024w"><figcaption>LỄ VU QUY · 24.10.2026</figcaption></figure></article>
   <article class="event-card"><div class="event-copy"><span class="event-index">02 — TIỆC VU QUY</span><p class="event-time">10<span>:</span>30</p><h3>Niềm vui<br><em>có bạn.</em></h3><p>Mời bạn dự tiệc vu quy, sẻ chia lời chúc và lưu lại những kỷ niệm cùng hai gia đình.</p></div><figure class="event-photo"><img data-photo="aut00786" data-variant="full" src="images/photo-aut00786-full.webp" alt="Nhật Uyên và Đức Anh trong khu vườn cưới" loading="lazy" decoding="async" data-responsive="true" sizes="(max-width: 700px) 86vw, 52vw"  width="1920" height="1280" srcset="images/photo-aut00786-480.webp 480w, images/photo-aut00786-960.webp 960w, images/photo-aut00786-full.webp 1920w"><figcaption>TIỆC VU QUY · 24.10.2026</figcaption></figure></article>
@@ -135,7 +146,7 @@
 </section>
 <section class="location chapter" id="location" data-chapter="Địa điểm" aria-labelledby="location-title">
  <div class="location-pin-spacer"><div class="location-stage stage">
-  <div class="chapter-heading"><span>06 / ĐỊA ĐIỂM</span><span>VÕ XU · LÂM ĐỒNG</span></div>
+  <div class="chapter-heading"><span>05 / ĐỊA ĐIỂM</span><span>VÕ XU · LÂM ĐỒNG</span></div>
   <div class="venue-intro">
    <p class="venue-kicker">Đường đến ngày vui</p>
    <h2 id="location-title"><span class="line-mask"><span class="venue-title-line">Võ Xu,</span></span><span class="line-mask"><em class="venue-title-line">Lâm Đồng.</em></span></h2>
@@ -150,7 +161,7 @@
 </div>
 </section>
 <section class="farewell chapter" id="farewell" data-chapter="Hẹn gặp bạn" aria-labelledby="farewell-title">
- <div class="farewell-stage stage"><div class="farewell-scene"><div class="farewell-photo"><img data-hero="aut01628" src="images/hero-aut01628-1440.webp" srcset="images/hero-aut01628-960.webp 960w, images/hero-aut01628-1440.webp 1440w, images/hero-aut01628-2048.webp 2048w, images/hero-aut01628-3072.webp 3072w" sizes="(max-width:700px) and (orientation:portrait) max(100vw,43svh), (max-height:500px) and (orientation:landscape) 55vw, (orientation:portrait) max(100vw,67svh), 70vw" width="3072" height="4608" alt="Đức Anh ở tiền cảnh, Nhật Uyên mỉm cười bên bó hoa vàng" loading="lazy" decoding="async"></div><div class="farewell-shade"></div><div class="farewell-content"><p class="eyebrow">07 / HẸN GẶP BẠN</p><h2 id="farewell-title"><span class="line-mask"><span class="farewell-line">Ngày vui của chúng mình,</span></span><span class="line-mask"><em class="farewell-line">mong có bạn.</em></span></h2><p class="farewell-note">Cảm ơn bạn đã là một phần trong ngày hạnh phúc của Nhật Uyên & Đức Anh.</p><p class="farewell-signature">Nhật Uyên <em>&</em> Đức Anh</p><a class="farewell-link" href="#location">Đến chung vui cùng chúng mình</a></div><div class="farewell-bottom"><span>24 . 10 . 2026</span><a href="#opening">Về đầu trang</a><span>Bộ ảnh cưới</span></div></div><div class="closing-envelope"><div class="closing-summary"><h1 class="closing-names"><span>Nhật Uyên</span> <em>&</em> <span>Đức Anh</span></h1><p class="closing-message">Giữ lại <em>lời hẹn.</em></p></div><div class="closing-card-space" aria-hidden="true"><div class="wedding-card closing-card">
+ <div class="farewell-stage stage"><div class="farewell-scene"><div class="farewell-photo"><img data-hero="aut01628" src="images/hero-aut01628-1440.webp" srcset="images/hero-aut01628-960.webp 960w, images/hero-aut01628-1440.webp 1440w, images/hero-aut01628-2048.webp 2048w, images/hero-aut01628-3072.webp 3072w" sizes="(max-width:700px) and (orientation:portrait) max(100vw,43svh), (max-height:500px) and (orientation:landscape) 55vw, (orientation:portrait) max(100vw,67svh), 70vw" width="3072" height="4608" alt="Đức Anh ở tiền cảnh, Nhật Uyên mỉm cười bên bó hoa vàng" loading="lazy" decoding="async"></div><div class="farewell-shade"></div><div class="farewell-content"><p class="eyebrow">06 / HẸN GẶP BẠN</p><h2 id="farewell-title"><span class="line-mask"><span class="farewell-line">Ngày vui của chúng mình,</span></span><span class="line-mask"><em class="farewell-line">mong có bạn.</em></span></h2><p class="farewell-note">Cảm ơn bạn đã là một phần trong ngày hạnh phúc của Nhật Uyên & Đức Anh.</p><p class="farewell-signature">Nhật Uyên <em>&</em> Đức Anh</p><a class="farewell-link" href="#location">Đến chung vui cùng chúng mình</a></div><div class="farewell-bottom"><span>24 . 10 . 2026</span><a href="#opening">Về đầu trang</a><span>Bộ ảnh cưới</span></div></div><div class="closing-envelope"><div class="closing-summary"><h1 class="closing-names"><span>Nhật Uyên</span> <em>&</em> <span>Đức Anh</span></h1><p class="closing-message">Giữ lại <em>lời hẹn.</em></p></div><div class="closing-card-space" aria-hidden="true"><div class="wedding-card closing-card">
   <div class="closing-paper"></div>
   <div class="envelope-flap flap-bottom"><div class="flap-surface"><svg class="fold-edge" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 50 50 100 100"/></svg></div></div>
   <div class="envelope-flap flap-top"><div class="flap-surface"><svg class="fold-edge" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 0 50 50 100 0"/></svg></div></div>
@@ -160,12 +171,5 @@
  </div></div><div class="closing-dateline"><p>24 . 10 . 2026</p><span>HẸN BẠN VÀO NGÀY CHUNG ĐÔI</span></div></div></div>
 </section>
 </main></div>
-<dialog id="photo-viewer" class="photo-viewer" aria-label="Xem toàn bộ ảnh cưới" aria-describedby="viewer-caption">
- <div class="viewer-shell">
-  <header class="viewer-header"><p>Nhật Uyên <em>&</em> Đức Anh</p><button type="button" id="viewer-close" aria-label="Đóng ảnh">Đóng <span aria-hidden="true">×</span></button></header>
-  <div class="viewer-stage"><img id="viewer-image" alt="" draggable="false" decoding="async"></div>
-  <footer class="viewer-footer"><div class="viewer-navigation"><button type="button" id="viewer-prev" aria-label="Xem ảnh trước">Trước</button><div class="viewer-description" aria-live="polite" aria-atomic="true"><p id="viewer-caption"></p><span id="viewer-count"></span></div><button type="button" id="viewer-next" aria-label="Xem ảnh tiếp theo">Tiếp</button></div><div class="viewer-thumbnails" aria-label="Chọn ảnh"></div></footer>
- </div>
-</dialog>
-<script src="vendor/gsap/gsap.min.js"></script><script src="vendor/gsap/ScrollTrigger.min.js"></script><script src="vendor/gsap/ScrollSmoother.min.js"></script><script src="vendor/gsap/ScrollToPlugin.min.js"></script><script src="vendor/gsap/SplitText.min.js"></script><script src="gallery-webgl.js"></script><script src="countdown.js"></script><script src="calendar.js"></script><script src="motion.js"></script>
+<script src="vendor/gsap/gsap.min.js"></script><script src="vendor/gsap/ScrollTrigger.min.js"></script><script src="vendor/gsap/ScrollSmoother.min.js"></script><script src="vendor/gsap/ScrollToPlugin.min.js"></script><script src="vendor/gsap/SplitText.min.js"></script><script src="memories-data.js"></script><script src="memories-album.js"></script><script src="memories-interactions.js"></script><script src="memories.js"></script><script src="countdown.js"></script><script src="calendar.js"></script><script src="motion.js"></script>
 </body></html>

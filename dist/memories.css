@@ -1,7 +1,7 @@
 /* Wedding Memories: screen-space chrome, a transform-only camera, world objects. */
 .wedding-memories{background:#25131d;color:#f2e6d5;position:relative}
 .mem-stage,.motion-enabled .mem-stage{height:100svh;min-height:0;position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#70354755 0%,#3b1f2a 36%,#24151e 76%)}
-.mem-stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,#20121d4d,transparent 14%,transparent 84%,#160e1860)}
+.mem-stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,#20121d80,transparent 20%,transparent 80%,#160e18dc 98%)}
 /* Fixed edge scrims keep the existing ivory navigation readable when the camera
    travels across the new light table. GSAP fades them with the shared scene. */
 .mem-stage::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;opacity:var(--mem-light-scene,0);background:linear-gradient(180deg,#25131def 0,transparent 15%,transparent 81%,#25131df5 95%)}
@@ -17,10 +17,6 @@
 /* The complete supplied photograph and the percentage-based object plane
    always share the same bounds. Only the world camera scales on resize. */
 .mem-table{inset:0;width:100%;height:100%;z-index:10;pointer-events:none}
-/* An ivory curtain behind the supplied transparent artwork creates one set,
-   revealed with the whole table. It is never a separate animated layer. */
-.mem-table::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#c8bcb3,#ece6df 28%,#f4eee6 52%,#d8cdc4),repeating-linear-gradient(90deg,transparent 0 42px,#5943380c 75px,transparent 110px);background-blend-mode:multiply;box-shadow:0 18px 50px #10080e38}
-.mem-table::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(91deg,#ffffff08 0 32px,#57423a0b 49px,#ffffff12 65px,transparent 100px);mask-image:linear-gradient(#000 0 40%,transparent 65%)}
 .mem-table-art{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:contain}
 .mem-object-layer{position:absolute;inset:0;z-index:20;transform-style:flat}
 .mem-contact{position:absolute;z-index:12;pointer-events:none;background:radial-gradient(ellipse at 49% 30%,#210804b8 0%,#21080470 28%,#28080524 55%,transparent 75%);transform:skewX(17deg);transform-origin:50% 0}
@@ -40,6 +36,14 @@
 .mem-frame-art{position:absolute;inset:0;width:400%;height:400%;transform:scale(.25);transform-origin:0 0;max-width:none;overflow:visible;pointer-events:none;user-select:none;filter:drop-shadow(6px 8px 4px #30292050)}
 .mem-frame--art .mem-frame-number{right:12%;bottom:4%;z-index:1;background:none;color:#f3ece1}
 .mem-frame--landscape .mem-frame-number{bottom:10%;right:15%}
+/* An open-backed easel supports the upright album in the upper-left pocket.
+   All feet use the same source-space tabletop as the frames and money box. */
+.mem-album-easel{position:absolute;z-index:9;pointer-events:none}
+.mem-album-easel i{position:absolute;display:block;background:linear-gradient(90deg,#3b211a,#b0956c 38%,#dfc49a 55%,#735439);box-shadow:2px 2px 2px #170d1555}
+.mem-easel-leg{top:0;height:103.1%;width:3.7%;transform-origin:50% 0;border-radius:2px}
+.mem-easel-leg--left{left:48%;transform:rotate(14deg)}
+.mem-easel-leg--right{right:48%;transform:rotate(-14deg)}
+.mem-album-easel .mem-easel-ledge{left:0;top:61%;width:100%;height:2.6%;border-radius:1px;background:linear-gradient(#e1c69e,#ad8a5f 40%,#6d4c36 65%,#54382b)}
 .mem-album-mount{z-index:26;transform-origin:center;--mem-book-type-scale:.4}
 .mem-album-mount .mem-album-pagination{display:none!important}
 .mem-album-mount .mem-album-page-heading{font-size:calc(8px * var(--mem-book-type-scale));letter-spacing:.12em}

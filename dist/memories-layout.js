@@ -9,13 +9,15 @@
  const standing=(u,v,width,height,rotation=0,row='back')=>{
   const foot=point(u,v);return{x:foot.x-width/2,y:foot.y-height,w:width,h:height,r:rotation,row,foot};
  };
- const albumCenter=point(.59,.58),cardCenter=point(.742,.57);
+ const albumCenter={x:170,y:420},cardCenter=point(.742,.57);
  window.WEDDING_TABLE_LAYOUT={
   image,tabletop,point,
   frames:[standing(.26,.82,155,119,-.4,'front'),standing(.205,.36,112,150,-.5),
    standing(.323,.28,136,181,.4),standing(.395,.85,110,147,.5,'front'),standing(.485,.54,116,155,-.3)],
-  // The closed cover occupies half the spread mount. Its footprint stays on cloth.
-  album:{x:albumCenter.x-220,y:albumCenter.y-110,w:440,h:220,r:-1.2,tilt:76,center:albumCenter},
+  // Closed cover rests upright on an easel in the open upper-left pocket.
+  // The same book still levels out and opens at the album-focus phase.
+  album:{x:albumCenter.x-230,y:albumCenter.y-115,w:460,h:230,r:-2,tilt:10,center:albumCenter},
+  easel:{x:43,y:274,w:258,h:426,footY:700},
   box:standing(.865,.87,218,218),
   card:{x:cardCenter.x-42,y:cardCenter.y-16,w:84,h:32,r:-4,tilt:73},
   wishArea:{x:967,y:443,w:365,h:330},

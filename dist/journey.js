@@ -12,27 +12,21 @@
     const coordinate=index-progress/settings.frameSpacing;
     const angle=settings.focusAngle+coordinate*settings.angularSpacing;
     const front=(Math.cos(angle)+1)/2;
-    // Follow a continuous material normal, including at the side turn. There
-    // is no +/-90-degree normal flip while a curved photo is visible edge-on.
-    const rotationY=Math.atan2(g.depth*Math.sin(angle),g.radius*Math.cos(angle))*180/Math.PI;
-    const bend=settings.frontBend+settings.sideBend*Math.pow(Math.abs(Math.sin(angle)),8);
-    const scale=.55+.43*front;
-    const z=g.depth*Math.cos(angle);
-    // Compress the distant ends of the same spiral, rather than wrapping cells.
-    const y=g.centerY-g.height/2+g.pitch*Math.tanh(coordinate*.67);
+    const y=g.centerY-g.height/2+coordinate*g.pitch;
     const edgeDistance=Math.min(y+g.height/2-g.filmTop,g.filmBottom-y-g.height/2);
-    const edge=clamp(0,1,edgeDistance/(g.frameHeight*scale*.53));
-    const distant=clamp(0,1,(3.0-Math.abs(coordinate))/1.4);
-    const visible=edge*edge*(3-2*edge)*distant*distant*(3-2*distant);
+    const edge=clamp(0,1,(edgeDistance+g.frameHeight*.45)/(g.frameHeight*.65));
+    const visible=edge*edge*(3-2*edge);
+    const z=g.depth*Math.cos(angle);
     return {
       x:g.radius*Math.sin(angle),y,z,
-      rotationY,
-      rotationZ:2*Math.sin(angle-settings.focusAngle),scale,
-      opacity:(.4+.6*front)*visible,
+      rotationY:Math.atan2(g.depth*Math.sin(angle),g.radius*Math.cos(angle))*180/Math.PI,
+      rotationZ:Math.atan(g.slope)*180/Math.PI,scale:1,
+      opacity:(.28+.72*front)*visible,
       zIndex:1000+Math.round(z*3)+2,offset:index*settings.frameSpacing,
-      angle,front,direction:1,bend
+      angle,front,direction:1,lift:0
     };
   }
+
   function renderJourney(config) {
     const section=document.querySelector('#journey');if(!section)return null;
     const scene=section.querySelector('.journey-scene');scene.replaceChildren();
@@ -128,30 +122,34 @@
     section.classList.toggle('journey-static',reduced);section.classList.toggle('journey-enhanced',!reduced);
     function geometry() {
       const width=stage.clientWidth,height=stage.clientHeight,landscape=width>height&&height<601;
-      const frameWidth=Math.min(mobile?width*.34:tablet?220:260,height*(landscape?.28:.35));
+      const frameWidth=Math.min(mobile?width*.32:tablet?208:244,height*(landscape?.255:.315));
       const top=height*(landscape?.26:mobile?.235:.245),bottom=height*(landscape?.83:.865);
-      const radius=Math.min(mobile?width*.31:tablet?width*.285:290,width/2-frameWidth*.48-22);
+      const radius=Math.min(mobile?width*.31:tablet?width*.285:282,width/2-frameWidth*.48-22);
+      const pitch=height*(landscape?.195:.185);
       const filmTop=height*(landscape?.23:.215),filmBottom=height*.895;
       return {width,height,frameWidth,frameHeight:frameWidth*1.34,top,bottom,filmTop,filmBottom,
-        radius,centerY:height*.565,pitch:height*(landscape?.31:.295),
-        depth:mobile?14:tablet?45:60};
+        radius,centerY:height*.555,pitch,angularSpacing:flow.angularSpacing,slope:pitch/(flow.angularSpacing*radius),
+        depth:radius*(mobile?.48:tablet?.65:.76)};
     }
     function transformAt(progress,index) {
       const pose=getFilmTransform(progress,index,filmGeometry||geometry(),flow,items.length);
       const lift=surfaceStates[index]?.lift||0;
-      if(lift){pose.bend*=1-lift;pose.rotationY*=1-lift;pose.rotationZ*=1-lift;}
+      pose.lift=lift;
+      if(lift){pose.rotationY*=1-lift;pose.rotationZ*=1-lift;}
       return pose;
     }
     function renderFilm() {
       if(reduced||destroyed||!filmGeometry)return;
       items.forEach(({button,group,plane},index)=>{
         const transform=transformAt(filmState.progress,index);
-        const {offset,angle,front,direction,bend,opacity,...pose}=transform;
+        const {offset,angle,front,direction,lift,opacity,...pose}=transform;
         // Composite opacity after projecting the complete curved cell. Fading
         // individual overlapping texture strips would leave visible seams.
         gsap.set(plane,{...pose,opacity:1,xPercent:-50,yPercent:-50,force3D:true});
         group.style.opacity=String(opacity);group.style.zIndex=String(pose.zIndex);
-        button.dataset.visibility=String(opacity);button.style.pointerEvents=opacity>.06?'auto':'none';
+        // Pointer hits come from the curved pixels; the planar button remains
+        // the keyboard/ARIA and Flip anchor, without an invisible flat hitbox.
+        button.dataset.visibility=String(opacity);button.style.pointerEvents='none';
         photoSurfaces[index]?.render(transform);
       });
       ribbon.render(filmState.progress,filmGeometry,transformAt,surfaceStates.reduce((sum,s)=>sum+s.lift,0));

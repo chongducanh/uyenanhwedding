@@ -121,3 +121,12 @@
 
 .journey-photo-plane{position:absolute;left:50%;top:50%;width:var(--journey-frame-width,250px);aspect-ratio:1/1.34;transform-style:preserve-3d;pointer-events:none}
 .journey-enhanced .journey-photo-plane>.journey-photo{inset:0;width:100%;height:100%;z-index:1;transform:none}
+
+/* The tiny film annotations follow the same material tangent as the images. */
+.journey-enhanced .journey-photo .journey-film-label,
+.journey-enhanced .journey-photo .journey-film-number{visibility:hidden}
+.journey-enhanced .journey-surface-label{position:absolute;top:50%;left:50%;right:auto;bottom:auto;width:max-content;padding:0;background:transparent;color:#e9ddc9;pointer-events:none;transform-origin:50% 50%}
+/* Keyboard focus follows the curved photographic surface, not its invisible
+   planar interaction target. This also avoids a floating rectangle after ESC. */
+.journey-enhanced .journey-photo:focus-visible{outline:none}
+.journey-enhanced .journey-photo-group:has(.journey-photo:focus-visible) .journey-photo-slice{filter:brightness(1.12);box-shadow:inset 0 2px #efd6aebb,inset 0 -2px #efd6aebb}

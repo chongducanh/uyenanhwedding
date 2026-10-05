@@ -1,4 +1,4 @@
-/* A continuous, flexible film surface between the real photo planes.
+/* A single analytic helical film surface carrying the real photographs.
    Geometry is evaluated from Journey's shared travel value, never a second tween.
    Small SVG patches are perspective-projected and depth-sorted with the photos;
    transparent film and punched rails keep the central time axis readable. */
@@ -12,32 +12,31 @@
   const svg=(tag,cls)=>{const n=document.createElementNS(NS,tag);if(cls)n.setAttribute('class',cls);return n;};
   const point=p=>p.map(v=>v.toFixed(2)).join(',');
   const polygon=points=>'M'+points.map(point).join('L')+'Z';
-  const curve=(a,b,c,d,t)=>add(add(mul(a,(1-t)**3),mul(b,3*(1-t)**2*t)),add(mul(c,3*(1-t)*t*t),mul(d,t**3)));
-  // Photo strips and film rails sample the same cylindrical surface. Curvature
-  // is local to the cell; its edges and tangents are also the connector anchors.
-  function localCurve(x,halfWidth,bend) {
-    if(Math.abs(bend)<.0001)return [x,0,0];
-    const radius=halfWidth/bend,angle=x/radius;
-    return [radius*Math.sin(angle),0,radius*(Math.cos(angle)-1)];
-  }
+  // One ruled helix, shared by the image pixels and every millimetre of stock.
+  // The material coordinate is an angle around the fixed vertical timeline.
+  // Vertical edges stay upright; the horizontal tangent includes the spiral rise.
   function framePlane(pose,g) {
-    const y=pose.rotationY*Math.PI/180,z=pose.rotationZ*Math.PI/180;
-    const right=[Math.cos(y)*Math.cos(z),Math.cos(y)*Math.sin(z),-Math.sin(y)];
-    const up=[-Math.sin(z),Math.cos(z),0],normal=[Math.sin(y)*Math.cos(z),Math.sin(y)*Math.sin(z),Math.cos(y)];
-    const halfWidth=g.frameWidth*pose.scale/2,halfHeight=g.frameHeight*pose.scale/2;
-    const center=[pose.x,pose.y,pose.z];
+    const halfWidth=g.frameWidth/2,halfHeight=g.frameHeight/2;
+    const center=[pose.x,pose.y,pose.z],lift=pose.lift||0;
     const at=(u,v=0)=>{
-      const local=localCurve(u*halfWidth,halfWidth,pose.bend||0);
-      return add(add(add(center,mul(right,local[0])),mul(normal,local[2])),mul(up,v*halfHeight));
+      const x=u*halfWidth,angle=pose.angle+x/g.radius;
+      const curved=[g.radius*Math.sin(angle),pose.y+x*g.slope+v*halfHeight,g.depth*Math.cos(angle)];
+      return mix(curved,add(center,[x,v*halfHeight,0]),lift);
     };
-    const tangent=u=>{const angle=u*(pose.bend||0);return add(mul(right,Math.cos(angle)),mul(normal,-Math.sin(angle)));};
-    return {center,across:mul(right,halfWidth),vertical:mul(up,halfHeight),at,tangent};
+    const tangent=u=>{
+      const angle=pose.angle+u*halfWidth/g.radius;
+      return mix([Math.cos(angle),g.slope,-g.depth/g.radius*Math.sin(angle)],[1,0,0],lift);
+    };
+    return {center,at,tangent};
   }
   function createPhotoSurface({paper,item,group,button},settings) {
     const imageWindow=paper.querySelector('.journey-image-window');
     const layer=document.createElement('span');layer.className='journey-photo-surface';layer.setAttribute('aria-hidden','true');
     const strips=Array.from({length:settings.photoSlices},()=>{
       const strip=document.createElement('span');strip.className='journey-photo-slice';layer.append(strip);return strip;
+    });
+    const labels=['journey-film-label','journey-film-number'].map(cls=>{
+      const label=paper.querySelector('.'+cls).cloneNode(true);label.classList.add('journey-surface-label');layer.append(label);return label;
     });
     group.append(layer);
     const open=()=>button.click();layer.addEventListener('click',open);
@@ -58,18 +57,25 @@
     }
     function render(pose) {
       if(!geometry)return;
-      const key=[pose.x,pose.y,pose.z,pose.rotationY,pose.rotationZ,pose.scale,pose.bend].join(',');
+      const key=[pose.x,pose.y,pose.z,pose.angle,pose.lift].join(',');
       if(key===lastPose)return;lastPose=key;
       const surface=framePlane(pose,geometry);
       strips.forEach((strip,i)=>{
         const left=-imageWidth/2+i*arcWidth;
-        const a=localCurve(left,halfWidth,pose.bend),b=localCurve(left+arcWidth,halfWidth,pose.bend);
-        const center=mix(surface.at(left/halfWidth,verticalOffset),surface.at((left+arcWidth)/halfWidth,verticalOffset),.5);
-        const width=distance(a,b)+2,yaw=Math.atan2(a[2]-b[2],b[0]-a[0])*180/Math.PI;
-        // A complete world-space pose per slice avoids browsers flattening a
-        // nested 3D photo at exactly the side turn. Only transforms change.
-        strip.style.transform=`translate(-50%,-50%) translate3d(${center[0]}px,${center[1]}px,${center[2]}px) rotateZ(${pose.rotationZ}deg) rotateY(${pose.rotationY+yaw}deg) scale(${pose.scale*width/(arcWidth+2)},${pose.scale})`;
+        const a=surface.at(left/halfWidth,verticalOffset),b=surface.at((left+arcWidth)/halfWidth,verticalOffset);
+        const center=mix(a,b,.5),axis=mul(add(b,mul(a,-1)),1/arcWidth);
+        const normal=[-axis[2],0,axis[0]],normalLength=Math.max(.000001,Math.hypot(...normal));
+        const matrix=[...axis,0,0,1,0,0,...mul(normal,1/normalLength),0,...center,1];
+        // This tangent basis carries x, y AND z. There is no independent card
+        // rotation or connector easing which could crease the material seam.
+        strip.style.transform=`translate(-50%,-50%) matrix3d(${matrix.join(',')})`;
         strip.style.zIndex=String(1000+Math.round(center[2]*3));
+        strip.style.pointerEvents=pose.opacity>.06?'auto':'none';
+      });
+      labels.forEach((label,i)=>{
+        const u=i?.77:-.64,center=surface.at(u,.94),axis=surface.tangent(u);
+        const normal=[-axis[2],0,axis[0]],length=Math.max(.000001,Math.hypot(...normal));
+        label.style.transform=`translate(-50%,-50%) matrix3d(${[...axis,0,0,1,0,0,...mul(normal,1/length),0,...center,1].join(',')})`;
       });
     }
     return {resize,render,destroy(){layer.removeEventListener('click',open);layer.remove();}};
@@ -101,17 +107,17 @@
       if(g!==lastGeometry)patches.forEach(({node})=>node.setAttribute('viewBox',`0 0 ${g.width} ${g.height}`));
       lastProgress=progress;lastGeometry=g;lastLift=lift;
       let ribbonLength=0;
+      const halfCell=g.frameWidth/(2*g.radius*g.angularSpacing);
       connections.forEach(connection=>{
-        const index=connection.index;
-        const cell=connection.kind==='cell',head=index<0,tail=index===count-1&&!cell;
-        const aPose=transformAt(progress,head?-.48:index),bPose=transformAt(progress,tail?count-1+.48:index+1);
-        const a=framePlane(aPose,g),b=framePlane(bPose,g);
-        a.vertical=mul(a.vertical,settings.stockWidth);b.vertical=mul(b.vertical,settings.stockWidth);
-        const start=cell?a.at(-1):a.at(1),end=cell?a.at(1):b.at(-1);
-        const reach=Math.min(distance(start,end)*.43,g.radius*.72);
-        const c1=add(start,mul(a.tangent(1),reach)),c2=add(end,mul(b.tangent(-1),-reach));
-        const surface=(t,v=0)=>cell?a.at(t*2-1,v*settings.stockWidth):
-          add(curve(start,c1,c2,end,t),mul(mix(a.vertical,b.vertical,t*t*(3-2*t)),v));
+        const index=connection.index,cell=connection.kind==='cell',head=index<0,tail=index===count-1&&!cell;
+        const from=cell?index-halfCell:head?-halfCell-.58:index+halfCell;
+        const to=cell?index+halfCell:tail?index+halfCell+.58:index+1-halfCell;
+        // No Bézier joins: photos and empty stock are merely intervals on the
+        // same analytic helix, with identical first/second derivatives at seams.
+        const surface=(t,v=0)=>{
+          const pose=transformAt(progress,from+(to-from)*t);
+          return [pose.x,pose.y+v*g.frameHeight*settings.stockWidth/2,pose.z];
+        };
         // Arc-length spacing keeps perforations regular as a connector bends.
         const arc=[0],arcSteps=48;
         let previous=surface(0);
@@ -138,9 +144,9 @@
           }
           const middle=(patch.start+patch.end)/2,depth=surface(middle)[2];
           const leaderFade=connection.kind==='leader'?Math.pow(head?middle:1-middle,1.2):1;
-          const light=(cell?aPose.opacity:aPose.opacity+(bPose.opacity-aPose.opacity)*middle)*leaderFade;
+          const light=transformAt(progress,from+(to-from)*middle).opacity*leaderFade;
           // Photo cells and stock cross the fixed axis at the same depth.
-          patch.node.style.zIndex=String(1000+Math.round((cell?aPose.z:depth)*3));
+          patch.node.style.zIndex=String(1000+Math.round(depth*3));
           patch.node.style.opacity=String(light);
           patch.body.setAttribute('d',outline);patch.shadow.setAttribute('d','M'+bottom.map(point).join('L'));patch.rails.setAttribute('d',rails);
           patch.edges.setAttribute('d','M'+top.map(point).join('L')+'M'+bottom.map(point).join('L'));
@@ -149,5 +155,5 @@
     }
     return {render,project,framePlane,get patchCount(){return patches.length;},destroy(){destroyed=true;patches.forEach(({node})=>node.remove());}};
   }
-  window.JourneyFilmRibbon={create,framePlane,localCurve,project,createPhotoSurface};
+  window.JourneyFilmRibbon={create,framePlane,project,createPhotoSurface};
 })();

@@ -60,21 +60,27 @@ Adding a fifth milestone adds a marker and photo phase automatically.
 All four photographs are cells of one compact, open 3D film coil around the
 fixed vertical timeline. `filmState.progress` is the only animated material
 coordinate. `getFilmTransform()` subtracts it from each cell's index, then derives
-angle, x/y/z, scale, yaw and opacity. Previous photographs continue along the
+angle, x/y/z, tangent and opacity. Scale comes from real perspective, not per-cell size tweens. Previous photographs continue along the
 same path: they never fly back to a starting position or wrap to another cell.
 
 `JOURNEY_CONFIG.flow` defines angular spacing (2.12 radians), focus bearing and
-material spacing. The responsive geometry caps the desktop radius at 290px;
-including the curved cells and connectors, the visible film stays within about
-±380px around the axis. Tablet and mobile reduce both radius and depth. There
-is no horizontal tracking camera and no viewport-wide leader or wave profile.
+material spacing. The responsive geometry caps the desktop radius at 282px.
+Tablet and mobile reduce radius and depth. The material is one elliptic helix:
 
-Depth controls perspective, size, opacity and stacking relative to the axis at
-z-index 1000. Front photos are about 220–230px wide on ordinary desktop sizes;
-rear cells become smaller and more muted. Photographs follow the elliptical
-coil's tangent with slight in-plane roll. The material normal continues through each side turn, without an orientation
-flip. A curved surface stays visible even when its center is nearly edge-on. The vertical travel compresses smoothly at the distant
-ends and fades, keeping the title and footer clear.
+```
+theta = focusAngle + (materialCoordinate - progress) * angularSpacing
+x = radius * sin(theta)
+y = centerY + (materialCoordinate - progress) * pitch
+z = depth * cos(theta)
+```
+
+Depth is 76% of radius on desktop, 65% on tablet and 48% on mobile. The stock
+moves in front of the central axis, around the side, behind it and back to the
+front. Its continuous vertical rise and camera-relative travel never reset or
+fold at a photo boundary. Rear cells become smaller through perspective and
+more muted through opacity. The stock height stays constant throughout a turn;
+the rise per full turn exceeds that height so adjacent turns remain separated.
+Title and footer are kept clear by the existing softly bounded film volume.
 
 The marker phase fills the timeline while the coil advances gently. The photo
 phase rotates the whole film into its reading position and holds there; the
@@ -106,12 +112,12 @@ titles as a list. After changing dates, run
 
 ## Connected film surface
 
-`dist/journey-ribbon.js` builds one connected strip: a short leader, alternating
-curved photo cells and connecting stock, then a short fading tail. Every cell uses
-exactly the same 3D plane as its DOM photo. Each connecting cubic starts and
-ends on the actual cell edges, with matching tangent directions. Both rails
-come from this one surface; there are no independent wave paths. `framePlane()`
-is the shared contract between photo transforms and film geometry.
+`dist/journey-ribbon.js` builds one analytic ruled surface. Photo cells and empty
+stock are contiguous intervals of the same angular coordinate. Both top and
+bottom rails, perforations, image pixels and small film annotations sample that
+surface. There are no independent Bézier connectors, per-photo cylinders or
+side-specific bends. At every cell boundary, positions and first derivatives
+match exactly; changing the photo density cannot introduce a crease.
 
 The subtle champagne stock has narrow rails and small real perforations
 (SVG even-odd paths), spaced by accumulated arc length through both photo cells
@@ -137,11 +143,12 @@ stock stop together. Reduced motion retains four accessible normal-flow rows.
 
 ### Curved photo surfaces
 
-`flow.frontBend` and `flow.sideBend` tune the curve in radians. Curvature stays
-subtle while reading the foreground photo and increases at the two side turns.
-`ribbon.photoSlices` controls the 24 cached texture strips per photograph.
-`localCurve()` and `framePlane().at()` are shared by those pixels, the film rails
-and connector anchors; `framePlane().tangent()` keeps the joins smooth.
+`ribbon.photoSlices` controls 32 cached texture strips per photograph.
+`framePlane().at()` evaluates the shared helix at each source-pixel interval;
+`framePlane().tangent()` includes its vertical rise. A world-space `matrix3d`
+maps each image strip using the helix chord, vertical ruling and surface normal.
+Consequently photographs bend around both side turns and follow the diagonal
+material tangent. The normal is guarded when the viewer straightens a rear cell.
 
 Each strip receives a complete world-space transform. Nesting the strips inside
 a rotated native button can flatten their paint at the side turn in browsers,
@@ -177,3 +184,9 @@ Fullscreen open, Escape close, forward-wheel resume, touch dismissal, keyboard
 access, reduced motion, responsive phase restoration and separate
 Journey/Memories pins are checked. Full images load only when opened. A fifth
 milestone fixture still creates its own marker/photo phases from data.
+
+Analytic continuity checks across six viewport sizes measured boundary errors
+below 6e-13 pixels and tangent dot products above 0.9999999999999994.
+Browser-projected image strips matched the shared surface within 0.0011 pixels.
+A viewer click temporarily straightens the selected image from that surface,
+then returns it to the same playhead and reattaches its curved pixels.

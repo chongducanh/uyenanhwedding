@@ -8,7 +8,7 @@
       1086
     ],
     "bytes": 388686,
-    "conversion": "Owner-supplied WebP retained byte-for-byte; one transparent table composition with a CSS curtain backdrop"
+    "conversion": "Owner-supplied transparent WebP retained byte-for-byte; one complete table composition over the existing burgundy section background, with no added backdrop"
   },
   {
     "asset": "frame",

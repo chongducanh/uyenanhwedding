@@ -3,7 +3,7 @@
 (() => {
  'use strict';
  const CONFIG = {
-  worldWidth:1448,worldCenterY:543,photoFocusScale:.78,albumScale:.88,
+  worldWidth:1448,worldCenterY:500,photoFocusScale:.78,albumScale:.88,
   photoScrollLength:1.12,albumPageScrollLength:1.3,cameraDuration:.65,
   blurAmount:2,mobileBreakpoint:767,mobilePhotoScrollLength:.43,
   mobileAlbumPageScrollLength:.43,scrub:.75
@@ -74,7 +74,8 @@
    button.append(border);button.classList.add('mem-frame--art');button.classList.toggle('mem-frame--landscape',photo.width>photo.height);
   }
   world.replaceChildren();section.classList.toggle('mem-static',reduced);
-  let album,frames=[],sceneObjects=[],camera={cx:CONFIG.worldWidth/2,cy:CONFIG.worldCenterY,zoom:1,screenY:mobile?.47:tablet?.48:.53},bookState={open:0,page:0,close:0};
+  const overviewCamera=()=>({cx:mobile?677:CONFIG.worldWidth/2,cy:mobile?520:CONFIG.worldCenterY,zoom:1,screenY:tablet?.52:.5});
+  let album,frames=[],sceneObjects=[],camera=overviewCamera(),bookState={open:0,page:0,close:0};
   const phases=[],photoRanges=[],pageRanges=[];let activePhase='',lastPage=-1;
   if(reduced){
    const tableGallery=el('div','mem-static-frames');frames=data.photos.map(createPhoto);tableGallery.append(...frames);world.append(tableGallery);
@@ -104,9 +105,12 @@
     const n=createPhoto(photo,i),p=photo.placement||(data.photos.length===5?positions[i]:placement);
     place(n,p);n.dataset.rotation=p.r;n.dataset.row=p.row||'back';n.classList.add('mem-object');objectLayer.append(n);contact(n,p.x+2,p.y+p.h-2,p.w*1.01,9);return n;
    });
+   const easel=el('div','mem-album-easel mem-object');easel.setAttribute('aria-hidden','true');place(easel,layout.easel);
+   easel.append(el('i','mem-easel-leg mem-easel-leg--left'),el('i','mem-easel-leg mem-easel-leg--right'),el('i','mem-easel-ledge'));world.append(easel);
+   contact(easel,layout.easel.x+15,layout.easel.footY-4,layout.easel.w-30,12);
    const albumMount=el('div','mem-album-mount mem-object');place(albumMount,layout.album);objectLayer.append(albumMount);
    album=window.WeddingAlbum.create({mount:albumMount,photos:data.album,site:data.site,onPhotoClick:openPhoto,mobile,reduced:false});
-   contact(albumMount,layout.album.center.x-112,layout.album.center.y-17,232,48).classList.add('mem-contact--album');
+
    const box=el('div','mem-money-box mem-object');box.setAttribute('aria-hidden','true');
    const boxImage=el('img','mem-box-art');boxImage.src=data.site.boxAsset;boxImage.alt='';boxImage.decoding='async';
    const boxSurface=el('div','mem-box-surface');boxSurface.append(boxImage);box.append(boxSurface);place(box,layout.box);
@@ -119,12 +123,14 @@
    wishScene=window.WeddingWishScene.create({gsap,stage,host:wishHost,world,anchor:cardAnchor,box,slot,wish,mobile});
    const shadows=[...contacts.values()];
    const interactiveObjects=[...frames,albumMount,box];
-   const setDressing=[table];
+   const setDressing=[table,easel];
    sceneObjects=[...setDressing,...interactiveObjects];
    const lightScene={amount:0};
    const paintEdgeContrast=()=>stage.style.setProperty('--mem-light-scene',lightScene.amount);
    const dimensions=()=>({width:stage.clientWidth,height:stage.clientHeight});
-   const baseScale=()=>{const v=dimensions();return Math.min(v.width*(mobile?.98:.84)/layout.image.width,1250/layout.image.width,Math.max(160,v.height-(mobile?180:230))/layout.image.height);};
+   // Fit the interactive scene, allowing the satin drape to extend below the
+   // viewport. On phones only the non-interactive outer cloth is cropped.
+   const baseScale=()=>{const v=dimensions();return mobile?Math.min(v.width*.96/1265,v.height*.68/780):Math.min(v.width*.96/layout.image.width,v.height*.96/760);};
    // Read the true laid-out bounds and invert only the world camera matrix.
    // Frame rotations are below one degree; offset bounds avoid rotation drift.
    function getFocusTransform(target,widthRatio=.82,heightRatio=.73,screenY=.51){
@@ -139,7 +145,7 @@
    function renderCamera(){const v=dimensions(),s=baseScale()*camera.zoom;gsap.set(world,{x:v.width/2-camera.cx*s,y:v.height*camera.screenY-camera.cy*s,scale:s,force3D:false});const type=1/Math.min(v.width*CONFIG.albumScale/albumMount.offsetWidth,v.height*.82/albumMount.offsetHeight);if(type!==bookTypeScale){bookTypeScale=type;albumMount.style.setProperty('--mem-book-type-scale',type);}wishScene?.render();}
    function paintAlbum(){album.setOpen(bookState.open);album.setPage(bookState.page);album.setClose(bookState.close);}
    const targetCamera=(tl,target,length,w=.82,h=.73,y=.51,at)=>tl.to(camera,{cx:()=>getFocusTransform(target,w,h,y).cx,cy:()=>getFocusTransform(target,w,h,y).cy,zoom:()=>getFocusTransform(target,w,h,y).zoom,screenY:y,duration:length,ease:'sine.inOut',onUpdate:renderCamera},at);
-   const overview=(tl,length)=>tl.to(camera,{cx:CONFIG.worldWidth/2,cy:CONFIG.worldCenterY,zoom:1,screenY:mobile?.47:tablet?.48:.53,duration:length,ease:'sine.inOut',onUpdate:renderCamera});
+   const overview=(tl,length)=>tl.to(camera,{...overviewCamera(),duration:length,ease:'sine.inOut',onUpdate:renderCamera});
    function focusObjects(tl,focus,at=0){tl.to(wishScene.state,{ambient:0,duration:.3},at);tl.to(sceneObjects.filter(n=>n!==focus),{opacity:.14,duration:mobile?.15:.35},at).to(shadows,{opacity:.08,duration:.2},at).to(focus,{opacity:1,duration:mobile?.15:.35},at);}
    const buildPart=(name,build)=>{const child=gsap.timeline();build(child);const start=timeline.duration();timeline.addLabel(name,start).add(child,start);phases.push({name,start,end:start+child.duration()});return{start,duration:child.duration()};};
    gsap.set(world,{transformOrigin:'0 0'});gsap.set(setDressing,{autoAlpha:1,y:0});gsap.set(interactiveObjects,{autoAlpha:1,y:0});gsap.set(frames,{rotation:i=>Number(frames[i].dataset.rotation),transformOrigin:'50% 100%'});gsap.set(albumMount,{rotation:layout.album.r,rotationX:layout.album.tilt,transformOrigin:'50% 50%'});gsap.set(shadows,{autoAlpha:1});gsap.set(wishHost,{autoAlpha:1});

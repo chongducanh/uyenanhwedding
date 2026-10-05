@@ -12,7 +12,7 @@ They are retained byte-for-byte, with no generated replacement or recompression:
 
 - `table-complete.webp`: “Trang trí bàn cưới hoa đỏ trắng nến lung linh.webp”,
   1448 × 1086. White cloth, burgundy satin, all flowers, candles and vases are
-  one complete composition. An ivory CSS curtain sits behind its transparency.
+  one complete composition. Its transparency reveals the existing burgundy section background; no white curtain or replacement backdrop is added.
 - `frame.webp`: “Bộ khung ảnh cưới lãng mạn.webp”, 1774 × 887. This sprite
   includes another couple's sample photographs. A hollow SVG clip removes the
   entire sample-photo aperture and every neighbouring frame. The site's real
@@ -39,9 +39,10 @@ Per-edition provenance, dimensions and sizes are in `images/memories/manifest.js
 - Three rear frames (02, 03, 05) and two front frames (01, 04) form a small
   cluster on the left. Original photo order is preserved. Rotations stay under
   one degree; bottom-center origins and tight contact shadows ground the frames.
-- The album is flat near the front center, with a 76° projection and −1.2°
-  rotation. The unchanged book engine centers its closed cover, then opens the
-  full spread at camera focus. No part rests beyond the tabletop lip.
+- The album occupies the empty upper-left pocket, with closed-cover center
+  (170,420), 10° tilt and −2° rotation. A slim easel supports it with feet at
+  y700; the easel is behind the complete table artwork so flowers naturally
+  obscure the lower legs. The same album levels out and opens at camera focus.
 - The AU/UA box stands to the right. The physical card rests between it and the
   album. Source coordinates identify each artwork's actual slot on the lid.
 - Slot slope is about 4.9°. The card's visible clipped edge aligns to that line;
@@ -66,7 +67,9 @@ as the camera travels over the new white table during the wish-card sequence.
 
 `getFocusTransform()` measures actual bounds and converts them back into world
 coordinates. Resizing recalculates the camera and slot. Journey and Memories
-keep independent sequential pins. Fullscreen frame/album viewers remain usable.
+keep independent sequential pins. The overview now spans up to 96% of the
+viewport width, letting only non-interactive outer cloth/lower drape crop when
+necessary; all interactive objects remain visible. Fullscreen frame/album viewers remain usable.
 
 `memories-wish-scene.js` animates the same paper from its tabletop anchor to the
 form and back into the measured slot. The box stays closed. Clipping begins only

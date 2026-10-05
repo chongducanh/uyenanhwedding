@@ -60,14 +60,16 @@ Adding a fifth milestone adds a marker and photo phase automatically.
 All four frames use one continuous mathematical helix. `filmState.progress` is
 the single animated travel value; frame index contributes only a fixed offset.
 `getHelixTransform(progress, index, geometry, settings, count)` calculates every
-frame's position, depth, scale, opacity and orientation. There are no per-frame
+frame's position, depth, scale, opacity and orientation. The photo plane follows
+the helix tangent: rear frames show the reverse side of the film before returning
+to their readable foreground orientation. There are no per-frame
 reset tweens, modulo wraps, corner poses or disappear/reappear transitions.
 
 The marker and reading segments advance the same film progress continuously.
 Sine/cosine drive lateral travel and depth; a smooth longitudinal curve keeps
 the finite ribbon inside the viewport. Rendered depth determines stacking.
-The papers have real transparent gaps, and the active caption remains beside
-the center spine. The previous caption dims as the next milestone approaches.
+Thin connecting film and translucent gaps keep the time axis visible; the active
+caption remains beside the center spine. The previous caption dims as the next milestone approaches.
 Tablet and mobile reduce radius/depth; resize remeasures the shared geometry.
 The outro continues travel and gently fades the whole scene into the gallery.
 
@@ -93,6 +95,34 @@ Reduced motion shows four complete rows in normal flow with a mild opacity
 reveal and no pinned helix. No-JavaScript visitors receive the four dates and
 titles as a list. After changing dates, run
 `node scripts/sync-journey-fallback.mjs` to regenerate that static list.
+
+## Connected film surface
+
+`dist/journey-ribbon.js` draws a single film surface through every photo plane,
+including leaders before the first photo and after the last. It receives the same
+`filmState.progress` and `transformAt()` as the photographs. There is no separate
+ribbon timeline, background image, autonomous movement or per-photo reset.
+
+Each connector attaches to the exact left and right edges of neighboring frames.
+Cubic curves leave along their surface tangents; the film narrows between photos.
+The renderer matches GSAP's rotation/scale order and the container's 1400px
+perspective, so joins remain attached through rotation, resizing and viewer return.
+Champagne edge bands have real punched perforations (SVG even-odd paths); the
+middle emulsion is translucent. The photo edge perforations use the same spacing.
+
+Small SVG patches share the photo depth order. Near parts pass in front of the
+central axis, rear parts pass behind it. Date/title labels remain readable above
+the scene. Geometry is computed without DOM measurements during scroll; SVG
+patches are allocated once, reused and removed during destroy. Unchanged progress
+skips ribbon work. Responsive refresh rebuilds geometry from the current stage.
+All patches are decorative, hidden from accessibility APIs and ignore pointer
+input; the four original photo buttons keep keyboard and fullscreen interaction.
+The viewer lock freezes the whole ribbon because it freezes the shared playhead.
+Reduced-motion mode omits the ribbon and retains all four accessible photo rows.
+
+Tune `JOURNEY_CONFIG.ribbon` for connector neck width, leader length, perforation
+pitch and patches per join. Both sites use the same renderer and settings. The
+wedding dates and supplied images have not changed.
 
 ## Dependencies
 
@@ -122,3 +152,11 @@ together; dense path samples remain continuous, fixed offsets remain unchanged,
 and reverse scrolling restores travel. Both sites' four real photos passed
 fullscreen open/close/resume checks. Film centering is reapplied on every render
 to avoid transform-cache drift after GSAP Flip restores a viewed paper.
+
+The connected-film renderer was checked at the same five viewport sizes. Its
+projected edges match the actual CSS photo bounds within 0.02px. Every connector
+moves with shared travel, freezes with the fullscreen viewer, and produces
+identical paths when returned to the same playhead. Native reverse scrolling
+restored paths within 0.2px (fractional scroll-position rounding). Both sites
+passed all four fullscreen-photo flows, breakpoint cleanup, reduced motion and
+separate Journey/Memories pins, with no JavaScript or local asset errors.

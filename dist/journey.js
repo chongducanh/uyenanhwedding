@@ -16,11 +16,15 @@
     // Camera follows the ribbon gently; tanh keeps its finite ends inside the stage.
     const follow=(progress/settings.frameSpacing/Math.max(1,count-1)-.5)*.8;
     const z=depth*g.depth;
+    // The emulsion follows the tangent of the spool. Rear frames turn with the
+    // film instead of staying front-facing while its connecting material folds.
+    let yaw=Math.atan2(Math.sin(angle)*g.depth,Math.cos(angle)*g.radiusX);
+    yaw+=Math.PI*2*Math.round((angle-yaw)/(Math.PI*2));
     return {
       x:Math.sin(angle)*g.radiusX,
       y:g.centerY+g.radiusY*Math.tanh(q*.72+follow)-g.height*.5,
       z,
-      rotationY:-Math.sin(angle-settings.focusAngle)*g.yaw,
+      rotationY:yaw*180/Math.PI,
       rotationZ:Math.sin(angle)*3+Math.sin(q*.8),
       scale:.58+.28*front+.14*proximity,
       opacity:.35+.40*front+.25*proximity,
@@ -34,7 +38,7 @@
     const axis=make('div','journey-axis');axis.setAttribute('aria-hidden','true');
     axis.append(make('span','journey-cap journey-cap--start'),make('span','journey-line'),make('span','journey-progress'),make('span','journey-cap journey-cap--end'));
     const markers=make('ol','journey-markers');markers.setAttribute('aria-label','Các dấu mốc của chúng mình');
-    const film=make('div','journey-films');
+    const film=make('div','journey-films journey-film-ribbon');
     const items=config.milestones.map((item,index)=>{
       const marker=make('li','journey-marker');marker.style.setProperty('--marker',markerPosition(index,config.milestones.length));marker.dataset.side=index%2?'left':'right';marker.dataset.milestone=item.id;
       const dot=make('span','journey-dot');dot.setAttribute('aria-hidden','true');
@@ -55,7 +59,7 @@
       paper.append(window,number,filmLabel);button.append(paper);film.append(button);
       return {item,marker,dot,copy,button,paper};
     });
-    scene.append(film,axis,markers);return {section,scene,axis,items,film,progress:axis.querySelector('.journey-progress')};
+    film.append(axis);scene.append(film,markers);return {section,scene,axis,items,film,progress:axis.querySelector('.journey-progress')};
   }
   function create({gsap,ScrollTrigger,Flip=window.Flip,getSmoother=()=>null,reduced=false,mobile=false,tablet=false}) {
     const config=window.JOURNEY_CONFIG,dom=renderJourney(config);if(!dom)return {destroy(){}};
@@ -63,6 +67,7 @@
     const heading=section.querySelector('.journey-heading'),footer=section.querySelector('.journey-footer'),chapter=section.querySelector('.journey-current');
     const lengths=config.scroll[mobile?'mobile':tablet?'tablet':'desktop'],phases=[],listeners=[],fades=[];
     const helix=config.helix,filmState={progress:-.36*helix.frameSpacing};
+    const ribbon=reduced?null:window.JourneyFilmRibbon.create({container:film,count:items.length,settings:config.ribbon});
     let filmGeometry=null,debugPoints=[];
     const debugEnabled=!!config.debug?.showFilmPath&&['localhost','127.0.0.1','::1'].includes(location.hostname);
     let timeline=null,trigger=null,lockedAt=null,pausedBefore=false,guard=false,destroyed=false,active='';
@@ -83,9 +88,9 @@
       const frameWidth=Math.min(width*(mobile?.30:tablet?.24:.20),mobile?164:260,height*(landscape?.205:.245));
       const depth=mobile?54:tablet?145:230;
       const top=height*(landscape?.26:mobile?.235:.245),bottom=height*(landscape?.83:.865);
-      return {width,height,frameWidth,top,bottom,centerY:(top+bottom)/2,radiusY:(bottom-top)*.30,
+      return {width,height,frameWidth,frameHeight:frameWidth*1.34,top,bottom,centerY:(top+bottom)/2,radiusY:(bottom-top)*.30,
         radiusX:Math.min(width*(mobile?.34:.28),(width/2-frameWidth*.50-14)/(1+depth/1400)),
-        depth,yaw:mobile?16:tablet?25:34};
+        depth};
     }
     function transformAt(progress,index) {
       return getHelixTransform(progress,index,filmGeometry||geometry(),helix,items.length);
@@ -96,6 +101,7 @@
         const {angle,offset,...pose}=transformAt(filmState.progress,index);
         gsap.set(button,{...pose,xPercent:-50,yPercent:-50,force3D:true});
       });
+      ribbon.render(filmState.progress,filmGeometry,transformAt);
       debugPoints.forEach(({node,index})=>{
         const pose=transformAt(filmState.progress,index);
         gsap.set(node,{x:pose.x,y:pose.y,z:pose.z,opacity:.3+.6*(pose.z/filmGeometry.depth+1)/2,force3D:true});
@@ -182,7 +188,7 @@
       items.forEach(({button,marker},i)=>{
         marker.append(button);
         fades.push(gsap.fromTo(marker,{opacity:.75},{opacity:1,ease:'none',scrollTrigger:{trigger:marker,start:'top 95%',end:'top 65%',scrub:true}}));
-      });film.remove();
+      });scene.prepend(axis);film.remove();
     } else buildJourneyTimeline();
     Promise.allSettled([...scene.querySelectorAll('img')].map(image=>image.decode())).then(()=>{if(!destroyed)ScrollTrigger.refresh();});
     function getNavigationState() {
@@ -190,9 +196,9 @@
       return phase?{label:phase.name,within:clamp(0,1,(time-phase.start)/(phase.end-phase.start))}:null;
     }
     function timeForNavigationState(token) {const phase=phases.find(p=>p.name===token?.label)||phases[0];return phase?phase.start+(phase.end-phase.start)*clamp(0,1,token?.within||0):0;}
-    return {timeline,phases,config,filmState,transformAt,calculateJourneyScrollDistance,getNavigationState,timeForNavigationState,viewer,
+    return {timeline,phases,config,filmState,ribbon,transformAt,calculateJourneyScrollDistance,getNavigationState,timeForNavigationState,viewer,
       refresh(){sizePhotos();ScrollTrigger.refresh();},
-      destroy(){destroyed=true;viewer.destroy();trigger?.kill();timeline?.kill();fades.forEach(t=>{t.scrollTrigger?.kill();t.kill();});listeners.forEach(fn=>fn());
+      destroy(){destroyed=true;viewer.destroy();ribbon?.destroy();trigger?.kill();timeline?.kill();fades.forEach(t=>{t.scrollTrigger?.kill();t.kill();});listeners.forEach(fn=>fn());
         section.classList.remove('journey-enhanced');section.classList.add('journey-static');delete section.dataset.phase;scene.replaceChildren();gsap.set([stage,scene,heading,axis,footer],{clearProps:'all'});}
     };
   }

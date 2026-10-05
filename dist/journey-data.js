@@ -16,6 +16,7 @@
     ],
     // Fixed spacing on one ribbon; phase progress never wraps or resets a frame.
     helix: {frameSpacing:.25, turns:.98, focusAngle:-.70},
+    ribbon: {patchesPerJoin:10, neckWidth:.38, leaderLength:.55, holePitch:18},
     debug: {showFilmPath:false}, // Local development only; ignored on hosted origins.
     scroll: {
       desktop: {intro:.8, marker:.7, photo:1.1, finalHold:.25, outro:.9},

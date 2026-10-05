@@ -1,13 +1,14 @@
 [
   {
     "asset": "table",
-    "original": "Bàn tiệc tình yêu đỏ sang trọng.png",
-    "webp": "table.webp",
+    "original": "Ảnh ChatGPT 13_28_24 5 thg 10, 2026.png",
+    "webp": "table-complete.webp",
     "dimensions": [
-      1122,
-      1402
+      1448,
+      1086
     ],
-    "bytes": 387316
+    "bytes": 345396,
+    "conversion": "WebP quality 92; original dimensions, framing and colors; metadata stripped"
   },
   {
     "asset": "frame",

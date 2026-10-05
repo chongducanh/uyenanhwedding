@@ -25,7 +25,7 @@
 
   // PHASE 6 — Fullscreen viewer, outside transformed / pinned scene containers.
   window.WeddingMemoryViewer = {
-    create({ photos = [], getSmoother = () => null, reduced = false, onLock = () => {}, onUnlock = () => {} } = {}) {
+    create({ photos = [], getSmoother = () => null, reduced = false, onLock = () => {}, onUnlock = () => {}, onSubmitted = () => {}, onResume = () => {} } = {}) {
       const id = `mem-viewer-${++uid}`;
       const dialog = make('dialog', 'mem-viewer');
       dialog.setAttribute('aria-labelledby', `${id}-title`);
@@ -277,23 +277,9 @@
     }
   };
 
-  // PHASE 9 — A replaceable submission boundary; the demo never pretends that
-  // localStorage sends a message to the couple. Hosts may override this callback.
-  if (typeof window.onWeddingWishSubmit !== 'function') {
-    window.onWeddingWishSubmit = async data => {
-      const key = `wedding-wishes:${data.siteKey || 'wedding'}`;
-      let wishes = [];
-      try { wishes = JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) { /* Ignore corrupt earlier demo data. */ }
-      if (!Array.isArray(wishes)) wishes = [];
-      const entry = { name: data.name, message: data.message, anonymous: data.anonymous, createdAt: data.createdAt };
-      try { localStorage.setItem(key, JSON.stringify([...wishes.slice(-29), entry])); }
-      catch (_) { throw new Error('Thiết bị chưa cho phép lưu lời chúc. Bạn hãy thử lại hoặc giữ lại lời chúc để gửi riêng.'); }
-      return { savedLocally: true, message: 'Đã lưu lời chúc trên thiết bị này. Lời chúc chưa được gửi đến cô dâu chú rể.' };
-    };
-    window.onWeddingWishSubmit.isLocalDemo = true;
-  }
+  // Submission is supplied by the host page. Drafts remain in memory only.
   window.WeddingWishForm = {
-    create({ mount, site = {}, reduced = false, onLock = () => {}, onUnlock = () => {} } = {}) {
+    create({ mount, site = {}, reduced = false, onLock = () => {}, onUnlock = () => {}, onSubmitted = () => {}, onResume = () => {} } = {}) {
       const id = `mem-wish-${++uid}`;
       const draftKey = site.key || 'wedding';
       const element = make('section', 'mem-wish');
@@ -313,16 +299,16 @@
       name.autocomplete = 'name';
       name.maxLength = 80;
       name.required = true;
-      name.placeholder = 'Bạn tên là…';
+      name.placeholder = 'Bạn là ai?';
       nameLabel.htmlFor = name.id;
       const messageLabel = make('label', 'mem-wish-label', 'Lời chúc');
       const message = make('textarea', 'mem-wish-input mem-wish-message');
       message.id = `${id}-message`;
       message.name = 'message';
-      message.rows = 3;
-      message.maxLength = 1200;
+      message.rows = 6;
+      message.maxLength = 1000;
       message.required = true;
-      message.placeholder = 'Một lời chúc dành cho ngày chung đôi…';
+      message.placeholder = site.key === 'bride' ? 'Viết vài lời dành cho Uyên & Anh...' : 'Viết vài lời dành cho Anh & Uyên...';
       messageLabel.htmlFor = message.id;
       const anonLabel = make('label', 'mem-wish-anonymous');
       const anonymous = make('input');
@@ -338,7 +324,7 @@
         name.required = !anonymous.checked;
       }
       let lastSuccessfulDraft = null;
-      const readDraft = () => ({ name: name.value.slice(0, 80), message: message.value.slice(0, 1200), anonymous: anonymous.checked });
+      const readDraft = () => ({ name: name.value.slice(0, 80), message: message.value.slice(0, 1000), anonymous: anonymous.checked });
       const sameDraft = (a, b) => Boolean(a && b && a.name === b.name && a.message === b.message && a.anonymous === b.anonymous);
       const saveDraft = () => {
         const draft = readDraft();
@@ -348,18 +334,27 @@
       };
       const submit = make('button', 'mem-wish-submit', 'Gửi lời chúc');
       submit.type = 'submit';
-      const notice = make('p', 'mem-wish-notice', window.onWeddingWishSubmit.isLocalDemo ? 'Lời chúc được lưu trên thiết bị này.' : '');
-      notice.id = `${id}-notice`;
-      form.setAttribute('aria-describedby', notice.id);
       const status = make('p', 'mem-wish-status');
       status.setAttribute('role', 'status');
       status.setAttribute('aria-live', 'polite');
       const resume = make('button', 'mem-wish-resume', 'Tiếp tục xem thiệp ↓');
       resume.type = 'button';
-      form.append(nameLabel, name, messageLabel, message, anonLabel, submit, notice, status);
-      element.append(monogram, title, intro, form, resume);
+      form.append(nameLabel, name, messageLabel, message, anonLabel, submit, status);
+      const writing = make('div', 'mem-wish-writing');
+      writing.append(form, resume);
+      const thanks = make('div', 'mem-wish-thanks');
+      thanks.setAttribute('role', 'status');
+      thanks.setAttribute('aria-live', 'polite');
+      const flower = make('span', 'mem-wish-flower', '❦');
+      flower.setAttribute('aria-hidden', 'true');
+      const thankYou = make('p');
+      thanks.append(flower, thankYou);
+      const letterhead = make('div', 'mem-wish-letterhead');
+      letterhead.append(monogram, title, intro);
+      element.append(letterhead, writing, thanks);
       mount?.append(element);
       let locked = false, active = false, requestedActive = false, busy = false, destroyed = false, focusTimer = 0;
+      let submitted = false, successDelay = null;
       let refreshFocus = null, refreshSelection = null, refreshing = false, refreshFrame = 0;
       const listeners = [];
       const listen = (node, type, handler, options) => {
@@ -369,6 +364,9 @@
       const lock = () => {
         if (locked || !active || destroyed) return;
         locked = true;
+        // Freeze paper dimensions while the mobile keyboard changes the viewport.
+        element.style.width = element.offsetWidth + 'px';
+        element.style.height = element.offsetHeight + 'px';
         element.classList.add('mem-wish-is-editing');
         onLock();
       };
@@ -379,8 +377,10 @@
         element.classList.toggle('mem-wish-is-active', value);
       };
       const unlock = () => {
-        if (!locked) return;
+        if (!locked || (busy && !destroyed)) return;
         locked = false;
+        element.style.removeProperty('width');
+        element.style.removeProperty('height');
         element.classList.remove('mem-wish-is-editing');
         onUnlock();
         applyActive(requestedActive);
@@ -463,10 +463,15 @@
         }, 0);
       });
       listen(resume, 'click', () => {
-        cancelRefreshFocus();
-        safeFocus(element);
-        unlock();
+        if (busy) return;
+        releaseEditing();
+        onResume();
       });
+      function releaseEditing() {
+        cancelRefreshFocus();
+        document.activeElement?.blur?.();
+        unlock();
+      }
       listen(anonymous, 'change', () => {
         name.disabled = anonymous.checked;
         name.required = !anonymous.checked;
@@ -475,11 +480,11 @@
       });
       listen(name, 'input', () => { name.setCustomValidity(''); saveDraft(); });
       listen(message, 'input', () => { message.setCustomValidity(''); saveDraft(); });
-      listen(form, 'submit', async event => {
+      async function submitWish(event) {
         event.preventDefault();
-        if (busy || destroyed) return;
+        if (busy || submitted || destroyed) return;
         const cleanName = name.value.trim().slice(0, 80);
-        const cleanMessage = message.value.trim().slice(0, 1200);
+        const cleanMessage = message.value.trim().slice(0, 1000);
         name.setCustomValidity(!anonymous.checked && !cleanName ? 'Bạn hãy nhập tên hoặc chọn gửi ẩn danh.' : '');
         message.setCustomValidity(!cleanMessage ? 'Bạn hãy viết một lời chúc.' : '');
         if (!form.reportValidity()) return;
@@ -487,50 +492,66 @@
         lock();
         busy = true;
         submit.setAttribute('aria-disabled', 'true');
-        submit.textContent = window.onWeddingWishSubmit.isLocalDemo ? 'Đang lưu lời chúc…' : 'Đang gửi lời chúc…';
-        notice.textContent = window.onWeddingWishSubmit.isLocalDemo ? 'Lời chúc được lưu trên thiết bị này.' : '';
+        submit.textContent = 'Đang gửi lời chúc…';
+        resume.disabled = true;
         form.setAttribute('aria-busy', 'true');
         status.textContent = '';
         status.classList.remove('mem-wish-error');
         try {
+          if (typeof window.onWeddingWishSubmit !== 'function') throw new Error('Lời chúc chưa gửi được. Bạn vui lòng thử lại sau.');
           const result = await window.onWeddingWishSubmit({
             name: anonymous.checked ? 'Ẩn danh' : cleanName,
             message: cleanMessage, anonymous: anonymous.checked,
             siteKey: site.key || 'wedding', wedding: site.names || '',
             date: site.dateLabel || '', createdAt: new Date().toISOString()
           });
+          if (result?.savedLocally === true || !result?.message) throw new Error('Lời chúc chưa gửi được. Bạn vui lòng thử lại sau.');
           lastSuccessfulDraft = submittedDraft;
           // Do not erase a newer edit made while an async host callback was pending.
           if (sameDraft(wishDrafts.get(draftKey), submittedDraft)) wishDrafts.delete(draftKey);
           if (destroyed) return;
-          status.textContent = typeof result?.message === 'string'
-            ? result.message.slice(0, 400) : 'Cảm ơn lời chúc của bạn.';
-          if (result?.savedLocally === false) notice.textContent = '';
+          submitted = true;
+          thankYou.textContent = String(result.message).slice(0, 400);
+          writing.inert = true;
+          element.classList.add('mem-wish-submitted');
+          element.dispatchEvent(new CustomEvent('wedding-wish-acknowledged', {bubbles: true}));
           const isReduced = typeof reduced === 'function' ? reduced() : reduced;
-          if (motion() && !isReduced) motion().fromTo(status, { opacity: 0, y: 4 }, { opacity: 1, y: 0, duration: .3 });
+          const finish = () => {
+            if (destroyed) return;
+            releaseEditing();
+            onSubmitted(result);
+          };
+          if (motion() && !isReduced) {
+            motion().to(writing, {autoAlpha: 0, duration: .3});
+            motion().to(thanks, {autoAlpha: 1, y: 0, duration: .5, delay: .2});
+            successDelay = motion().delayedCall(1.8, finish);
+          } else { writing.hidden = true; thanks.style.opacity = '1'; thanks.style.visibility = 'visible'; queueMicrotask(finish); }
         } catch (error) {
           if (destroyed) return;
           status.classList.add('mem-wish-error');
           status.textContent = (error instanceof Error && error.message)
-            ? error.message.slice(0, 300) : 'Chưa thể lưu lời chúc. Bạn hãy thử lại.';
+            ? error.message.slice(0, 300) : 'Lời chúc chưa gửi được. Bạn hãy thử lại.';
         } finally {
           if (!destroyed) {
             busy = false;
+            resume.disabled = false;
             submit.removeAttribute('aria-disabled');
             submit.textContent = 'Gửi lời chúc';
             form.removeAttribute('aria-busy');
           }
         }
-      });
+      }
+      listen(form, 'submit', submitWish);
       setActive(false);
-      return { element, setActive, destroy() {
+      return { element, letterhead, writing, thanks, setActive, releaseEditing, get submitted() { return submitted; }, get locked() { return locked; }, destroy() {
         if (destroyed) return;
         saveDraft();
         destroyed = true;
         cancelRefreshFocus();
         clearTimeout(focusTimer);
         unlock();
-        motion()?.killTweensOf(status);
+        successDelay?.kill();
+        motion()?.killTweensOf([status, writing, thanks]);
         listeners.forEach(remove => remove());
         element.remove();
       } };

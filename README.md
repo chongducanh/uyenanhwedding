@@ -47,3 +47,5 @@ callback lời chúc và bộ đồ họa WebP dành riêng cho từng lễ.
 
 Xem [JOURNEY.md](JOURNEY.md) để sửa ngày, gán 4 ảnh kỷ niệm và điều chỉnh
 film helix. Section dùng cấu hình nhà trai/nhà gái sẵn có.
+
+Bố cục bàn ký ức: `dist/memories-layout.js`; ảnh nền duy nhất: `table-complete.webp`.

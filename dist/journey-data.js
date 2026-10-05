@@ -20,6 +20,7 @@
     ribbon: {patchesPerJoin:16, stockWidth:1.08, holePitch:14, photoSlices:32},
     debug: {showFilmPath:false}, // Local development only; ignored on hosted origins.
     scroll: {
+      distanceScale: .5, // Half the scroll travel; preserve the rhythm between phases.
       desktop: {intro:.8, marker:.7, photo:1.1, finalHold:.25, outro:.9},
       tablet: {intro:.55, marker:.5, photo:.8, finalHold:.2, outro:.65},
       mobile: {intro:.32, marker:.28, photo:.5, finalHold:.12, outro:.4}

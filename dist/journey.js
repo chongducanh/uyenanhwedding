@@ -201,7 +201,7 @@
         .to(heading,{opacity:.65,y:-8,duration:lengths.outro*.38},lengths.outro*.62);
     }
     function calculateJourneyScrollDistance() {
-      return Math.round(stage.clientHeight*(lengths.intro+items.length*(lengths.marker+lengths.photo)+lengths.finalHold+lengths.outro));
+      return Math.round(stage.clientHeight*(lengths.intro+items.length*(lengths.marker+lengths.photo)+lengths.finalHold+lengths.outro)*(config.scroll.distanceScale ?? 1));
     }
     function updateExperience() {
       if(destroyed||!timeline)return;

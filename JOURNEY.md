@@ -54,7 +54,9 @@ continues below the last marker to a visible decorative end cap.
 
 `calculateJourneyScrollDistance()` sums the configured intro, marker and photo
 lengths × milestone count, final hold, and outro, then multiplies by stage
-height. Default desktop length is 9.15 viewport heights; mobile is 3.96.
+height and `scroll.distanceScale` (0.5). This halves the scroll travel while
+retaining all phase proportions: desktop is 4.575 viewport heights, tablet 3.3,
+and mobile 1.98. Set the scale in `journey-data.js` to tune overall pacing.
 Adding a fifth milestone adds a marker and photo phase automatically.
 
 All four photographs are cells of one compact, open 3D film coil around the

@@ -13,7 +13,7 @@ animating duplicate galleries.
     .mem-heading                   screen-space chapter information
     .mem-camera
       .mem-world                   one stable 1440px coordinate system
-        .mem-table / .mem-table-surface / .mem-decor
+        .mem-table                 complete, uncut table artwork
       .mem-contact × 7             shadows on the tabletop plane
         .mem-frame × photos.length
         .mem-album-mount            physical cover + two-sided paper leaf
@@ -79,9 +79,9 @@ original dimensions and alpha channels, at quality 90.
 | Album cover | `album-au.webp` — Anh & Uyên | `album-ua.webp` — Uyên & Anh |
 | Money box | `money-box-au.webp` — AU | `money-box-ua.webp` — UA |
 
-The table and flower layers display complementary CSS clips of the same supplied
-transparent table image. This allows a sequential reveal without duplicating the
-image download. The supplied wooden frame overlays each table photo.
+The complete table uses one uncut supplied transparent image, including flowers,
+candles, drapery and pearls. There is no separate floral artwork/reveal. The
+supplied wooden frame overlays each table photo.
 Album covers use a square physical page shape and CSS framing to hide the
 original mockup's surrounding background while retaining the supplied cover.
 Each site includes only its own cover and box, plus shared table/frame artwork.
@@ -106,12 +106,13 @@ framing, correct AU/UA identity, click targets and image loading.
 
 ## Table staging
 
-The tabletop occupies world coordinates x=240…1200, y=460…635. Three rear
-frames stand at y=490; two front frames stand at y≈595 and partially overlap
-the back row. Their origins stay at the bottom center so small tilts retain a
-contact point. The closed album rests at the front with a 62° tilt and −12°
-rotation, and returns to the same pose after reading. The money box stands on
-the right with its own footprint.
+The complete table keeps a small frame cluster on the left: three rear frames
+stand at y=495, with two overlapping front frames at y≈536. Their origins stay
+at bottom center so small tilts retain a contact point. The album rests near
+the center with a 58° tilt and −4° rotation, and returns to the same pose after
+reading. The money box stands on the right with its own footprint. These
+proportions match the current groom-side composition; original photo order,
+UA artwork and bride-side interactions are unchanged.
 
 Seven separate contact shadows sit on the tabletop and share an upper-left
 light direction. Cropped views of the original flower garland and lightweight
@@ -119,6 +120,22 @@ pearl paths overlap feet and edges. All ornamental layers ignore pointer
 events. Focused photos and the open album rise above foreground decoration;
 the normal physical stacking order returns in the overview.
 
-The front cloth begins at the tabletop lip instead of behind the displayed
-objects. The surface reuses the existing fabric image as its texture, so no
-new image download or photo replacement is needed.
+The original tabletop and front cloth stay joined in the complete artwork.
+The artwork is positioned so its front lip stays beyond the displayed objects.
+No new image download or photo replacement is needed.
+
+## Complete-table introduction
+
+The table is fully dressed from the first frame. `mem-table-art` displays the
+complete `tableAsset` once, without complementary flower/cloth clips or a
+`decorAsset`. Its front lip aligns with the existing object footprints; no
+separate tabletop overlay is rendered. Foreground contact flowers and pearls
+are present from the outset;
+they never rise or reveal separately.
+
+The intro settles the whole world camera from 0.96 to 1 over 0.34 timeline units.
+Only afterward do the five frames, album and money box rise 8 world pixels with
+a small stagger. Each object's contact shadow reveals at the same time. The
+groom's physical wish card continues to follow the box's visibility. All later
+photo, album and wish phases, responsive timings and site-specific assets are
+preserved. Reversing the intro returns to a complete, already decorated table.

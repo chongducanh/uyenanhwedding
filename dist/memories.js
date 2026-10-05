@@ -58,18 +58,11 @@
    nav.forEach(button=>listen(button,'click',()=>{const target=button.dataset.memoryJump==='wishes'?wishHost:button.dataset.memoryJump==='album'?mount:tableGallery;target.scrollIntoView({behavior:'instant',block:'start'});}));
   }else{
    const backdrop=el('div','mem-world-backdrop');backdrop.setAttribute('aria-hidden','true');world.append(backdrop);
+   // One uncut artwork contains the ready-set table, cloth, flowers, candles
+   // and pearls, including their original tabletop and contact details.
    const table=el('div','mem-table mem-object');table.setAttribute('aria-hidden','true');
-   if(data.site.tableAsset){const image=el('img','mem-table-art');image.src=data.site.tableAsset;image.alt='';image.decoding='async';table.append(image);table.classList.add('has-art');}
-   else{table.append(el('div','mem-table-top'),el('div','mem-table-cloth'));}
-   world.append(table);
-   const decor=el('div','mem-decor mem-object');decor.setAttribute('aria-hidden','true');
-   if(data.site.decorAsset){const image=el('img','mem-decor-art');image.src=data.site.decorAsset;image.alt='';image.decoding='async';decor.append(image);}
-   else{decor.innerHTML='<div class="mem-vase"></div><svg viewBox="0 0 260 260" fill="none"><g stroke="#a88d63" stroke-width="1.2"><path d="M128 252Q130 127 54 58M128 250Q142 125 211 47M129 248Q77 152 21 134M133 233Q176 142 252 113M128 230V33"/><path d="M59 66q-52 11-44-35 40 3 44 35ZM73 84q47-9 25-45-31 17-25 45ZM188 79q4-52 46-46 4 32-46 46ZM169 114q-41-14-34-45 38 1 34 45ZM62 160q-47 7-50-28 32-9 50 28ZM202 135q47 5 43-33-29 0-43 33ZM128 58q-29-24-6-46 31 16 6 46Z"/></g></svg>';}
-   if(data.site.decorInTable){table.classList.add('mem-table--split-art');decor.classList.add('mem-decor--table-art');}
-   world.append(decor);
-   // A real support plane: rear feet at y=490, front feet at y=595.
-   // The cloth starts at the front lip (y=630), never behind floating objects.
-   const tabletop=el('div','mem-table-surface mem-object');tabletop.setAttribute('aria-hidden','true');world.append(tabletop);
+   const tableArt=el('img','mem-table-art');tableArt.src=data.site.tableAsset;tableArt.alt='';
+   tableArt.decoding='async';tableArt.width=1122;tableArt.height=1402;table.append(tableArt);world.append(table);
    const contacts=new Map();
    function contact(node,x,y,width,height=22){
     const shadow=el('div','mem-contact');shadow.setAttribute('aria-hidden','true');
@@ -77,11 +70,11 @@
     world.append(shadow);contacts.set(node,shadow);return shadow;
    }
    const positions=[
-    {x:298,y:431,w:230,h:164,r:-1.5,row:'front'},
-    {x:405,y:260,w:164,h:230,r:-1,row:'back'},
-    {x:605,y:239,w:174,h:251,r:0,row:'back'},
-    {x:808,y:267,w:156,h:223,r:1,row:'back'},
-    {x:886,y:387,w:150,h:209,r:1.5,row:'front'}
+    {x:328,y:442,w:140,h:94,r:-1,row:'front'},
+    {x:340,y:336,w:105,h:159,r:-.8,row:'back'},
+    {x:477,y:313,w:120,h:182,r:.5,row:'back'},
+    {x:543,y:411,w:87,h:128,r:1,row:'front'},
+    {x:631,y:343,w:101,h:152,r:-.5,row:'back'}
    ];
    frames=data.photos.map((photo,i)=>{
     const width=Math.min(154,850/data.photos.length),height=width*photo.height/photo.width+16;
@@ -89,32 +82,34 @@
     const n=createPhoto(photo,i),p=photo.placement||(data.photos.length===5?positions[i]:placement);
     Object.assign(n.style,{left:p.x+'px',top:p.y+'px',width:p.w+'px',height:p.h+'px'});n.dataset.rotation=p.r;n.dataset.row=p.row||'back';n.classList.add('mem-object');world.append(n);contact(n,p.x+5,p.y+p.h-4,p.w*1.08);return n;
    });
-   const albumMount=el('div','mem-album-mount mem-object');Object.assign(albumMount.style,{left:'510px',top:'463px',width:'420px',height:'210px'});world.append(albumMount);
+   const albumMount=el('div','mem-album-mount mem-object');Object.assign(albumMount.style,{left:'570px',top:'439px',width:'320px',height:'160px'});world.append(albumMount);
    album=window.WeddingAlbum.create({mount:albumMount,photos:data.album,site:data.site,onPhotoClick:openPhoto,mobile,reduced:false});
-   contact(albumMount,603,603,245,35);
+   contact(albumMount,647,556,188,24);
    const box=el('div','mem-money-box mem-object');box.setAttribute('aria-hidden','true');
    const inside=el('div','mem-box-inside'),door=el('div','mem-box-door');
    if(data.site.boxAsset){const image=el('img','mem-box-art');image.src=data.site.boxAsset;image.alt='';image.decoding='async';door.append(image);}
    else{door.append(el('span','mem-box-slot'),el('span','mem-box-monogram',data.site.initials),el('span','mem-box-label','WITH LOVE'));door.classList.add('mem-box-door--drawn');}
-   box.append(inside,door);world.append(box);contact(box,1004,539,170,29);
+   box.append(inside,door);world.append(box);contact(box,1020,537,151,23);
    // Cropped views of the supplied flower garland, plus pearl strands, occlude
    // only feet/edges. They share the same light direction as the contact shadows.
    const foreground=el('div','mem-table-foreground mem-object');foreground.setAttribute('aria-hidden','true');
    if(data.site.tableAsset){
-    const clusters=[{x:319,y:566,w:142,h:72,view:'80 980 310 180'},
-     {x:540,y:477,w:88,h:48,view:'340 1040 240 135'},
-     {x:743,y:596,w:100,h:55,view:'480 1050 240 145'},
-     {x:1028,y:513,w:145,h:66,view:'750 1020 290 170'}];
+    const clusters=[{x:328,y:516,w:93,h:42,view:'80 980 310 180'},
+     {x:590,y:518,w:68,h:34,view:'340 1040 240 135'},
+     {x:783,y:561,w:70,h:37,view:'480 1050 240 145'},
+     {x:1069,y:519,w:98,h:45,view:'750 1020 290 170'}];
     clusters.forEach(c=>{const cluster=el('div','mem-flower-contact');Object.assign(cluster.style,{left:c.x+'px',top:c.y+'px',width:c.w+'px',height:c.h+'px'});
      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',c.view);svg.setAttribute('preserveAspectRatio','none');
      const image=document.createElementNS('http://www.w3.org/2000/svg','image');image.setAttribute('href',data.site.tableAsset);image.setAttribute('width','1122');image.setAttribute('height','1402');svg.append(image);cluster.append(svg);foreground.append(cluster);});
    }
    const pearls=document.createElementNS('http://www.w3.org/2000/svg','svg');pearls.classList.add('mem-table-pearls');pearls.setAttribute('viewBox','0 0 1440 1000');
-   const strand='M342 584C382 628 481 615 526 584 M561 490C571 513 592 518 619 506 M619 616C663 655 766 650 815 615 M969 584C999 610 1101 605 1132 555';
+   const strand='M352 533C403 555 469 549 510 534 M585 537C609 548 632 546 650 538 M665 581C706 602 779 595 812 578 M963 550C1004 575 1090 574 1121 539';
    ['shadow','thread','beads'].forEach(type=>{const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',strand);path.classList.add('mem-pearl-'+type);pearls.append(path);});
    foreground.append(pearls);world.append(foreground);
    const shadows=[...contacts.values()];
-   sceneObjects=[table,tabletop,decor,...frames,albumMount,box,foreground];
+   const interactiveObjects=[...frames,albumMount,box];
+   const setDressing=[table,foreground];
+   sceneObjects=[...setDressing,...interactiveObjects];
    const dimensions=()=>({width:stage.clientWidth,height:stage.clientHeight});
    const baseScale=()=>{const v=dimensions();return Math.min(v.width*.96/(mobile?1200:CONFIG.worldWidth),v.height*.78/1000);};
    // World-space positions never include the currently transformed camera. This
@@ -129,11 +124,19 @@
    const overview=(tl,length)=>tl.to(camera,{cx:720,cy:CONFIG.worldCenterY,zoom:1,screenY:.55,duration:length,ease:'sine.inOut',onUpdate:renderCamera});
    function focusObjects(tl,focus,at=0){tl.to(sceneObjects.filter(n=>n!==focus),{opacity:.14,duration:mobile?.15:.35},at).to(shadows,{opacity:.08,duration:.2},at).to(focus,{opacity:1,duration:mobile?.15:.35},at);}
    const buildPart=(name,build)=>{const child=gsap.timeline();build(child);const start=timeline.duration();timeline.addLabel(name,start).add(child,start);phases.push({name,start,end:start+child.duration()});return{start,duration:child.duration()};};
-   gsap.set(world,{transformOrigin:'0 0'});gsap.set(sceneObjects,{autoAlpha:0,y:45});gsap.set(frames,{rotation:i=>Number(frames[i].dataset.rotation),transformOrigin:'50% 100%'});gsap.set(albumMount,{rotation:-12,rotationX:62,transformOrigin:'50% 50%'});gsap.set(shadows,{autoAlpha:0});gsap.set(wishHost,{autoAlpha:0,y:18});gsap.set(door,{transformOrigin:'12% 60%'});
+   gsap.set(world,{transformOrigin:'0 0'});gsap.set(setDressing,{autoAlpha:1,y:0});gsap.set(interactiveObjects,{autoAlpha:0,y:8});gsap.set(frames,{rotation:i=>Number(frames[i].dataset.rotation),transformOrigin:'50% 100%'});gsap.set(albumMount,{rotation:-4,rotationX:58,transformOrigin:'50% 50%'});gsap.set(shadows,{autoAlpha:0});gsap.set(wishHost,{autoAlpha:0,y:18});gsap.set(door,{transformOrigin:'12% 60%'});
    gsap.set(inside,{autoAlpha:0});
    timeline=gsap.timeline({defaults:{ease:'none'},onUpdate:updateExperience});
-   // PHASE 1 — A sequential table, decor, five frames, album and money box reveal.
-   buildPart('intro',tl=>{tl.to([table,tabletop],{autoAlpha:1,y:0,duration:.28},0).to(decor,{autoAlpha:1,y:0,duration:.3},.12).to(frames,{autoAlpha:1,y:0,stagger:.055,duration:.3},.22).to(shadows,{autoAlpha:1,stagger:.045,duration:.22},.35).to(albumMount,{autoAlpha:1,y:0,duration:.25},.53).to(box,{autoAlpha:1,y:0,duration:.25},.65).to(foreground,{autoAlpha:1,y:0,duration:.22},.68);hold(tl,mobile?.18:.35);});
+   // PHASE 1 — The complete table is already present. Settle the entire camera,
+   // then reveal only its interactive objects (and their matching contact shadows).
+   buildPart('intro',tl=>{
+    tl.fromTo(camera,{zoom:.96},{zoom:1,duration:.34,ease:'sine.out',onUpdate:renderCamera},0)
+      .to(frames,{autoAlpha:1,y:0,stagger:.045,duration:.24},.36)
+      .to(frames.map(frame=>contacts.get(frame)),{autoAlpha:1,stagger:.045,duration:.24},.36)
+      .to([albumMount,contacts.get(albumMount)],{autoAlpha:1,y:0,duration:.24},.56)
+      .to([box,contacts.get(box)],{autoAlpha:1,y:0,duration:.24},.68);
+    hold(tl,mobile?.18:.35);
+   });
    // PHASE 2 — Move the entire camera between framed pictures, then pause to read.
    data.photos.forEach((photo,i)=>{
     const length=mobile?CONFIG.mobilePhotoScrollLength:CONFIG.photoScrollLength,travel=mobile?length*.62:Math.min(CONFIG.cameraDuration,length*.7);
@@ -154,7 +157,7 @@
    }
    // PHASE 6 — Clickable page buttons open the separately managed fullscreen viewer.
    // PHASE 7 — Close the final spread and return the closed book to the tabletop.
-   buildPart('album-close',tl=>{tl.to(bookState,{close:1,duration:mobile?.3:.65,ease:'sine.inOut',onUpdate:paintAlbum});overview(tl,mobile?.25:.6);tl.to(sceneObjects,{opacity:1,duration:.25},mobile?.3:.65).to(shadows,{opacity:1,duration:.25},mobile?.3:.65).to(albumMount,{rotation:-12,rotationX:62,duration:.25},mobile?.3:.65);tl.to(frames,{rotation:i=>Number(frames[i].dataset.rotation),duration:.25},mobile?.3:.65);});
+   buildPart('album-close',tl=>{tl.to(bookState,{close:1,duration:mobile?.3:.65,ease:'sine.inOut',onUpdate:paintAlbum});overview(tl,mobile?.25:.6);tl.to(sceneObjects,{opacity:1,duration:.25},mobile?.3:.65).to(shadows,{opacity:1,duration:.25},mobile?.3:.65).to(albumMount,{rotation:-4,rotationX:58,duration:.25},mobile?.3:.65);tl.to(frames,{rotation:i=>Number(frames[i].dataset.rotation),duration:.25},mobile?.3:.65);});
    // PHASE 8 — The same world camera approaches the money box.
    buildPart('box-focus',tl=>{focusObjects(tl,box);targetCamera(tl,box,mobile?.3:.8,.92,.82,.51,0);});
    // PHASE 9 — Door opens; the form lives in a stable, untransformed screen plane.

@@ -52,8 +52,8 @@ Bố cục bàn ký ức: `dist/memories-layout.js`; ảnh nền duy nhất: `ta
 
 ## Nhạc cưới và tốc độ cuộn
 
-`dist/wedding-music.js` chọn ngẫu nhiên một trong ba file người dùng cung cấp
-trong `dist/audio/`: **Beautiful in White**, **Marry You**, **Ngày Đầu Tiên**.
+`dist/wedding-music.js` chọn ngẫu nhiên một trong bốn file người dùng cung cấp
+trong `dist/audio/`: **Beautiful in White**, **Marry You**, **Ngày Đầu Tiên**, **Lễ Đường**.
 Mỗi lần mở/tải lại trang hoặc quay lại từ back/forward cache sẽ chọn lại;
 chuyển tab vẫn giữ bài đang nghe. Chọn ngẫu nhiên có thể trùng bài lần trước.
 Nhạc lặp lại, âm lượng 32%, không có nút hay trình phát hiển thị. Website thử

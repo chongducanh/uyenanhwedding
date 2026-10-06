@@ -1,7 +1,7 @@
 /* Native background audio. Keep play() inside trusted gestures for mobile browsers. */
 (() => {
   const MUSIC = Object.freeze({
-    tracks: ['audio/beautiful-in-white.mp3', 'audio/marry-you.mp3', 'audio/ngay-dau-tien.mp3'],
+    tracks: ['audio/beautiful-in-white.mp3', 'audio/marry-you.mp3', 'audio/ngay-dau-tien.mp3', 'audio/le-duong.mp3'],
     volume: 0.32
   });
   const assetBase = document.currentScript.src;

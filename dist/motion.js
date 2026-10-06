@@ -22,6 +22,28 @@
   const destination=pin?pin.start+(pin.end-pin.start)*(photoTarget ? .85 : (readableProgress[el.id]||0)):(smoother?smoother.offset(el,'top top'):el.getBoundingClientRect().top+scrollY);
   scrollToY(destination,animate,duration);
  }
+ // Accelerate wheel input only; GSAP still owns smoothing and pin coordinates.
+ // Native touch, zoom gestures, embedded media and form scrolling stay native.
+ const WHEEL_MULTIPLIER=1.2;
+ function enableWheelBoost(){
+  const editable='input,textarea,select,[contenteditable]:not([contenteditable="false"])';
+  function onWheel(event){
+   if(event.defaultPrevented||!event.cancelable||event.ctrlKey||event.metaKey||event.altKey||event.shiftKey||Math.abs(event.deltaX)>=Math.abs(event.deltaY))return;
+   if(smoother?.paused()||root.classList.contains('mem-interaction-locked')||document.querySelector('dialog[open]'))return;
+   const target=event.target instanceof Element?event.target:null;
+   if(target?.closest(editable+', [role="dialog"], .wedding-music-panel')||document.activeElement?.matches(editable))return;
+   for(let node=target;node&&node!==document.body&&node!==root;node=node.parentElement){
+    if(node.scrollHeight>node.clientHeight+1&&/(auto|scroll|overlay)/.test(getComputedStyle(node).overflowY))return;
+   }
+   const style=getComputedStyle(document.body);
+   const lineHeight=parseFloat(style.lineHeight)||parseFloat(style.fontSize)*1.2||16;
+   const unit=event.deltaMode===1?lineHeight:event.deltaMode===2?innerHeight:1;
+   event.preventDefault();
+   window.scrollBy({top:event.deltaY*unit*WHEEL_MULTIPLIER,left:0,behavior:'instant'});
+  }
+  window.addEventListener('wheel',onWheel,{passive:false});
+  return()=>window.removeEventListener('wheel',onWheel);
+ }
  function setupMotion(){
   if(mm)mm.revert();
   mm=gsap.matchMedia();
@@ -41,6 +63,7 @@
     return()=>{journeyExperience?.destroy();journey=null;experience?.destroy();memories=null;root.classList.remove('reduced');};
    }
    smoother=ScrollSmoother.create({wrapper:'#smooth-wrapper',content:'#smooth-content',smooth:1.05,smoothTouch:.12,effects:false,normalizeScroll:false});
+   const removeWheelBoost=enableWheelBoost();
    const mobile=ctx.conditions.mobile,flowMap=mobile||ctx.conditions.short;
    const pin=(id,stage,length)=>({id:`pin-${id}`,trigger:`#${id}`,pin:stage,pinSpacer:id==='location'?$('.location-pin-spacer'):undefined,start:'top top',end:()=>`+=${innerHeight*length}`,scrub:.65,invalidateOnRefresh:true,anticipatePin:1});
    function titleReveal(selector){
@@ -157,6 +180,7 @@
    gsap.to('.page-progress',{scaleX:1,ease:'none',scrollTrigger:{id:'page-progress',trigger:'#smooth-content',start:'top top',end:'bottom bottom',scrub:true}});
    ScrollTrigger.refresh();
    return()=>{
+    removeWheelBoost();
     // Restore any gallery modal scroll lock before disposing the shared smoother.
     journeyExperience?.destroy();journey=null;experience?.destroy();memories=null;$('.farewell-scene').inert=false;splits.forEach(s=>s.revert());smoother?.kill();smoother=null;root.classList.remove('motion-enabled');
    };

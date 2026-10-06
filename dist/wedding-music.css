@@ -1,0 +1,16 @@
+/* A small music control sits outside the transformed scroll container. */
+.wedding-music{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:80;color:#f3e7d4;font-family:var(--sans);isolation:isolate}
+.wedding-music-toggle{display:flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 15px;border:1px solid #c6a87880;background:#301a23f5;color:inherit;font:400 14px/1.3 var(--sans);cursor:pointer;box-shadow:0 5px 24px #13080d33}
+.wedding-music-toggle svg{fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.wedding-music-panel{position:absolute;right:0;bottom:calc(100% + 10px);width:min(320px,calc(100vw - 32px));padding:13px;border:1px solid #c6a87880;background:#301a23fa;box-shadow:0 15px 55px #13080d66}
+.wedding-music-panel[hidden]{display:none}
+.wedding-music-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.wedding-music-heading p{margin:0;font:400 25px/1.1 var(--serif);color:#f3e7d4}
+.wedding-music-heading span{display:block;margin-top:4px;font:400 13px/1.4 var(--sans);color:#d2b5bd}
+.wedding-music-close{flex:none;width:44px;height:44px;border:0;background:transparent;color:inherit;font:300 29px/1 var(--sans);cursor:pointer}
+.wedding-music-player{height:200px;min-width:200px;background:#190d13}
+.wedding-music-player iframe{display:block;width:100%;height:100%;border:0}
+.wedding-music-source{display:block;margin-top:10px;padding:4px 0;color:#d8c19f;font:400 14px/1.5 var(--sans);text-underline-offset:4px}
+.wedding-music button:focus-visible,.wedding-music a:focus-visible{outline:2px solid #ead1ab;outline-offset:3px}
+@media(max-width:700px){.wedding-music{right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom))}.wedding-music-toggle{padding-inline:12px}.wedding-music-panel{width:min(304px,calc(100vw - 24px));padding:11px}}
+@media(max-height:500px){.wedding-music-panel{padding:8px;bottom:calc(100% + 6px)}.wedding-music-heading{margin-bottom:4px}.wedding-music-heading p{font-size:23px}.wedding-music-source{margin-top:5px;padding:0}.wedding-music-heading span{display:none}}

@@ -49,3 +49,14 @@ Xem [JOURNEY.md](JOURNEY.md) để sửa ngày, gán 4 ảnh kỷ niệm và đi
 film helix. Section dùng cấu hình nhà trai/nhà gái sẵn có.
 
 Bố cục bàn ký ức: `dist/memories-layout.js`; ảnh nền duy nhất: `table-complete.webp`.
+
+## Nhạc cưới và tốc độ cuộn
+
+`dist/wedding-music.js` mở bản chính thức **Beautiful in White — Shane Filan**
+qua player YouTube hiển thị sau khi bấm “Nhạc cưới”. Đóng player hoặc chuyển tab
+sẽ dừng phát. Video không tải trước khi khách chọn mở; nếu trình duyệt chặn
+autoplay, khách có thể bấm Play trong player.
+
+`WHEEL_MULTIPLIER` trong `dist/motion.js` là `1.2`: mỗi lần lăn chuột di chuyển
+thêm 20%, còn GSAP vẫn làm mượt. Không thay đổi khoảng pin, tốc độ cảm ứng,
+trường nhập lời chúc hay thao tác trong trình xem ảnh.

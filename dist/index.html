@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="images/envelope-paper.webp" media="(orientation:landscape)">
 <link rel="preload" as="image" href="images/envelope-paper-mobile.webp" media="(orientation:portrait)">
-<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="envelope.css"><link rel="stylesheet" href="wedding-details.css"><link rel="stylesheet" href="memories-album.css"><link rel="stylesheet" href="memories-interactions.css"><link rel="stylesheet" href="memories.css"><link rel="stylesheet" href="journey.css">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="envelope.css"><link rel="stylesheet" href="wedding-details.css"><link rel="stylesheet" href="memories-album.css"><link rel="stylesheet" href="memories-interactions.css"><link rel="stylesheet" href="memories.css"><link rel="stylesheet" href="journey.css"><link rel="stylesheet" href="wedding-music.css">
 </head><body>
 <a class="skip" href="#celebration">Đến lịch trình lễ cưới</a>
 <div class="page-progress" aria-hidden="true"></div>
@@ -187,5 +187,5 @@ window.onWeddingWishSubmit = async (d) => {
   await fetch(endpoint, {method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:d.name,message:d.message,anonymous:d.anonymous})});
   return {savedLocally:false,message:'Lời chúc đã đến tay Nhật Uyên & Đức Anh. Cảm ơn bạn!'};
 };
-</script><script src="memories-interactions.js"></script><script src="memories-wish-scene.js"></script><script src="memories.js"></script><script src="countdown.js"></script><script src="calendar.js"></script><script src="motion.js"></script>
+</script><script src="memories-interactions.js"></script><script src="memories-wish-scene.js"></script><script src="memories.js"></script><script src="countdown.js"></script><script src="calendar.js"></script><script src="motion.js"></script><script src="wedding-music.js"></script>
 </body></html>

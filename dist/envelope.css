@@ -247,3 +247,6 @@ html:not(.motion-enabled) .closing-envelope .closing-dateline{position:absolute;
  .farewell-note{font-size:10px;line-height:1.65;margin-top:10px}.farewell-signature{font-size:23px;margin-top:12px}
  .farewell-link{font-size:9px;margin-top:6px;padding-block:5px}.farewell-bottom{bottom:10px}
 }
+
+/* Keep only the invitation lunar date readable; the calendar is unchanged. */
+.photo-invitation-details p > span{font-size:12px;font-style:normal;line-height:1.65;letter-spacing:.2px;color:#f0e3e7}

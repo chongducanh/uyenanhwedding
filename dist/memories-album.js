@@ -113,7 +113,7 @@
     const label = node('div', 'mem-album-cover-label');
     label.append(node('span', 'mem-album-cover-kicker', 'WEDDING MEMORIES'));
     label.append(node('span', 'mem-album-cover-initials', site.initials || 'A & U'));
-    label.append(node('span', 'mem-album-cover-names', site.names || 'Đức Anh & Nhật Uyên'));
+    label.append(node('span', 'mem-album-cover-names', site.names || ''));
     label.append(node('span', 'mem-album-cover-date', site.dateLabel || ''));
     if (site.albumCover) {
       const coverImage = node('img', 'mem-album-cover-image');
@@ -142,7 +142,7 @@
       heading.append(node('span', '', String((spread.number - 1) * 2 + (side === 'left' ? 1 : 2)).padStart(2, '0')));
       const picturesNode = node('div', 'mem-album-page-pictures');
       pictures.forEach((photo, i) => picturesNode.append(photoButton(photo, i)));
-      if (!pictures.length) picturesNode.append(node('p', 'mem-album-page-dedication', 'Một lời hẹn.\nMột đời bên nhau.'));
+      if (!pictures.length) picturesNode.append(node('p', 'mem-album-page-dedication', site.dateLabel));
       host.append(heading, picturesNode, node('div', 'mem-album-page-foot', site.names || ''));
     }
 

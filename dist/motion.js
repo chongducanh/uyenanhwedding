@@ -103,7 +103,6 @@
     .from('.date-divider',{scaleY:0,duration:.7,ease:'power2.out'},.2)
     .from('.calendar-details>*',{y:45,autoAlpha:0,stagger:.12,duration:.65},.5)
     .to(path,{strokeDashoffset:0,duration:.9,ease:'power1.inOut'},.9)
-    .from('.date-promise',{y:25,autoAlpha:0,duration:.5},1.2)
     .from('.month-heading',{y:20,autoAlpha:0,duration:.5},.35)
     .from('.month-grid thead',{y:10,autoAlpha:0,duration:.4},.5)
     .from('.month-day',{y:15,autoAlpha:0,stagger:.018,duration:.45,ease:'power1.out'},.6)
@@ -115,12 +114,11 @@
    const orbit=$('.countdown-orbit-line'),orbitLength=orbit.getTotalLength();
    gsap.set(orbit,{strokeDasharray:orbitLength,strokeDashoffset:orbitLength});
    const countdown=gsap.timeline({scrollTrigger:pin('countdown','.countdown-stage',mobile?1.35:1.45)});timelines.countdown=countdown;
-   countdown.from('.countdown-content>.eyebrow',{y:30,autoAlpha:0,duration:.55},0)
-    .from('.countdown-title-line',{yPercent:115,stagger:.12,duration:.85,ease:'power2.out'},.1)
+   countdown.from('.countdown-title-line',{yPercent:115,stagger:.12,duration:.85,ease:'power2.out'},.1)
     .from('.count-unit',{x:i=>(mobile?[-65,65,-65,65]:[-160,-55,55,160])[i],y:i=>mobile?(i<2?70:100):90,rotation:i=>[-7,-3,3,7][i],scale:.72,autoAlpha:0,stagger:.14,duration:1.1,ease:'power2.out'},.45)
     .from('.count-label',{y:16,autoAlpha:0,stagger:.1,duration:.5},1.05)
     .to(orbit,{strokeDashoffset:0,duration:2.8,ease:'power1.inOut'},.15)
-    .from('.countdown-note,.countdown-bottom',{y:22,autoAlpha:0,stagger:.12,duration:.6},1.5)
+    .from('.countdown-note',{y:22,autoAlpha:0,stagger:.12,duration:.6},1.5)
     .addLabel('read',2.1)
     .to('.countdown-clock',{duration:1.1},'read')
     .to('.countdown-clock',{scale:1.045,y:-8,duration:.7,ease:'sine.inOut'},3.2)

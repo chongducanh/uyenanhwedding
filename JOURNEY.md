@@ -1,4 +1,4 @@
-# Hành trình của 2 đứa mình
+# Hành trình của hai đứa mình
 
 The shared Journey implementation sits immediately before Wedding Memories.
 It adds its own ScrollTrigger; the gallery, album engine, money box, wish card,

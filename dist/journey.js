@@ -30,6 +30,7 @@
   function renderJourney(config) {
     const section=document.querySelector('#journey');if(!section)return null;
     const scene=section.querySelector('.journey-scene');scene.replaceChildren();
+    section.querySelector('.journey-heading .eyebrow').textContent=`${config.milestones[0].date} — ${config.milestones.at(-1).date}`;
     const axis=make('div','journey-axis');axis.setAttribute('aria-hidden','true');
     axis.append(make('span','journey-cap journey-cap--start'),make('span','journey-line'),make('span','journey-progress'),make('span','journey-cap journey-cap--end'));
     const markers=make('ol','journey-markers');markers.setAttribute('aria-label','Các dấu mốc của chúng mình');
@@ -210,7 +211,7 @@
       if(phase&&active!==phase.name){
         active=phase.name;section.dataset.phase=active;
         const index=phase.index;
-        chapter.textContent=index===undefined?`${items.length} dấu mốc · Một hành trình`:`${String(index+1).padStart(2,'0')} / ${String(items.length).padStart(2,'0')} — ${items[index].item.title}`;
+        chapter.textContent=index===undefined?config.summary:`${String(index+1).padStart(2,'0')} / ${String(items.length).padStart(2,'0')} — ${items[index].item.title}`;
         items.forEach(({marker},i)=>{if(i===index)marker.setAttribute('aria-current','step');else marker.removeAttribute('aria-current');});
       }
       renderFilm();
@@ -236,7 +237,7 @@
       timeline.scrollTrigger=trigger;updateExperience();
     }
     if(reduced) {
-      chapter.textContent=`${items.length} dấu mốc · Một hành trình`;
+      chapter.textContent=config.summary;
       items.forEach(({button,marker},i)=>{
         marker.append(button);
         fades.push(gsap.fromTo(marker,{opacity:.75},{opacity:1,ease:'none',scrollTrigger:{trigger:marker,start:'top 95%',end:'top 65%',scrub:true}}));

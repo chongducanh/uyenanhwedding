@@ -7,7 +7,8 @@
     siteVariant: site.key, // Existing 'groom' = nhà trai / 'bride' = nhà gái.
     names: site.names,
     initials: site.initials,
-    title: 'Hành trình của 2 đứa mình',
+    title: 'Hành trình của hai đứa mình',
+    summary: 'Hơn hai năm rưỡi, bốn cột mốc',
     milestones: [
       {id:'meet', title:'Làm quen', date:'07.04.2024', image:'images/journey/journey-meet-preview.webp', full:'images/journey/journey-meet-full.webp', imageReady:true, width:1200, height:900, fit:'contain', alt:`Chiếc laptop bên cửa sổ — kỷ niệm làm quen của ${site.names}`},
       {id:'confession', title:'Tỏ tình', date:'24.08.2024', image:'images/journey/journey-confession-preview.webp', full:'images/journey/journey-confession-full.webp', imageReady:true, width:675, height:1200, alt:`${site.names} chụp ảnh bên nhau trước gương, lưu giữ kỷ niệm tỏ tình`},

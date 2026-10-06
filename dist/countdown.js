@@ -12,7 +12,7 @@
   const left=remaining(),values=[left.days,left.hours,left.minutes,left.seconds];
   const animate=visible&&!document.hidden&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
   elements.forEach((el,i)=>{const value=String(values[i]).padStart(2,'0');if(el.textContent===value)return;el.textContent=value;if(animate&&window.gsap)gsap.fromTo(el,{yPercent:-14,opacity:.45},{yPercent:0,opacity:1,duration:.42,ease:'power2.out',overwrite:true});});
-  section.querySelector('em.countdown-title-line').textContent=left.total>0?'đang đến gần.':'đã đến.';
+  section.querySelector('em.countdown-title-line').textContent=left.total>0?'đang đến gần':'đã đến';
   note.textContent=left.total>0?'Lễ vu quy 08:30 · Tiệc vu quy 10:30':'Lễ vu quy đã đến · 24.10.2026';
   timer?.kill();if(left.total>0&&!document.hidden&&window.gsap)timer=gsap.delayedCall(1,refresh);
  }

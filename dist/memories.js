@@ -81,7 +81,7 @@
    const tableGallery=el('div','mem-static-frames');frames=data.photos.map(createPhoto);tableGallery.append(...frames);world.append(tableGallery);
    const mount=el('div','mem-static-album');world.append(mount);
    album=window.WeddingAlbum.create({mount,photos:data.album,site:data.site,onPhotoClick:openPhoto,mobile,reduced:true});
-   wish.setActive(true);captionHint.textContent='Bấm ảnh để xem trọn khung';caption.textContent='Những hình ảnh để giữ. Những lời thương để trao.';
+   wish.setActive(true);captionHint.textContent='Bấm ảnh để xem trọn khung';caption.textContent='Năm khung ảnh, một cuốn album và hòm thư nhỏ.';
    nav.forEach(button=>listen(button,'click',()=>{const target=button.dataset.memoryJump==='wishes'?wishHost:button.dataset.memoryJump==='album'?mount:tableGallery;target.scrollIntoView({behavior:'instant',block:'start'});}));
   }else{
    world.classList.add('wedding-scene');
@@ -231,7 +231,7 @@
      sceneObjects.forEach(object=>{object.style.filter=focused&&!isWish&&object!==focused&&!mobile?`blur(${CONFIG.blurAmount}px)`:'none';});
      frames.forEach(frame=>{frame.style.zIndex=frame===focused?'60':frame.dataset.row==='front'?'24':'20';});
      albumMount.style.zIndex=focused===albumMount?'60':'26';box.style.zIndex=focused===box?'60':'28';
-     caption.textContent=photo?photo.photo.caption:page?'Lật từng trang, giữ từng khoảnh khắc.':isForm?'Một lời chúc, một kỷ niệm đẹp.':activePhase.startsWith('album')?'Lật từng trang, giữ từng khoảnh khắc.':activePhase.startsWith('box')?'Gửi lại một lời thương.':'Những điều đẹp đẽ, ở lại cùng nhau.';
+     caption.textContent=photo?photo.photo.caption:page?'Ba mươi tấm, lật chậm thôi.':isForm?'Viết gì cũng được, hai đứa đọc hết.':activePhase.startsWith('album')?'Ba mươi tấm, lật chậm thôi.':activePhase.startsWith('box')?'Hòm thư nhỏ của hai đứa.':'Năm khung ảnh, một cuốn album và hòm thư nhỏ.';
      captionHint.textContent=page?'Bấm ảnh để xem trọn khung':'';
      indexLabel.textContent=photo?`${String(photo.index+1).padStart(2,'0')} / ${String(frames.length).padStart(2,'0')}`:page?`${String(page.index+1).padStart(2,'0')} / ${String(album.spreadCount).padStart(2,'0')}`:'';
      section.dataset.state=photo?'PHOTO_FOCUS':page?'ALBUM_PAGE':isForm?(wish.submitted?'CARD_SUBMITTED':'CARD_INTERACTIVE'):({'intro':'TABLE_OVERVIEW','album-focus':'ALBUM_FOCUS','album-open':'ALBUM_OPEN','album-close':'ALBUM_CLOSING','box-focus':'MONEY_BOX_FOCUSED','card-lift':'CARD_PICKING_UP','card-insert':'CARD_INSERTING','card-inserted':'CARD_INSERTED','exit':'SCENE_EXITING'}[activePhase]||'TABLE_OVERVIEW');

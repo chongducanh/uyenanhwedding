@@ -31,7 +31,7 @@
    if(event.defaultPrevented||!event.cancelable||event.ctrlKey||event.metaKey||event.altKey||event.shiftKey||Math.abs(event.deltaX)>=Math.abs(event.deltaY))return;
    if(smoother?.paused()||root.classList.contains('mem-interaction-locked')||document.querySelector('dialog[open]'))return;
    const target=event.target instanceof Element?event.target:null;
-   if(target?.closest(editable+', [role="dialog"], .wedding-music-panel')||document.activeElement?.matches(editable))return;
+   if(target?.closest(editable+', [role="dialog"]')||document.activeElement?.matches(editable))return;
    for(let node=target;node&&node!==document.body&&node!==root;node=node.parentElement){
     if(node.scrollHeight>node.clientHeight+1&&/(auto|scroll|overlay)/.test(getComputedStyle(node).overflowY))return;
    }
@@ -225,7 +225,29 @@
  ScrollTrigger.addEventListener('refreshInit',captureMemoriesResize);
  ScrollTrigger.addEventListener('refresh',restoreMemoriesAfterRefresh);
  gsap.addEventListener('matchMedia',restoreMemoriesAfterRefresh);
+ function clearPendingScrollRestore(){
+  memoriesRestore=null;restoreTask?.kill();restoreTask=null;
+  resizeSettled?.kill();resizeSettled=null;restoringMemories=false;
+  gsap.killTweensOf(window);
+  galleryViewport={width:innerWidth,height:innerHeight};
+ }
+ function resetPageToTop(){
+  clearPendingScrollRestore();
+  ScrollTrigger.clearScrollMemory('manual');
+  smoother?.scrollTop(0);
+  window.scrollTo({top:0,left:0,behavior:'instant'});
+  ScrollTrigger.update();
+ }
  setupMotion();
+ resetPageToTop();
+ addEventListener('pageshow',event=>{
+  if(event.persisted){
+   // Dispose cached viewers/form locks before rebuilding the pinned scenes.
+   clearPendingScrollRestore();
+   setupMotion();
+  }
+  resetPageToTop();
+ });
  // Internal links preserve native URLs while GSAP owns their scrolling.
  $$('a[href^="#"]').forEach(link=>link.addEventListener('click',event=>{
   const href=link.getAttribute('href'),selector=['#album','#portrait'].includes(href)?'#memories':href;
@@ -240,7 +262,7 @@
  });
  const mapButton=$('#map-interact'),map=$('#venue-map'),mapShell=$('.map-shell');
  mapButton.addEventListener('click',()=>{const on=mapButton.getAttribute('aria-pressed')!=='true';mapButton.setAttribute('aria-pressed',String(on));mapButton.textContent=on?'Quay lại cuộn trang':'Tương tác bản đồ';mapShell.classList.toggle('is-interactive',on);map.tabIndex=on?0:-1;});
- gsap.delayedCall(.15,()=>{ScrollTrigger.refresh();if(location.hash)goTo(location.hash,false);});
+ gsap.delayedCall(.15,()=>ScrollTrigger.refresh());
  // Exposes only animation state for browser QA and future editing.
  window.weddingMotion={get smoother(){return smoother;},get reduced(){return reduced;},get memories(){return memories;},get journey(){return journey;},timelines,gsapVersion:gsap.version};
 })();

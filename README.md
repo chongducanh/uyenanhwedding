@@ -52,10 +52,19 @@ Bố cục bàn ký ức: `dist/memories-layout.js`; ảnh nền duy nhất: `ta
 
 ## Nhạc cưới và tốc độ cuộn
 
-`dist/wedding-music.js` mở bản chính thức **Beautiful in White — Shane Filan**
-qua player YouTube hiển thị sau khi bấm “Nhạc cưới”. Đóng player hoặc chuyển tab
-sẽ dừng phát. Video không tải trước khi khách chọn mở; nếu trình duyệt chặn
-autoplay, khách có thể bấm Play trong player.
+`dist/wedding-music.js` chọn ngẫu nhiên một trong ba file người dùng cung cấp
+trong `dist/audio/`: **Beautiful in White**, **Marry You**, **Ngày Đầu Tiên**.
+Mỗi lần mở/tải lại trang hoặc quay lại từ back/forward cache sẽ chọn lại;
+chuyển tab vẫn giữ bài đang nghe. Chọn ngẫu nhiên có thể trùng bài lần trước.
+Nhạc lặp lại, âm lượng 32%, không có nút hay trình phát hiển thị. Website thử
+phát ngay; nếu trình duyệt chặn âm thanh tự động, lần chạm/bấm hoặc nhấn phím
+đầu tiên sẽ thử phát lại. Nhạc tạm dừng khi ẩn tab và tiếp tục khi quay lại.
+Đổi danh sách file/âm lượng trong cấu hình `MUSIC`.
+
+`dist/page-start.js` tắt khôi phục vị trí cuộn và bỏ hash ban đầu. `dist/motion.js`
+đồng bộ GSAP về đầu trang khi mở/tải lại; khi quay lại từ bộ nhớ back/forward,
+các scene được khởi tạo lại để giải phóng viewer/form cũ. Điều hướng nội trang
+và khôi phục vị trí khi resize vẫn hoạt động bình thường.
 
 `WHEEL_MULTIPLIER` trong `dist/motion.js` là `1.2`: mỗi lần lăn chuột di chuyển
 thêm 20%, còn GSAP vẫn làm mượt. Không thay đổi khoảng pin, tốc độ cảm ứng,

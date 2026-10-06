@@ -1,48 +1,54 @@
-/* The official recording plays only inside a visible, user-opened player. */
+/* Native background audio. Keep play() inside trusted gestures for mobile browsers. */
 (() => {
- 'use strict';
- const TRACK={title:'Beautiful in White',artist:'Shane Filan',videoId:'06-XXOTP3Gc'};
- const root=document.createElement('aside');root.className='wedding-music';
- root.setAttribute('aria-label','Nhạc cưới');
- root.innerHTML=`
-  <section class="wedding-music-panel" id="wedding-music-panel" aria-label="Beautiful in White — Shane Filan" hidden>
-   <div class="wedding-music-heading"><div><p>Beautiful in White</p><span>Shane Filan</span></div><button class="wedding-music-close" type="button" aria-label="Đóng và tắt nhạc">×</button></div>
-   <div class="wedding-music-player"></div>
-   <a class="wedding-music-source" href="https://www.youtube.com/watch?v=06-XXOTP3Gc" target="_blank" rel="noopener noreferrer">Xem bản chính thức trên YouTube</a>
-  </section>
-  <button class="wedding-music-toggle" type="button" aria-expanded="false" aria-controls="wedding-music-panel">
-   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 18V5l11-2v13M9 9l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/></svg><span>Nhạc cưới</span>
-  </button>`;
- document.body.append(root);
- const panel=root.querySelector('.wedding-music-panel'),mount=root.querySelector('.wedding-music-player');
- const toggle=root.querySelector('.wedding-music-toggle'),label=toggle.querySelector('span'),close=root.querySelector('.wedding-music-close');
- const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
- let opened=false;
- function openPlayer(){
-  if(opened)return;
-  opened=true;panel.hidden=false;toggle.setAttribute('aria-expanded','true');label.textContent='Tắt nhạc';
-  const frame=document.createElement('iframe');
-  const url=new URL('https://www.youtube.com/embed/'+TRACK.videoId);
-  url.search=new URLSearchParams({autoplay:'1',loop:'1',playlist:TRACK.videoId,controls:'1',playsinline:'1',rel:'0',origin:location.origin});
-  frame.src=url.href;frame.title=TRACK.title+' — '+TRACK.artist+' (video chính thức)';
-  frame.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';frame.allowFullscreen=true;
-  frame.referrerPolicy='strict-origin-when-cross-origin';
-  mount.replaceChildren(frame);
-  if(window.gsap){gsap.killTweensOf(panel);gsap.fromTo(panel,{opacity:0,y:8},{opacity:1,y:0,duration:reduced()?0:.25,ease:'power1.out'});}
-  close.focus({preventScroll:true});
- }
- function closePlayer(restoreFocus=true){
-  if(!opened)return;
-  opened=false;toggle.setAttribute('aria-expanded','false');label.textContent='Nhạc cưới';
-  // Removing the player stops playback immediately; never leave hidden audio.
-  mount.replaceChildren();
-  if(window.gsap){gsap.killTweensOf(panel);gsap.to(panel,{opacity:0,y:6,duration:reduced()?0:.18,onComplete:()=>{if(!opened)panel.hidden=true;}});}
-  else panel.hidden=true;
-  if(restoreFocus)toggle.focus({preventScroll:true});
- }
- toggle.addEventListener('click',()=>opened?closePlayer():openPlayer());
- close.addEventListener('click',()=>closePlayer());
- root.addEventListener('keydown',event=>{if(event.key==='Escape'&&opened){event.preventDefault();closePlayer();}});
- document.addEventListener('visibilitychange',()=>{if(document.hidden)closePlayer(false);});
- window.addEventListener('pagehide',()=>closePlayer(false));
+  const MUSIC = Object.freeze({
+    tracks: ['audio/beautiful-in-white.mp3', 'audio/marry-you.mp3', 'audio/ngay-dau-tien.mp3'],
+    volume: 0.32
+  });
+  const assetBase = document.currentScript.src;
+  const audio = document.createElement('audio');
+  audio.id = 'wedding-background-music';
+  audio.loop = true;
+  audio.autoplay = true;
+  audio.preload = 'auto';
+  audio.volume = MUSIC.volume;
+  audio.hidden = true;
+  audio.setAttribute('aria-hidden', 'true');
+  document.body.append(audio);
+
+  let pending = false, selection = 0;
+  function chooseTrack() {
+    selection++;
+    pending = false;
+    const track = MUSIC.tracks[Math.floor(Math.random() * MUSIC.tracks.length)];
+    audio.src = new URL(track, assetBase).href;
+  }
+  function tryPlay() {
+    if (document.hidden || !audio.paused || pending) return;
+    pending = true;
+    // An autoplay rejection is normal; a later trusted tap/key press retries it.
+    const currentSelection = selection;
+    audio.play().catch(() => {}).finally(() => {
+      if (currentSelection === selection) pending = false;
+    });
+  }
+  function onGesture(event) {
+    if (!event.isTrusted || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.type === 'keydown' && ['Shift', 'Control', 'Alt', 'Meta', 'Escape'].includes(event.key)) return;
+    tryPlay();
+  }
+  // pointerup supplies activation on touch devices where pointerdown does not.
+  ['pointerdown', 'pointerup', 'keydown'].forEach(type => {
+    addEventListener(type, onGesture, { capture: true, passive: true });
+  });
+  // Do not leave sound playing in a hidden tab or a cached page.
+  audio.addEventListener('playing', () => { if (document.hidden) audio.pause(); });
+  addEventListener('visibilitychange', () => { if (document.hidden) audio.pause(); else tryPlay(); });
+  addEventListener('pagehide', () => audio.pause());
+  addEventListener('pageshow', event => {
+    // Cached back/forward visits count as a new opening; tab switches do not.
+    if (event.persisted) chooseTrack();
+    tryPlay();
+  });
+  chooseTrack();
+  tryPlay();
 })();
